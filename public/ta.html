@@ -1,0 +1,96 @@
+<html>
+<head>
+  <meta http-equiv="content-type" content="text/html; charset=utf-8">
+  <meta name="viewport"
+  content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0" />
+  <title>Office Hour Check-in</title>
+  <link rel="shortcut icon" href="favicon.ico">
+
+  <div id="app" class="flex flex-column"></div>
+  <script src="/js/jquery.min.js"></script>
+  <script src="/js/bootstrap.min.js"></script>
+  <script src="/js/feathers.js"></script>
+  <script src="/socket.io/socket.io.js"></script>
+  <link rel="stylesheet" href="/css/bootstrap.min.css">
+  <link rel="stylesheet" href="/css/global.css">
+  <link rel="stylesheet" href="/css/toastr.min.css">
+</head>
+<body>
+  <script src="/js/ta.js"></script>
+  <nav class="navbar navbar-inverse">
+    <div class="container-fluid">
+      <!-- Brand and toggle get grouped for better mobile display -->
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a class="navbar-brand" href="/">CMSC330 Office Hours</a>
+      </div>
+      <!-- Collect the nav links, forms, and other content for toggling -->
+      <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="#">TA Home <span class="sr-only">(current)</span></a></li>
+        </ul>
+        <ul class="nav navbar-nav navbar-right">
+          <li><a href="#" onclick="logout()">Logout</a></li>
+        </ul>
+      </div>
+    </div>
+  </nav>
+  <div id="main" class="container">
+    <div class="row">
+      <div class="col-md-3">
+        <p class="lead">Available TAs: <strong id="num-tas">0</span></strong>
+          <hr>
+          <div class="panel panel-primary">
+            <div class="panel-heading">TAs hosting office hours</div>
+            <table id="ta-table" class="table">
+            </table>
+          </div>
+        </div>
+        <div class="col-md-6">
+          <p class="lead">Students in queue: <strong id="students-in-queue">4</strong></p>
+          <hr>
+          <div id="student-queue-area" class="panel panel-default" style="display:none;">
+            <div class="panel-heading">You are hosting office hours</div>
+            <div class="panel-body">
+              <form id="clock-out-form">
+                <button id="clock-out-btn" type="submit" class="btn btn-default">Leave office hours</button>
+              </form>
+              <hr>
+              <!-- Table -->
+              <table id="student-table" class="table">
+                <tr class="active">
+                  <th>Num</th>
+                  <th>Student</th>
+                  <th>Description</th>
+                  <th>Date submitted</th>
+                </tr>
+              </table>
+              <form id="student-dequeue-form">
+                <button id="student-dequeue-btn" type="submit" class="btn btn-success" style="display:none;">Dequeue Student</button>
+              </form>
+            </div>
+          </div>
+          <div id="clock-in-area" class="panel panel-default">
+            <div class="panel-heading">You are not in office hours</div>
+            <div class="panel-body">
+              <form id="clock-in-form">
+                <button id="clock-in-btn" type="submit" class="btn btn-default">Join office hours</button>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <footer id="footer" class="footer" style="display:none;position:absolute;bottom:0;width:100%;background-color:#e6fff2;height:40px;line-height:40px">
+    <div class="container">
+      <p>You are currently hosting office hours. Do not forget to press the leave button before departing. </p>
+    </div>
+  </footer>
+</body>
+</html>
