@@ -10,14 +10,13 @@ module.exports = function () {
 
   const cas = new (require('passport-cas').Strategy)({
     ssoBaseURL: 'https://shib.idm.umd.edu/shibboleth-idp/profile/cas',
-    serverBaseURL: "http://" + app.get('host') + ":" + app.get('port')+'/',
+    serverBaseURL: app.get('http') + app.get('host') + ":" + app.get('port')+'/',
     validate: '/serviceValidate'
   }, function(login, cb) {
+    // all we get from CAS validation is the directoryID, which is all we need
     if (login != null) {
-
       userService.find({ query: { directoryID: login } })
       .then(user => {
-        console.log(user)
         if (!user || user.total == 0) {
           cb(null, false, null)
         } else {
@@ -43,6 +42,7 @@ module.exports = function () {
       res.redirect('/student.html')
     });
   });
+
   app.use('/', function(req, res, next) {
     // we do this for lazy routing
     res.redirect('/cas_login');

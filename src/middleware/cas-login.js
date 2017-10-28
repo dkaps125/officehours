@@ -7,28 +7,29 @@ module.exports = function (options = {}) {
   return function casLogin(req, res, next) {
     console.log('cas_login middleware is running');
     passport.authenticate('cas', function(err, user, info) {
-      console.log(user)
 
       if (err) {
-        console.log(err)
-        res.redirect("/login.html?invalid")
+        // login error
+        res.redirect("/login.html?invalid");
       } else if (!user || !user.data || !user.data.length > 0){
-        console.log("invalid user")
-        res.redirect("/login.html?invalid")
+        // user not authorized
+        res.redirect("/login.html?invalid");
       } else {
-        console.log("authenticated "+user)
-        var redirect = "/"
+        // user authorized
+        var redirect = "/";
         if (user.data[0].role == "Instructor") {
-          redirect = "/instructor.html"
+          redirect = "/instructor.html";
         } else if (user.data[0].role == "TA") {
-          redirect = "/ta.html"
+          redirect = "/ta.html";
+        } else if (user.data[0].role == "Student") {
+          redirect = "/student.html";
         }
 
         return app.passport.createJWT({ userId: user.data[0]._id },
           app.get('authentication')).then(accessToken => {
 
           // have to do this manually for feathers-authentication-client to accept the jwt
-          res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })
+          res.cookie('feathers-jwt', accessToken, { maxAge: 7200, httpOnly: false })
           res.redirect(redirect)
         });
       }
