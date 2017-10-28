@@ -1,6 +1,7 @@
 const { authenticate } = require('feathers-authentication').hooks;
 const auth  = require('feathers-authentication-hooks');
 const commonHooks = require('feathers-hooks-common');
+const errors = require('feathers-errors');
 
 const createdToken = hook => {
   console.log(hook);
@@ -8,8 +9,8 @@ const createdToken = hook => {
 
 const restrictToTAOrSelf =
 // !!hooks.params.provider true when external
-commonHooks.when(hook => !hook.params.user || !!hook.params.provider ||
-  !(hook.params.user.role === "Instructor"
+commonHooks.when(hook => !!hook.params.provider &&
+  !!hook.params.user && !(hook.params.user.role === "Instructor"
   || hook.params.user.role === "TA"),
   auth.restrictToOwner({ownerField: 'user'})
 );
@@ -30,13 +31,29 @@ commonHooks.when(hook => !!hook.params.user &&
   commonHooks.populate({schema: userSchema})
 );
 
+const validatePasscode = context => {
+  if (!!context.data && ((typeof context.data.passcode) === "string")
+    && context.data.passcode.toLowerCase().trim() === "secret") {
+      return context;
+  }
+  console.log(context.data)
+  throw new errors.BadRequest('Incorrect passcode', { errors: { passcode: context.data.passcode } });
+}
+
+const emitQueuePositionUpdate = context => {
+  context.app.io.emit("queue update");
+}
+
 module.exports = {
   before: {
     all: [ authenticate('jwt') ],
     find: [restrictToTAOrSelf],
     get: [restrictToTAOrSelf],
     // TODO: validate description length
-    create: [auth.associateCurrentUser({as: 'user'})],
+    create: [auth.associateCurrentUser({as: 'user'}),
+      validatePasscode,
+      commonHooks.discard('passcode')
+    ],
     update: [restrictToTAOrSelf],
     patch: [restrictToTAOrSelf],
     remove: [commonHooks.disallow()] // tickets should be immutable
@@ -46,9 +63,9 @@ module.exports = {
     all: [],
     find: [populateUserIfTA],
     get: [populateUserIfTA],
-    create: [],
-    update: [],
-    patch: [],
+    create: [emitQueuePositionUpdate],
+    update: [emitQueuePositionUpdate],
+    patch: [emitQueuePositionUpdate],
     remove: []
   },
 

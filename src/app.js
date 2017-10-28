@@ -22,6 +22,8 @@ const authentication = require('./authentication');
 const passport = require('passport');
 
 const mongoose = require('./mongoose');
+const sched = require('node-schedule');
+const randomstring = require('randomstring');
 
 const app = feathers();
 
@@ -42,7 +44,8 @@ app.configure(hooks());
 app.configure(mongoose);
 app.configure(mongoose);
 app.configure(rest());
-app.configure(socketio());
+const io = socketio();
+app.configure(io);
 
 // Set up our services (see `services/index.js`)
 app.configure(services);
@@ -58,5 +61,21 @@ app.use(handler());
 app.use(passport.initialize());
 
 app.hooks(appHooks);
+
+function setPasscode() {
+  app.passcode = randomstring.generate({
+    length: 5,
+    capitalization: 'lowercase'
+  })
+
+  if (!!app.io) {
+    app.io.emit("passcode updated");
+  }
+}
+
+// on the hour, set a new passcode
+sched.scheduleJob('0 * * * *', setPasscode);
+
+setPasscode();
 
 module.exports = app;

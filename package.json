@@ -46,8 +46,10 @@
     "helmet": "^3.6.1",
     "mongodb": "^2.2.31",
     "mongoose": "^4.12.1",
+    "node-schedule": "^1.2.5",
     "passport": "^0.4.0",
     "passport-cas": "^0.1.1",
+    "randomstring": "^1.1.5",
     "serve-favicon": "^2.4.3",
     "winston": "^2.3.1"
   },

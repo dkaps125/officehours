@@ -20,6 +20,10 @@ client.authenticate()
   return users.get(payload.userId)
 })
 .then(user => {
+  if (user.role !== "Student") {
+    window.location.href = '/';
+    return;
+  }
   console.log("user",user);
   client.set('user', user);
   setNumTokens();
@@ -51,6 +55,9 @@ function setNumTokens() {
       client.service('/queue-position').get().then(positionInfo => {
         if (unfulfilledTokens.total > 0) {
           hideRequestOH(positionInfo.peopleAheadOfMe+1);
+        } else {
+          // TODO: maybe toatr.toast here
+          showRequestOH();
         }
         $("#students-in-queue").html(positionInfo.sizeOfQueue);
       }).catch(function(err) {
@@ -60,9 +67,8 @@ function setNumTokens() {
 }
 
 function submitToken() {
-  client.service('/tokens').create({ desc: $("#ticket-desc").val()})
+  client.service('/tokens').create({ desc: $("#ticket-desc").val(), passcode: $("#ticket-code").val()})
   .then(ticket => {
-    hideRequestOH(2);
     setNumTokens();
   })
   .catch(function (err) {
@@ -72,15 +78,22 @@ function submitToken() {
 }
 
 function setAvailableTAs() {
-  client.service('/availabletas').find().then(availabletas => {
-    $('#num-tas').html("" + (availabletas.total));
-    var row = 0;
-    var ttable = $("#ta-table")[0];
-    availabletas.data.map(ta => {
-      var r = ttable.insertRow(row);
-      r.insertCell(0).innerHTML = ta.name || ta.directoryID;
-      row++;
-    });
+  client.service('/availabletas').find().then(setAvailableTAsHTML);
+}
+
+// magically reactive
+socket.on("availabletas updated", setAvailableTAsHTML);
+socket.on("queue update", setNumTokens);
+
+function setAvailableTAsHTML(availabletas) {
+  $('#num-tas').html("" + (availabletas.total));
+  $("#ta-table").find("tr").remove();
+  var row = 0;
+  var ttable = $("#ta-table")[0];
+  availabletas.data.map(ta => {
+    var r = ttable.insertRow(row);
+    r.insertCell(0).innerHTML = ta.name || ta.directoryID;
+    row++;
   });
 }
 
@@ -88,6 +101,12 @@ function hideRequestOH(numInQueue) {
   $("#ticket-submit-area").hide();
   $("#ticket-no-submit").show();
   $("#ticket-queue-msg").html("You are #"+numInQueue+" in the queue");
+}
+
+function showRequestOH() {
+  $("#ticket-submit-area").show();
+  $("#ticket-no-submit").hide();
+  $("#ticket-queue-msg").html("You are #"+0+" in the queue");
 }
 
 $(function() {

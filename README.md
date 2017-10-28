@@ -6,6 +6,10 @@
 
 This project uses [Feathers](http://feathersjs.com). An open source web framework for building modern real-time applications.
 
+## TODO list:
+* XSS Filtering
+* Hardening
+
 ## Getting Started
 
 Getting up and running is as easy as 1, 2, 3.
@@ -52,6 +56,6 @@ __0.1.0__
 
 ## License
 
-Copyright (c) 2016
+Copyright (c) 2017
 
 Licensed under the [MIT license](LICENSE).

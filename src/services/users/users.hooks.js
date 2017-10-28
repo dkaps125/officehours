@@ -53,7 +53,23 @@ module.exports = {
     get: [],
     create: [],
     update: [],
-    patch: [],
+    patch: [commonHooks.when(hook => (hook.result.role === "Instructor" || hook.result.role === "TA"),
+      (hook) => {
+        hook.app.service('/users').find(
+          {
+            query: {
+              $or: [
+                {role: "TA"},
+                {role: "Instructor"}
+              ],
+              onDuty: true
+            }
+          }).then(res => {
+            hook.app.io.emit('availabletas updated', res);
+          });
+          return hook ;
+      }
+    )],
     remove: []
   },
 

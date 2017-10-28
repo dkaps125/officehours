@@ -51,12 +51,14 @@
             </table>
           </div>
         </div>
-        <div class="col-md-6">
-          <p class="lead">Students in queue: <strong id="students-in-queue">4</strong></p>
+        <div class="col-md-8">
+          <p class="lead">Students in queue: <strong id="students-in-queue"></strong></p>
           <hr>
           <div id="student-queue-area" class="panel panel-default" style="display:none;">
             <div class="panel-heading">You are hosting office hours</div>
             <div class="panel-body">
+              <h3 style="display:inline-block;">Passcode for this hour: &nbsp;</h3>
+              <h2 style="display:inline-block;padding-bottom:10px;"><span id="passcode" class="label label-primary">secret</span></h2>
               <form id="clock-out-form">
                 <button id="clock-out-btn" type="submit" class="btn btn-default">Leave office hours</button>
               </form>

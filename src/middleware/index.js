@@ -34,8 +34,17 @@ module.exports = function () {
   passport.use(cas);
 
   app.use('/cas_login', casLogin({app: app}));
+  app.use('/loginAsFakeUser', function(req, res, next) {
+    console.log('logging in as fake user')
+    app.passport.createJWT({ userId: '59e533d1dd9acd1989414d6b' },
+      app.get('authentication')).then(accessToken => {
+
+      res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })
+      res.redirect('/student.html')
+    });
+  });
   app.use('/', function(req, res, next) {
     // we do this for lazy routing
     res.redirect('/cas_login');
-  })
+  });
 };

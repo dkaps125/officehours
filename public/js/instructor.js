@@ -25,11 +25,7 @@ client.authenticate()
       window.location.href = '/';
     }
     client.set('user', user);
-    users.find({query: {$limit: 5000, $sort: {createdAt: -1}}}).then(results => {
-      renderUsers(results)
-    }).catch(function(err) {
-      console.error(err);
-    });
+    refreshUsers();
 
   })
   .catch(error => {
@@ -47,19 +43,38 @@ function logout() {
 
 /**********/
 function renderUsers(users) {
+  $("#userTable").find("tr:gt(0)").remove();
   var row = 1;
   var utable = $("#userTable")[0];
   users.data.map(user => {
-    console.log(user);
     var r = utable.insertRow(row);
     r.insertCell(0).innerHTML = row;
     r.insertCell(1).innerHTML = user.directoryID;
     r.insertCell(2).innerHTML = user.name || user.directoryID;
-    r.insertCell(3).innerHTML = user.role
-    r.insertCell(4).innerHTML = "Delete | Edit"
+    r.insertCell(3).innerHTML = user.role;
+    r.insertCell(4).innerHTML = '<a href="javascript:deleteUser(\''+user._id+'\')">Delete ✖</a>'
+    //r.insertCell(4).innerHTML = '<a href="/editUser?uid='+user._id+'">Edit ✎</a> | <a href="javascript:deleteUser(\''+user._id+'\')">Delete ✖</a>'
+
     row++;
   })
 }
+
+function refreshUsers() {
+  users.find({query: {$limit: 5000, $sort: {createdAt: -1}}}).then(results => {
+    renderUsers(results);
+  }).catch(function(err) {
+    console.error(err);
+  });
+}
+
+function deleteUser(user) {
+  users.remove(user).then( res => {
+    refreshUsers();
+  }).catch(function(err) {
+    console.log(err);
+  })
+}
+
 $(function() {
   $('#add-user').submit(function(e) {
     e.preventDefault();
@@ -72,12 +87,7 @@ $(function() {
     users.create(newUser).then( res => {
       $('#add-user-name').val("");
       $("#add-user-directoryid").val("");
-      $("#userTable").find("tr:gt(0)").remove();
-      users.find({query: {$limit: 5000}}).then(results => {
-        renderUsers(results);
-      }).catch(function(err) {
-        console.error(err);
-      });
+      refreshUsers();
     }).catch(function(err) {
       console.error(err);
     })

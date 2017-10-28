@@ -36,12 +36,17 @@ client.authenticate()
     clockOut();
   }
 
+  socket.on("passcode updated", function() {
+    // toastr emit
+    setPasscode();
+  });
   socket.on("tokens created", function(token) {
     updateStudentQueue();
-  })
+  });
   socket.on("tokens patched", function(token) {
     updateStudentQueue();
-  })
+  });
+  updateStudentQueue();
 })
 .catch(error => {
   console.log("auth error or not authenticated, redirecting...", error);
@@ -52,6 +57,12 @@ function logout() {
   // log out of feathers and redirect to login page
   client.logout();
   window.location.href = '/login.html';
+}
+
+function setPasscode() {
+  client.service('passcode').get({}).then(result => {
+    $("#passcode").html(result.passcode);
+  });
 }
 
 function setAvailableTAs() {
@@ -96,6 +107,7 @@ function clockIn() {
   $("#footer").show();
   setAvailableTAs();
   updateStudentQueue();
+  setPasscode();
 }
 
 function clockOut() {
@@ -122,6 +134,7 @@ $(function() {
   $('#clock-in-form').submit(function(e) {
     e.preventDefault();
     users.patch(client.get('user')._id, {onDuty: true}).then(newMe => {
+      // probably better to pass in the results but this works
       clockIn();
     });
   });
@@ -133,5 +146,3 @@ $(function() {
     });
   })
 });
-
-/********/
