@@ -102,8 +102,8 @@ $RECYCLE.BIN/
 *.cab
 *.msi
 
-# Hide the config folder for now
-config/*.json
+# Hide the production config
+config/production.json
 *.msm
 *.msp
 

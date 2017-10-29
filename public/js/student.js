@@ -35,6 +35,10 @@ client.authenticate()
   window.location.href = '/login.html';
 });
 
+// toastr config
+toastr.options.closeDuration = 10000;
+toastr.options.positionClass = "toast-bottom-right";
+
 function logout() {
   // log out of feathers and redirect to login page
   client.logout();
@@ -70,9 +74,10 @@ function submitToken() {
   client.service('/tokens').create({ desc: $("#ticket-desc").val(), passcode: $("#ticket-code").val()})
   .then(ticket => {
     setNumTokens();
+    toastr.success("Your help request has been submitted!")
   })
   .catch(function (err) {
-    //TODO: toastr
+    toastr.error("Your help request could not be submitted.")
     console.error(err)
   })
 }
@@ -90,6 +95,11 @@ function setAvailableTAsHTML(availabletas) {
   $("#ta-table").find("tr").remove();
   var row = 0;
   var ttable = $("#ta-table")[0];
+
+  if (availabletas.total == 0) {
+    ttable.insertRow(row).insertCell(0).innerHTML = "No TAs hosting office hours";
+  }
+
   availabletas.data.map(ta => {
     var r = ttable.insertRow(row);
     r.insertCell(0).innerHTML = ta.name || ta.directoryID;

@@ -19,6 +19,10 @@ module.exports = function (app) {
       type: String,
       maxLength: 200
     },
+    isBeingHelped: {
+      type: Boolean,
+      default: false
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now }
   });

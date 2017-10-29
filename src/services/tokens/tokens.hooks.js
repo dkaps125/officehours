@@ -33,7 +33,7 @@ commonHooks.when(hook => !!hook.params.user &&
 
 const validatePasscode = context => {
   if (!!context.data && ((typeof context.data.passcode) === "string")
-    && context.data.passcode.toLowerCase().trim() === "secret") {
+    && context.data.passcode.toLowerCase().trim() === context.app.passcode) {
       return context;
   }
   console.log(context.data)

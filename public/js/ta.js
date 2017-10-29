@@ -26,7 +26,7 @@ client.authenticate()
     window.location.href = '/';
   } else if (user.role === "Instructor") {
     // add link back to instructor home
-    $('<li><a href="/Instructor.html">Instructor Home</a></li>').insertBefore('ul.nav>li:first');
+    $('<li><a href="/instructor.html">Instructor Home</a></li>').insertBefore('ul.nav>li:first');
   }
 
   client.set('user', user);

@@ -1,7 +1,20 @@
-const casLogin = require('./cas-login');
 const passport = require('passport');
 const auth = require('feathers-authentication');
+const multer = require('multer');
+const csvUpload = require('./csv');
+const casLogin = require('./cas-login');
 const { authenticate } = auth.hooks;
+const path = require('path');
+
+var upload = multer({
+  dest: path.join(__dirname, '../../csvUploads/'),
+  preservePath: true,
+  limits: {
+    fileSize: 1000000
+  }
+});
+
+
 module.exports = function () {
   // Add your custom middleware here. Remember, that
   // in Express the order matters
@@ -42,6 +55,8 @@ module.exports = function () {
       res.redirect('/student.html')
     });
   });
+  app.use('/csvUpload', auth.express.authenticate('jwt'),
+    upload.single('userfile'), csvUpload({app}))
 
   app.use('/', function(req, res, next) {
     // we do this for lazy routing
