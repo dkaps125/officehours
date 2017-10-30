@@ -18,6 +18,13 @@ const restrictToInstructor = [
   commonHooks.disallow('external'))
 ];
 
+const restrictToInstructorOrTA = [
+  authenticate('jwt'),
+  commonHooks.when(hook => !!hook.params.user &&
+    !(hook.params.user.role === "Instructor" || hook.params.user.role === "TA"),
+  commonHooks.disallow('external'))
+];
+
 const restrictGet = [
   commonHooks.when(hook => !!hook.params.user &&
     !(hook.params.user.role === "Instructor"
@@ -37,8 +44,8 @@ module.exports = {
     ],
     get: [ ...restrictGet ],
     create: [ ...restrictToInstructor ],
-    update: [ ...restrictToInstructor ],
-    patch: [ ...restrictToInstructor ],
+    update: [ ...restrictToInstructorOrTA ],
+    patch: [ ...restrictToInstructorOrTA ],
     remove: [ ...restrictToInstructor ]
   },
 

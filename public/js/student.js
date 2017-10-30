@@ -62,7 +62,6 @@ function setNumTokens() {
           lastTotal = unfulfilledTokens.total;
           hideRequestOH(positionInfo.peopleAheadOfMe+1);
         } else {
-          // TODO: maybe toatr.toast here
           if (unfulfilledTokens.total == 0 && lastTotal > 0) {
             toastr.success("You have been dequeued by a TA!", {timeout: 15000});
           }
