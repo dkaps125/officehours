@@ -31,5 +31,9 @@
     }
   },
   "mongodb": "mongodb://localhost:27017/officehours",
-  "http": "http://"
+  "http": "http://",
+  "CAS": {
+    "baseURL": "https://shib.idm.umd.edu/shibboleth-idp/profile/cas",
+    "validationPath": "/serviceValidate"
+  }
 }

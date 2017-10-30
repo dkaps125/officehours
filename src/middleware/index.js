@@ -14,7 +14,6 @@ var upload = multer({
   }
 });
 
-
 module.exports = function () {
   // Add your custom middleware here. Remember, that
   // in Express the order matters
@@ -22,9 +21,9 @@ module.exports = function () {
   const userService = app.service('users');
 
   const cas = new (require('passport-cas').Strategy)({
-    ssoBaseURL: 'https://shib.idm.umd.edu/shibboleth-idp/profile/cas',
+    ssoBaseURL: app.get("CAS").baseURL,
     serverBaseURL: app.get('http') + app.get('host') + ":" + app.get('port')+'/',
-    validate: '/serviceValidate'
+    validate: app.get("CAS").validationURL
   }, function(login, cb) {
     // all we get from CAS validation is the directoryID, which is all we need
     if (login != null) {

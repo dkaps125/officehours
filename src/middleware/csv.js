@@ -10,10 +10,7 @@ module.exports = function (options = {}) {
   const userQuery = app.service('users');
 
   return function userCSV(req, res, next) {
-    console.log('userCSV middleware is running');
-    console.log(req.user)
-
-    var failed = false
+    var failed = false;
     var failure = (err) => {
       if (!failed) {
         failed = true;
@@ -36,12 +33,13 @@ module.exports = function (options = {}) {
         failure("Malformed CSV record, missing name or directoryID");
         return;
       }
-      if (!!record.role && record.role.length > 0) {
-        record.role = record.role.toLowerCase();
-        record.role[0] = record.role[0].toUpperCase();
+      if (!!record.role && record.role.length > 0 && record.role.toLowerCase() != "ta") {
+        record.role = record.role.substr(0,1).toUpperCase() + record.role.substr(1,record.length).toLowerCase();
+      } else if (!!record.role && record.role.toUpperCase() == "TA") {
+        record.role = record.role.toUpperCase();
       }
-      if (record.role !== "Student" || record.role !== "Instructor" || record.role !== "TA") {
-        record.role = "Student"
+      if (record.role !== "Student" && record.role !== "Instructor" && record.role !== "TA") {
+        record.role = "Student";
       }
 
       userQuery.create({
@@ -53,7 +51,6 @@ module.exports = function (options = {}) {
       }).catch(err => {
         cb();
       });
-
     });
 
     var parser = csv({columns: true})
@@ -73,9 +70,8 @@ module.exports = function (options = {}) {
         });
       }
       if (!!req.file && !!req.file.path) {
-      fs.unlink(req.file.path)
+        fs.unlink(req.file.path)
       }
-
     })
     .on('error', err => {
       failure(err.message || "Malformed CSV passed");

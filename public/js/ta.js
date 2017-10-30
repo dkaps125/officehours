@@ -6,6 +6,11 @@ const client = feathers()
 .configure(feathers.authentication({
   cookie: 'feathers-jwt',
 }));
+
+// toastr config
+toastr.options.closeDuration = 10000;
+toastr.options.positionClass = "toast-bottom-right";
+
 const users = client.service('/users');
 client.authenticate()
 .then(response => {
@@ -37,14 +42,17 @@ client.authenticate()
   }
 
   socket.on("passcode updated", function() {
-    // toastr emit
     setPasscode();
+    toastr.success("Passcode updated.", {timeout: 30000});
   });
   socket.on("tokens created", function(token) {
     updateStudentQueue();
+    console.log(token);
+    toastr.success("New ticket created");
   });
   socket.on("tokens patched", function(token) {
     updateStudentQueue();
+    toastr.success("Ticket status updated");
   });
   updateStudentQueue();
 })
@@ -119,7 +127,7 @@ function clockOut() {
 
 function dequeueStudent() {
   client.service('dequeue-student').create({}).then(result => {
-    console.log(result);
+    //console.log(result);
     updateStudentQueue();
   }).catch(function (err) {
     console.log(err);
@@ -135,6 +143,7 @@ $(function() {
     e.preventDefault();
     users.patch(client.get('user')._id, {onDuty: true}).then(newMe => {
       // probably better to pass in the results but this works
+      toastr.success("You are now in office hours");
       clockIn();
     });
   });
@@ -142,6 +151,7 @@ $(function() {
     e.preventDefault();
     users.patch(client.get('user')._id, {onDuty: false})
     .then(newMe => {
+      toastr.success("You are logged out of office hours");
       clockOut();
     });
   })

@@ -45,6 +45,7 @@ function logout() {
   window.location.href = '/login.html';
 }
 
+var lastTotal = 0;
 function setNumTokens() {
   client.service('/numtokens').get().then(numTokens => {
     $('#num-tokens').html("You have <strong>" + numTokens.tokensRemaining + "</strong> tokens remaining.");
@@ -58,9 +59,14 @@ function setNumTokens() {
   }).then(unfulfilledTokens => {
       client.service('/queue-position').get().then(positionInfo => {
         if (unfulfilledTokens.total > 0) {
+          lastTotal = unfulfilledTokens.total;
           hideRequestOH(positionInfo.peopleAheadOfMe+1);
         } else {
           // TODO: maybe toatr.toast here
+          if (unfulfilledTokens.total == 0 && lastTotal > 0) {
+            toastr.success("You have been dequeued by a TA!", {timeout: 15000});
+          }
+          lastTotal = unfulfilledTokens.total;
           showRequestOH();
         }
         $("#students-in-queue").html(positionInfo.sizeOfQueue);
