@@ -40,7 +40,7 @@ module.exports = {
   before: {
     all: [],
     find: [
-    ...restrictToInstructor
+    ...restrictToInstructorOrTA
     ],
     get: [ ...restrictGet ],
     create: [ ...restrictToInstructor ],
