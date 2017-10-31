@@ -1,7 +1,7 @@
 const { authenticate } = require('feathers-authentication').hooks;
 const commonHooks = require('feathers-hooks-common');
 const { restrictToOwner } = require('feathers-authentication-hooks');
-
+const xss = require('xss');
 
 const restrict = [
   authenticate('jwt'),
@@ -36,16 +36,28 @@ const restrictGet = [
   )
 ];
 
+const filterXSS = (context) => {
+  if (!!context.data){
+    if (!!context.data.name) {
+      context.data.name = xss(context.data.name);
+    }
+    if (!!context.data.directoryID) {
+      context.data.directoryID = xss(context.data.directoryID);
+    }
+  }
+  return context;
+}
+
 module.exports = {
   before: {
-    all: [],
+    all: [filterXSS],
     find: [
     ...restrictToInstructorOrTA
     ],
     get: [ ...restrictGet ],
-    create: [ ...restrictToInstructor ],
-    update: [ ...restrictToInstructorOrTA ],
-    patch: [ ...restrictToInstructorOrTA ],
+    create: [ ...restrictToInstructor],
+    update: [ ...restrictToInstructorOrTA, commonHooks.setUpdatedAt() ],
+    patch: [ ...restrictToInstructorOrTA, commonHooks.setUpdatedAt() ],
     remove: [ ...restrictToInstructor ]
   },
 

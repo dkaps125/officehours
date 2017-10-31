@@ -17,7 +17,7 @@
       "header": {
         "type": "access"
       },
-      "audience": "https://yourdomain.com",
+      "audience": "https://330hours.cs.umd.edu/",
       "subject": "anonymous",
       "issuer": "UMD",
       "algorithm": "HS256",
@@ -26,7 +26,7 @@
     "cookie": {
       "enabled": true,
       "name": "feathers-jwt",
-      "httpOnly": false,
+      "httpOnly": true,
       "secure": false
     }
   },
@@ -35,5 +35,8 @@
   "CAS": {
     "baseURL": "https://shib.idm.umd.edu/shibboleth-idp/profile/cas",
     "validationPath": "/serviceValidate"
+  },
+  "tokens": {
+    "max": 5
   }
 }

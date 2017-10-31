@@ -72,9 +72,34 @@ function setPasscode() {
     app.io.emit("passcode updated");
   }
 }
+const TWO_HR_MS = 2* 60 * 60 * 1000
+
+function clearTAS() {
+  const userService = app.service("users");
+  userService.find(
+    {
+      query: {
+        onDuty: true,
+        // we can assume they're a TA or Instructor
+        updatedAt: {
+          $lt: new Date().getTime() - TWO_HR_MS
+        }
+    }
+  }).then(inHoursTAs => {
+    console.log("Clearing stale TA's on duty status");
+    inHoursTAs.data.map(curTA => {
+      userService.patch({"_id" : curTA._id}, {onDuty: false})
+      .catch(function(err) {
+        console.error("Cannot reset onduty status for",curTA);
+      })
+    })
+  })
+}
 
 // on the hour, set a new passcode
 sched.scheduleJob('0 * * * *', setPasscode);
+// every 15 mins starting at 1, clear TAs's onDuty status if it's stale
+sched.scheduleJob('1,16,31,46 * * * *', clearTAS);
 
 setPasscode();
 

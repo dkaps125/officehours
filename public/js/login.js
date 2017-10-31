@@ -1,4 +1,4 @@
-const socket = io();
+const socket = io({secure: true});
 const client = feathers()
 .configure(feathers.hooks())
 .configure(feathers.socketio(socket))

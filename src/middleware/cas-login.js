@@ -29,7 +29,7 @@ module.exports = function (options = {}) {
           app.get('authentication')).then(accessToken => {
 
           // have to do this manually for feathers-authentication-client to accept the jwt
-          res.cookie('feathers-jwt', accessToken, { maxAge: 7200000, httpOnly: false })
+          res.cookie('feathers-jwt', accessToken, { maxAge: 1800000, httpOnly: false })
           res.redirect(redirect)
         });
       }

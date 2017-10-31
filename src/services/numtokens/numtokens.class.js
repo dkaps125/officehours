@@ -1,11 +1,11 @@
 /* eslint-disable no-unused-vars */
 const DAY_MS = 24 * 60 * 60 * 1000;
-const MAX_TOKENS = 15;
 
 class Service {
   constructor (options) {
     this.options = options || {};
     this.app = options.app
+    this.MAX_TOKENS = this.app.get('tokens').max;
   }
   get (id, params) {
     return this.app.service('/tokens').find({
@@ -16,11 +16,10 @@ class Service {
       }
     })
     .then(res => {
-      const tokensRemaining = (MAX_TOKENS-res.total) < 0 ? 0 : (MAX_TOKENS-res.total);
+      const tokensRemaining = (this.MAX_TOKENS-res.total) < 0 ? 0 : (this.MAX_TOKENS-res.total);
       return Promise.resolve({tokensRemaining});
     })
     .catch(function(err) {
-      console.log(error)
       return Promise.resolve({tokensRemaining: 0});
     })
   }

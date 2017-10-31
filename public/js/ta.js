@@ -1,5 +1,5 @@
 // Feathers/API setup
-const socket = io();
+const socket = io({secure: true});
 const client = feathers()
 .configure(feathers.hooks())
 .configure(feathers.socketio(socket))
@@ -54,6 +54,7 @@ client.authenticate()
     updateStudentQueue();
     toastr.success("Ticket status updated");
   });
+  socket.on("availabletas updated", setAvailableTAsHTML);
   updateStudentQueue();
 })
 .catch(error => {
@@ -73,17 +74,21 @@ function setPasscode() {
   });
 }
 
+function setAvailableTAsHTML(availabletas) {
+  $('#num-tas').html("" + (availabletas.total));
+  $("#ta-table").find("tr").remove();
+  var row = 0;
+  var ttable = $("#ta-table")[0];
+  availabletas.data.map(ta => {
+    var r = ttable.insertRow(row);
+    r.insertCell(0).innerHTML = ta.name || ta.directoryID;
+    row++;
+  });
+}
+
 function setAvailableTAs() {
   client.service('/availabletas').find().then(availabletas => {
-    $('#num-tas').html("" + (availabletas.total));
-    $("#ta-table").find("tr").remove();
-    var row = 0;
-    var ttable = $("#ta-table")[0];
-    availabletas.data.map(ta => {
-      var r = ttable.insertRow(row);
-      r.insertCell(0).innerHTML = ta.name || ta.directoryID;
-      row++;
-    });
+    setAvailableTAsHTML(availabletas);
   });
 }
 

@@ -34,6 +34,7 @@
       <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
         <ul class="nav navbar-nav">
           <li class="active"><a href="#">Home <span class="sr-only">(current)</span></a></li>
+          <li><a href="http://cs.umd.edu/class/fall2017/cmsc330/#officehours">OH Schedule</a></li>
           <li><a href="/faq.html">FAQ </a></li>
         </ul>
         <ul class="nav navbar-nav navbar-right">
@@ -64,13 +65,13 @@
                 <p id="num-tokens">Loading...</p>
                 <p><small>This will add you to the office hours queue and will cost one OH token.
                   If you run out of tokens, you will not be able to recieve office hours assistance
-                  until regeneration.</small>
+                  until regeneration (every 24 hours).</small>
                 </p>
                 <hr>
                 <form id="ticket-submit-form">
                   <textarea id="ticket-desc" class="form-control" rows="2" placeholder="Describe your issue in less than two sentences"></textarea>
                   <br>
-                  <input type="text" id="ticket-code" class="form-control" rows="1" placeholder="Passcode"></input>
+                  <input type="text" id="ticket-code" class="form-control" rows="1" placeholder="Passcode" autocomplete="off"></input>
                   <br>
                   <button id="ticket-button" type="submit" class="btn btn-default">Request help</button>
                 </form>
