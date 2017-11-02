@@ -58,13 +58,13 @@ const filterXSS = context => {
 }
 
 const validateTokens = context => {
-  return app.service('numtokens').get().then(res => {
+  return context.app.service('numtokens').get().then(res => {
     if (res.tokensRemaining > 0) {
       return context;
     } else {
       throw new errors.BadRequest('Out of tokens', { errors: { tokensRemaining: 0 } });
     }
-  }).error(err => {
+  }).catch(err => {
       throw new errors.BadRequest('Token calculation error', { errors: { } });
   })
 }

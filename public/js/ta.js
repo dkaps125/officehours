@@ -47,7 +47,6 @@ client.authenticate()
   });
   socket.on("tokens created", function(token) {
     updateStudentQueue();
-    console.log(token);
     toastr.success("New ticket created");
   });
   socket.on("tokens patched", function(token) {

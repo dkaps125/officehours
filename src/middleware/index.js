@@ -19,10 +19,16 @@ module.exports = function () {
   // in Express the order matters
   const app = this; // eslint-disable-line no-unused-vars
   const userService = app.service('users');
+  const environment = process.env.NODE_ENV;
+  var serverBaseURL = app.get('http') + app.get('host') + ':' + app.get('port')+'/';
+
+  if (environment === "production") {
+    serverBaseURL = app.get('http') + app.get('host') + '/'
+  }
 
   const cas = new (require('passport-cas').Strategy)({
     ssoBaseURL: app.get("CAS").baseURL,
-    serverBaseURL: app.get('http') + app.get('host') + ":" + app.get('port')+'/',
+    serverBaseURL,
     validate: app.get("CAS").validationURL
   }, function(login, cb) {
     // all we get from CAS validation is the directoryID, which is all we need
@@ -45,15 +51,17 @@ module.exports = function () {
   passport.use(cas);
 
   app.use('/cas_login', casLogin({app: app}));
-  app.use('/loginAsFakeUser', function(req, res, next) {
-    console.log('logging in as fake user')
-    app.passport.createJWT({ userId: '59e533d1dd9acd1989414d6b' },
-      app.get('authentication')).then(accessToken => {
+  if (environment !== "production") {
+    app.use('/loginAsFakeUser', function(req, res, next) {
+      console.log('logging in as fake user')
+      app.passport.createJWT({ userId: '' },
+        app.get('authentication')).then(accessToken => {
 
-      res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })
-      res.redirect('/student.html')
+        res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })
+        res.redirect('/student.html')
+      });
     });
-  });
+  }
   app.use('/csvUpload', auth.express.authenticate('jwt'),
     upload.single('userfile'), csvUpload({app}))
 

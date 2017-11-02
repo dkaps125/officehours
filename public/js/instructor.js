@@ -27,6 +27,15 @@ client.authenticate()
   client.set('user', user);
   refreshUsers();
 
+  socket.on("tokens created", function(token) {
+    updateStudentQueue();
+    toastr.success("New ticket created");
+  });
+  socket.on("tokens patched", function(token) {
+    updateStudentQueue();
+    toastr.success("Ticket status updated");
+  });
+  updateStudentQueue();
 })
 .catch(error => {
   console.log("auth error or not authenticated, redirecting...", error);
@@ -44,6 +53,28 @@ function logout() {
 }
 
 /**********/
+function updateStudentQueue() {
+  client.service('/tokens').find({query: {fulfilled: false}}).then(tickets => {
+    $("#student-table").find("tr:gt(0)").remove();
+    var row = 1;
+    var stable = $("#student-table")[0];
+    tickets.data.map(ticket => {
+      var r = stable.insertRow(row);
+      r.insertCell(0).innerHTML = row;
+      r.insertCell(1).innerHTML = ticket.user.name || ticket.user.directoryID;
+      r.insertCell(2).innerHTML = ticket.desc || "No description";
+      r.insertCell(3).innerHTML = (new Date(ticket.createdAt)).toLocaleString();
+      row++;
+    });
+    $("#students-in-queue").html(tickets.total);
+    if (tickets.total == 0) {
+      $("#student-dequeue-btn").hide();
+    } else {
+      $("#student-dequeue-btn").show();
+    }
+  });
+}
+
 function renderUsers(users) {
   $("#userTable").find("tr:gt(0)").remove();
   var row = 1;
