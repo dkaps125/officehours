@@ -57,16 +57,35 @@ const filterXSS = context => {
   return context;
 }
 
+const DAY_MS = 24 * 60 * 60 * 1000;
+
 const validateTokens = context => {
-  return context.app.service('numtokens').get().then(res => {
-    if (res.tokensRemaining > 0) {
+  console.log(context.params.user._id)
+  const MAX_TOKENS = context.app.get('tokens').max;
+  return context.app.service('/tokens').find({
+    query: {
+      createdAt: {
+        $gt: new Date().getTime() - DAY_MS
+      },
+      user: context.params.user._id
+    }
+  })
+  .then(res => {
+    const tokensRemaining = (MAX_TOKENS-res.total) < 0 ? 0 : (MAX_TOKENS-res.total);
+    if (tokensRemaining > 0) {
       return context;
     } else {
       throw new errors.BadRequest('Out of tokens', { errors: { tokensRemaining: 0 } });
     }
-  }).catch(err => {
-      throw new errors.BadRequest('Token calculation error', { errors: { } });
   })
+  .catch(function(err) {
+    console.log(err)
+    if (err.message === 'Out of tokens') {
+      throw new errors.BadRequest('Out of tokens', { errors: { tokensRemaining: 0 } });
+    } else {
+    throw new errors.BadRequest('Token calculation error', { errors: { } });
+    }
+  });
 }
 
 module.exports = {

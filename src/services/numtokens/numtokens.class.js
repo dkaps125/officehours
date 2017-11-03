@@ -13,9 +13,7 @@ class Service {
         createdAt: {
           $gt: new Date().getTime() - DAY_MS
         },
-        user: {
-          "_id": params.user._id
-        }
+        user: params.user._id
       }
     })
     .then(res => {
