@@ -77,10 +77,15 @@ const validateTokens = context => {
     } else {
       throw new errors.BadRequest('Out of tokens', { errors: { tokensRemaining: 0 } });
     }
+    res.data.map(token => {
+      if (!token.fulfilled) {
+        throw new errors.BadRequest('Already in the queue', { errors: { tokensRemaining } });
+      }
+    })
   })
   .catch(function(err) {
     console.log(err)
-    if (err.message === 'Out of tokens') {
+    if (err.message === 'Out of tokens' || err.message === 'Already in the queue') {
       throw new errors.BadRequest('Out of tokens', { errors: { tokensRemaining: 0 } });
     } else {
     throw new errors.BadRequest('Token calculation error', { errors: { } });

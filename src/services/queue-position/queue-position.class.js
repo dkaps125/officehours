@@ -6,7 +6,7 @@ class Service {
   }
 
   get (id, params) {
-    return this.app.service('/tokens').find({query:{fulfilled:false}})
+    return this.app.service('/tokens').find({query:{$limit: 100, fulfilled:false}})
     .then(tickets => {
       var peopleAheadOfMe = 0;
 

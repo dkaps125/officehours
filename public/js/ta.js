@@ -92,7 +92,7 @@ function setAvailableTAs() {
 }
 
 function updateStudentQueue() {
-  client.service('/tokens').find({query: {fulfilled: false}}).then(tickets => {
+  client.service('/tokens').find({query: {$limit: 100, fulfilled: false}}).then(tickets => {
     $("#student-table").find("tr:gt(0)").remove();
     var row = 1;
     var stable = $("#student-table")[0];

@@ -67,11 +67,6 @@ function updateStudentQueue() {
       row++;
     });
     $("#students-in-queue").html(tickets.total);
-    if (tickets.total == 0) {
-      $("#student-dequeue-btn").hide();
-    } else {
-      $("#student-dequeue-btn").show();
-    }
   });
 }
 

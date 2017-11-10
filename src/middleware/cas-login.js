@@ -5,9 +5,7 @@ module.exports = function (options = {}) {
   const app = options.app
 
   return function casLogin(req, res, next) {
-    console.log('cas_login middleware is running');
     passport.authenticate('cas', function(err, user, info) {
-
       if (err) {
         // login error
         res.redirect("/login.html?invalid");
