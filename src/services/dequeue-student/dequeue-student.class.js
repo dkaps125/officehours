@@ -20,7 +20,8 @@ class Service {
       if (tokens.total >= 1) {
         return this.app.service('tokens').patch(tokens.data[0]._id,
         {
-          fulfilled: true
+          fulfilled: true,
+          fulfilledBy: params.user._id,
         });
       } else {
         return tokens

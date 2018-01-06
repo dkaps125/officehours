@@ -15,6 +15,14 @@ module.exports = function (app) {
       type: Boolean,
       default: false,
     },
+    fulfilledBy: {
+      type: Schema.Types.ObjectId,
+      ref: 'user'
+    },
+    isClosed: {
+      type: Boolean,
+      default: false
+    },
     desc: {
       type: String,
       maxLength: 200
