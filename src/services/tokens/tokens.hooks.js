@@ -57,15 +57,16 @@ const filterXSS = context => {
   return context;
 }
 
-const DAY_MS = 24 * 60 * 60 * 1000;
-
 const validateTokens = context => {
-  console.log(context.params.user._id)
+
   const MAX_TOKENS = context.app.get('tokens').max;
+  const lastMidnight = new Date();
+  lastMidnight.setHours(0,0,0,0);
+
   return context.app.service('/tokens').find({
     query: {
       createdAt: {
-        $gt: new Date().getTime() - DAY_MS
+        $gt: lastMidnight.getTime(),
       },
       user: context.params.user._id
     }

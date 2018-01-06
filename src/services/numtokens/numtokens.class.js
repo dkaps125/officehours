@@ -1,5 +1,4 @@
 /* eslint-disable no-unused-vars */
-const DAY_MS = 24 * 60 * 60 * 1000;
 
 class Service {
   constructor (options) {
@@ -8,10 +7,13 @@ class Service {
     this.MAX_TOKENS = this.app.get('tokens').max;
   }
   get (id, params) {
+    const lastMidnight = new Date();
+    lastMidnight.setHours(0,0,0,0);
+
     return this.app.service('/tokens').find({
       query: {
         createdAt: {
-          $gt: new Date().getTime() - DAY_MS
+          $gt: lastMidnight.getTime(),
         },
         user: params.user._id
       }
