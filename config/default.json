@@ -17,9 +17,9 @@
       "header": {
         "type": "access"
       },
-      "audience": "https://330hours.cs.umd.edu/",
-      "subject": "anonymous",
-      "issuer": "UMD",
+      "audience": "https://yourdomain.edu/",
+      "subject": "Office hours app",
+      "issuer": "Your institution",
       "algorithm": "HS256",
       "expiresIn": "2h"
     },
@@ -33,7 +33,7 @@
   "mongodb": "mongodb://localhost:27017/officehours",
   "http": "http://",
   "CAS": {
-    "baseURL": "https://shib.idm.umd.edu/shibboleth-idp/profile/cas",
+    "baseURL": "https://yourcasinstance.yourdomain.edu/",
     "validationPath": "/serviceValidate"
   },
   "tokens": {
