@@ -85,11 +85,12 @@ const validateTokens = context => {
     })
   })
   .catch(function(err) {
-    console.log(err)
     if (err.message === 'Out of tokens' || err.message === 'Already in the queue') {
       throw new errors.BadRequest('Out of tokens', { errors: { tokensRemaining: 0 } });
+    } else if (err.message === 'Incorrect passcode') {
+      throw err;
     } else {
-    throw new errors.BadRequest('Token calculation error', { errors: { } });
+      throw new errors.BadRequest('Token calculation error', { errors: { } });
     }
   });
 }

@@ -46,9 +46,13 @@ function logout() {
 }
 
 var lastTotal = 0;
+var numTokens = -1;
+
 function setNumTokens() {
-  client.service('/numtokens').get().then(numTokens => {
-    $('#num-tokens').html("You have <strong>" + numTokens.tokensRemaining + "</strong> tokens remaining.");
+  client.service('/numtokens').get().then(res => {
+    numTokens = res.tokensRemaining;
+
+    $('#num-tokens').html("You have <strong>" + numTokens + "</strong> tokens remaining.");
     return client.service('/tokens').find(
       {
         query: {
@@ -82,8 +86,13 @@ function submitToken() {
     toastr.success("Your help request has been submitted!")
   })
   .catch(function (err) {
-    toastr.error("Your help request could not be submitted.")
-    console.error(err)
+    var errMsg = "Your help request could not be submitted: ";
+    if (numTokens <= 0) {
+      errMsg += "You are out of tokens."
+    } else {
+      errMsg += (!!err.message) ? err.message+"." : "" ;
+    }
+    toastr.error(errMsg);
   })
 }
 
@@ -102,7 +111,7 @@ function setAvailableTAsHTML(availabletas) {
   var ttable = $("#ta-table")[0];
 
   if (availabletas.total == 0) {
-    ttable.insertRow(row).insertCell(0).innerHTML = "No TAs hosting office hours";
+    ttable.insertRow(row).insertCell(0).innerHTML = '<small class="text-muted">No TAs are currently hosting office hours</small>';
   }
 
   availabletas.data.map(ta => {
