@@ -7,8 +7,7 @@
 This project uses [Feathers](http://feathersjs.com). An open source web framework for building modern real-time applications.
 
 ## TODO list:
-* XSS Filtering
-* Hardening
+* Improvement requests from Fall '17 test pilot.
 
 ## Getting Started
 
@@ -50,7 +49,7 @@ For more information on all the things you can do with Feathers visit [docs.feat
 
 ## Changelog
 
-__0.1.0__
+__1.0.0__
 
 - Initial release
 
