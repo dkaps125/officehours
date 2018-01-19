@@ -47,6 +47,7 @@ function logout() {
 
 var lastTotal = 0;
 var numTokens = -1;
+var lastTicketCancelled = false;
 
 function setNumTokens() {
   client.service('/numtokens').get().then(res => {
@@ -66,21 +67,26 @@ function setNumTokens() {
           lastTotal = unfulfilledTokens.total;
           hideRequestOH(positionInfo.peopleAheadOfMe+1);
         } else {
-          if (unfulfilledTokens.total == 0 && lastTotal > 0) {
+          if (unfulfilledTokens.total == 0 && lastTotal > 0 && !lastTicketCancelled) {
             toastr.success("You have been dequeued by a TA!", {timeout: 15000});
           }
           lastTotal = unfulfilledTokens.total;
+          lastTicketCancelled = false;
           showRequestOH();
         }
         $("#students-in-queue").html(positionInfo.sizeOfQueue);
-      }).catch(function(err) {
+      })
+      .catch(function(err) {
         console.error(err);
       })
   })
 }
 
 function submitToken() {
-  client.service('/tokens').create({ desc: $("#ticket-desc").val(), passcode: $("#ticket-code").val()})
+  client.service('/tokens').create({
+    desc: $("#ticket-desc").val(),
+    passcode: $("#ticket-code").val()
+  })
   .then(ticket => {
     setNumTokens();
     toastr.success("Your help request has been submitted!")
@@ -98,6 +104,32 @@ function submitToken() {
 
 function setAvailableTAs() {
   client.service('/availabletas').find().then(setAvailableTAsHTML);
+}
+
+function cancelRequest() {
+  client.service('/tokens').find({
+    query: {
+      fulfilled: false
+    }
+  }).then((tickets) => {
+      if (tickets.total == 0) {
+        toastr.warning("There are no open tickets that can be cancelled");
+      } else {
+        // if the student has multiple tickets open for some reason, kill them all
+        tickets.data.map(ticket => {
+          client.service('/tokens').patch(ticket._id, {
+            fulfilled: true,
+            cancelledByStudent: true
+          }).then(ticket => {
+            lastTicketCancelled = true
+            toastr.warning("Your help ticket has cancelled")
+            setNumTokens()
+          }).catch( function (err) {
+            toastr.error((!!err.message) ? err.message : "Cannot cancel ticket")
+          })
+        })
+      }
+  })
 }
 
 // magically reactive
@@ -138,6 +170,9 @@ $(function() {
     e.preventDefault();
     submitToken();
   });
+  $('#cancel-req').click(function(e) {
+    cancelRequest();
+  })
 });
 
 /********/
