@@ -67,6 +67,7 @@ function updateStudentQueue() {
       row++;
     });
     $("#students-in-queue").html(tickets.total);
+    $("#students-in-queue-sm").html(tickets.total);
   });
 }
 
@@ -108,6 +109,7 @@ function deleteUser(user) {
 }
 
 $(function() {
+  // Add user button
   $('#add-user').submit(function(e) {
     e.preventDefault();
     var newUser = {
@@ -125,6 +127,7 @@ $(function() {
     })
   });
 
+  // Upload form
   var uploadForm = document.getElementById('js-upload-form');
 
   var startUpload = function(files) {
@@ -165,4 +168,53 @@ $(function() {
     startUpload(uploadFiles)
   });
 
+  // Scroll navbar
+  var navItems = [];
+  navItems[0] = $("#live-queue").position().top;
+  navItems[1] = $("#student-stats").position().top;
+  navItems[2] = $("#ta-stats").position().top;
+  navItems[3] = $("#manage-user").position().top;
+  navItems[4] = $("#roster").position().top;
+
+  var navListSm = [];
+  navListSm[0] = $("#live-queue-nav-sm");
+  navListSm[1] = $("#student-stats-nav-sm");
+  navListSm[2] = $("#ta-stats-nav-sm");
+  navListSm[3] = $("#manage-user-nav-sm");
+  navListSm[4] = $("#roster-nav-sm");
+
+  var navListLg = [];
+  navListLg[0] = $("#live-queue-nav-lg");
+  navListLg[1] = $("#student-stats-nav-lg");
+  navListLg[2] = $("#ta-stats-nav-lg");
+  navListLg[3] = $("#manage-user-nav-lg");
+  navListLg[4] = $("#roster-nav-lg");
+
+  var selected = 0;
+
+  $(document).ready(function() {
+    $(window).scroll(function() {
+      const scrollLoc = $(this).scrollTop();
+      var newSelected = 0;
+      if (scrollLoc >= 0 && scrollLoc < navItems[1]) {
+        newSelected = 0;
+      } else if (scrollLoc >= navItems[1] && scrollLoc < navItems[2]) {
+        newSelected = 1;
+      } else if (scrollLoc >= navItems[2] && scrollLoc < navItems[3]) {
+        newSelected = 2;
+      } else if (scrollLoc >= navItems[3] && scrollLoc < navItems[4]) {
+        newSelected = 3;
+      } else if (scrollLoc >= navItems[4]) {
+        newSelected = 4;
+      }
+
+      if (newSelected != selected) {
+        navListLg[selected].removeClass("active");
+        navListSm[selected].removeClass("active");
+        selected = newSelected;
+        navListLg[selected].addClass("active");
+        navListSm[selected].addClass("active");
+      }
+    });
+  });
 });

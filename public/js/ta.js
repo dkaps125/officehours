@@ -158,5 +158,5 @@ $(function() {
       toastr.success("You are logged out of office hours");
       clockOut();
     });
-  })
+  });
 });

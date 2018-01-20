@@ -3,7 +3,7 @@
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
     <meta name="viewport"
           content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0" />
-    <title>Office Hour Check-in</title>
+    <title>Instructor Dashboard</title>
     <link rel="shortcut icon" href="favicon.ico">
 
     <div id="app" class="flex flex-column"></div>
@@ -20,7 +20,6 @@
     <script src="/js/instructor.js"></script>
     <nav class="navbar navbar-inverse">
       <div class="container-fluid">
-        <!-- Brand and toggle get grouped for better mobile display -->
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
             <span class="sr-only">Toggle navigation</span>
@@ -43,9 +42,38 @@
         </div>
       </div>
     </nav>
-    <div id="main" class="container" >
+    <div id="main" class="container">
       <div class="row">
-        <div class="col-md-12">
+        <!-- Full screen sidebar -->
+        <div class="col-xl-3 col-md-3 col-lg-3 device-xl device-lg device-md visible-xl visible-lg visible-md">
+          <div class="sidebar-nav-fixed affix" id="instructor-sidebar-lg">
+            <h3>Dashboard</h3>
+            <div class="list-group" style="width:220px;">
+              <a href="#live-queue" id="live-queue-nav-lg" class="list-group-item active"><span id="students-in-queue" class="badge"></span>Live student queue</a>
+              <a href="#student-stats" id="student-stats-nav-lg" class="list-group-item">Student statistics</a>
+              <a href="#ta-stats" id="ta-stats-nav-lg" class="list-group-item">TA statistics</a>
+              <a href="#manage-user" id="manage-user-nav-lg" class="list-group-item">User management</a>
+              <a href="#roster" id="roster-nav-lg" class="list-group-item">User roster</a>
+            </div>
+          </div>
+        </div>
+        <!-- Mobile sidebar -->
+        <div class="col-md-3 device-sm device-xs visible-sm visible-xs">
+          <div class="sidebar-nav" id="instructor-sidebar-sm">
+            <h3>Dashboard</h3>
+            <div class="list-group">
+              <a href="#live-queue" id="live-queue-nav-sm" class="list-group-item active"><span id="students-in-queue-sm" class="badge">14</span>Live student queue</a>
+              <a href="#student-stats" id="student-stats-nav-sm" class="list-group-item">Student statistics</a>
+              <a href="#ta-stats" id="ta-stats-nav-sm" class="list-group-item">TA statistics</a>
+              <a href="#manage-user" id="manage-user-nav-sm" class="list-group-item">User management</a>
+              <a href="#roster" id="roster-nav-sm" class="list-group-item">User roster</a>
+            </div>
+          </div>
+          <hr>
+        </div>
+        <!-- Main content -->
+        <div class="col-xl-9 col-lg-9 col-md-9">
+          <span id="live-queue"></span>
           <h3>Live student queue</h3>
           <div>
             <table id="student-table" class="table">
@@ -57,7 +85,45 @@
               </tr>
             </table>
           </div>
-          <hr>
+          <hr id="student-stats">
+          <h3>Student statistics</h3>
+          <div class="well stats">
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div class=""> 330 </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead">Total tickets</p>
+              </div>
+            </div>
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div class=""> 37 </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead">Tickets this week</p>
+              </div>
+            </div>
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div class=""> 11 </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead">Tickets today</p>
+              </div>
+            </div>
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div class=""> 2.5 </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead">Avg Wait (mins)</p>
+              </div>
+            </div>
+          </div>
+          <hr id="ta-stats">
+          <h3>TA statistics</h3>
+          <hr id="manage-user">
           <h3>Add user</h3>
           <form id="add-user" class="form-inline">
             <div class="form-group">
@@ -99,6 +165,10 @@
               </div>
             </form>
           <hr>
+          <h3>Bulk user deletion</h3>
+          <button class="btn btn-warning">Delete all students</button>
+          <button class="btn btn-warning">Delete all TAs</button>
+          <hr id="roster">
           <h3>All users</h3>
           <table id="userTable" class="table table-striped">
             <tr class="active">
