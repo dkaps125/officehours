@@ -22,6 +22,7 @@ class Service {
         {
           fulfilled: true,
           fulfilledBy: params.user._id,
+          fulfilledByName: params.user.name || params.user.directoryID,
           isBeingHelped: true,
           dequeuedAt: Date.now(),
         });

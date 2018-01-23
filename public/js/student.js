@@ -75,6 +75,7 @@ function setNumTokens() {
           showRequestOH();
         }
         $("#students-in-queue").html(positionInfo.sizeOfQueue);
+        getCurrentTicket();
       })
       .catch(function(err) {
         console.error(err);
@@ -130,6 +131,44 @@ function cancelRequest() {
         })
       }
   })
+}
+
+var currentTicket = null;
+
+function getCurrentTicket() {
+  client.service('/tokens').find({
+    query: {
+      $limit: 1,
+      fulfilled: true,
+      isBeingHelped: true,
+      $sort: {
+        createdAt: 1
+      }
+    }
+  }).then((ticket) => {
+    if (ticket.total >= 1) {
+      currentTicket = ticket.data[0];
+      showCurrentTicket(currentTicket);
+    } else {
+      currentTicket = null;
+      $("#ticket-responder-name").html("");
+      $("#ticket-description").html("");
+      $("#current-ticket-area").hide();
+      /*$("#ticket-submit-area").show();
+      $("#ticket-no-submit").hide();*/
+    }
+  }).catch(function (err) {
+    console.error(err);
+  });
+}
+
+function showCurrentTicket(ticket) {
+  $("#ticket-responder-name").html(ticket.fulfilledByName + " is assisting you");
+  $("#ticket-description").html(ticket.desc || "No description provided");
+  $("#current-ticket-area").show();
+  $("#ticket-submit-area").hide();
+  $("#ticket-no-submit").hide();
+
 }
 
 // magically reactive

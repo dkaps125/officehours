@@ -19,6 +19,9 @@ module.exports = function (app) {
       type: Schema.Types.ObjectId,
       ref: 'user'
     },
+    fulfilledByName: {
+      type: String,
+    },
     isClosed: {
       type: Boolean,
       default: false

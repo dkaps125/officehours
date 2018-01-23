@@ -6,7 +6,7 @@ module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient');
   const { Schema } = mongooseClient;
   const comment = new Schema({
-    text: { type: String, required: true },
+    text: { type: String },
     knowledgeable: { type: String, enum: ["Yes", "No", "Not sure"], default: "Not sure"},
     toldTooMuch: { type: String, enum: ["Yes", "No", "Not sure"], default: "Not sure"},
     shouldGetExtraToken: { type: Boolean, default: false },
