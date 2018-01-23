@@ -8,8 +8,32 @@ const client = feathers()
 }));
 
 // toastr config
-toastr.options.closeDuration = 10000;
+toastr.options.closeDuration = 12000;
 toastr.options.positionClass = "toast-bottom-right";
+
+// from remysharp.com
+function throttle(fn, threshhold, scope) {
+  threshhold || (threshhold = 1000);
+  var last,
+      deferTimer;
+  return function () {
+    var context = scope || this;
+
+    var now = +new Date,
+        args = arguments;
+    if (last && now < last + threshhold) {
+      // hold on to it
+      clearTimeout(deferTimer);
+      deferTimer = setTimeout(function () {
+        last = now;
+        fn.apply(context, args);
+      }, threshhold);
+    } else {
+      last = now;
+      fn.apply(context, args);
+    }
+  };
+}
 
 const users = client.service('/users');
 client.authenticate()
@@ -43,16 +67,16 @@ client.authenticate()
 
   socket.on("passcode updated", function() {
     setPasscode();
-    toastr.success("Passcode updated.", {timeout: 30000});
+    toastr.success("Passcode updated.", {timeout: 300000});
   });
   socket.on("tokens created", function(token) {
     updateStudentQueue();
     toastr.success("New ticket created");
   });
-  socket.on("tokens patched", function(token) {
+  socket.on("tokens patched", throttle(function(token) {
     updateStudentQueue();
     toastr.success("Ticket status updated");
-  });
+  }));
   socket.on("availabletas updated", setAvailableTAsHTML);
   updateStudentQueue();
 })
@@ -161,6 +185,8 @@ function getCurrentStudent() {
       if (ticket.total >= 1) {
         currentTicket = ticket.data[0];
         showCurrentTicket(currentTicket);
+      } else {
+        $("#current-student-area").hide();
       }
     }).catch(function (err) {
       console.error(err);
@@ -170,7 +196,7 @@ function getCurrentStudent() {
 function showCurrentTicket(ticket) {
   $("#current-student-name").html("Assisting: " + ticket.user.name);
   $("#current-student-issue-text").html(ticket.desc || "No description provided");
-  $("#current-student-ticket-createtime").html("Ticket created at: " + (new Date(ticket.createdAt)).toLocaleString());
+  $("#current-student-ticket-createtime").html("Ticket created " + (new Date(ticket.createdAt)).toLocaleString());
   $("#current-student-area").show();
 
 }
@@ -178,19 +204,39 @@ function showCurrentTicket(ticket) {
 function closeTicket() {
   if ((!!currentTicket) && window.confirm("Are you sure you want to permanently close this ticket?")) {
     $("#current-student-area").hide();
-    client.service('tickets').patch(currentTicket._id, {
+    console.log("patching "+currentTicket._id)
+    client.service('tokens').patch(currentTicket._id, {
       isBeingHelped: false,
       isClosed: true,
       closedAt: Date.now(),
       // TODO: shouldIgnoreInTokenCount: false/true
     }).then(updatedTicket => {
       // TODO: comment service create
+      client.service('comment').create({
+        text:  $('#student-notes-box').val(),
+        knowledgeable: $('input[name=radio1]:checked').val(),
+        toldTooMuch: $('input[name=radio2]:checked').val(),
+        student: currentTicket.user._id,
+        ticket: currentTicket._id
+      }).then(comment => {
+        console.log("new comment");
+        console.log(comment);
+        toastr.success("Ticket closed and comment successfully saved");
+        currentTicket = null;
+      }).catch(function(err) {
+        toastr.error("Error closing ticket and submitting comments");
+        console.error(err);
+        currentTicket = null;
+      })
     })
-    currentTicket = null;
   }
 }
 
 $(function() {
+  $("#close-ticket-form").submit(function(e) {
+    e.preventDefault();
+    closeTicket();
+  });
   $('#student-dequeue-form').submit(function(e) {
     e.preventDefault();
     dequeueStudent();

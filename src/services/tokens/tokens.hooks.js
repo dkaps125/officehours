@@ -85,6 +85,7 @@ const validateTokens = context => {
     })
   })
   .catch(function(err) {
+    // TODO: this error checking code is questionable, look into this
     if (err.message === 'Out of tokens' || err.message === 'Already in the queue') {
       throw new errors.BadRequest('Out of tokens', { errors: { tokensRemaining: 0 } });
     } else if (err.message === 'Incorrect passcode') {
