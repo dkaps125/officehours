@@ -22,6 +22,8 @@ class Service {
         {
           fulfilled: true,
           fulfilledBy: params.user._id,
+          isBeingHelped: true,
+          dequeuedAt: Date.now(),
         });
       } else {
         return tokens

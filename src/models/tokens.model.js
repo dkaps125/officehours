@@ -35,8 +35,15 @@ module.exports = function (app) {
       type: Boolean,
       default: false
     },
+    shouldIgnoreInTokenCount: {
+      type: Boolean,
+      default: false
+    },
     createdAt: { type: Date, default: Date.now },
-    updatedAt: { type: Date, default: Date.now }
+    updatedAt: { type: Date, default: Date.now },
+    dequeuedAt: { type: Date },
+    closedAt:  { type: Date }
+    // TODO: verifier for closedAt
   });
 
   return mongooseClient.model('tokens', tokens);

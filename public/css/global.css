@@ -10,6 +10,7 @@ body {
   position:fixed;
   width:100%;
   z-index:3;
+  overflow:auto;
   /*TODO: background-color: 990000;*/
 }
 
@@ -37,38 +38,12 @@ body {
     border-color: #222;
 }
 
+/* typography */
+.warning-text {
+  color: orange;
+}
+
 /* stats */
-.numberCircle {
-  display: inline-block;
-  height: 60px;
-  width: 60px;
-  line-height: 60px;
-
-  -moz-border-radius: 30px; /* or 50% */
-  border-radius: 30px; /* or 50% */
-
-  background-color: #990000;
-  color: white;
-  text-align: center;
-  font-size: 2em;
-
-}
-
-.numberCircle2 {
-    border-radius: 50%;
-    behavior: url(PIE.htc); /* remove if you don't care about IE8 */
-
-    width: 36px;
-    height: 36px;
-    padding: 8px;
-
-    background: #fff;
-    border: 2px solid #666;
-    color: #666;
-    text-align: center;
-
-    font: 32px Arial, sans-serif;
-}
 .statsBlock {
   border-radius: 10px;
   border: 2px solid gray;

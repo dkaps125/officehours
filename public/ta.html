@@ -43,57 +43,113 @@
     </div>
   </nav>
   <div id="main" class="container">
-    <div class="row">
+    <div class="row" style="padding-top:15px;">
       <div class="col-md-3">
-        <p class="lead">Available TAs: <strong id="num-tas">0</span></strong>
-          <hr>
-          <div class="panel panel-primary">
-            <div class="panel-heading">TAs hosting office hours</div>
-            <table id="ta-table" class="table">
-            </table>
+        <p class="lead">Available TAs: <strong id="num-tas">0</span></strong></p>
+        <hr>
+        <div id="clock-in-area" class="panel panel-default">
+          <div class="panel-heading">You are not in office hours</div>
+          <div class="panel-body">
+            <form id="clock-in-form">
+              <button id="clock-in-btn" type="submit" class="btn btn-default">Join office hours</button>
+            </form>
           </div>
         </div>
-        <div class="col-md-8">
-          <p class="lead">Students in queue: <strong id="students-in-queue"></strong></p>
-          <hr>
-          <div id="student-queue-area" class="panel panel-default" style="display:none;">
-            <div class="panel-heading">You are hosting office hours</div>
-            <div class="panel-body">
-              <h3 style="display:inline-block;">Passcode for this hour: &nbsp;</h3>
-              <h2 style="display:inline-block;padding-bottom:10px;"><span id="passcode" class="label label-primary">secret</span></h2>
-              <form id="clock-out-form">
-                <button id="clock-out-btn" type="submit" class="btn btn-default">Leave office hours</button>
-              </form>
-              <hr>
-              <form id="student-dequeue-form">
-                <button id="student-dequeue-btn" type="submit" class="btn btn-success" style="display:none;">Dequeue Student</button>
-              </form>
-              <table id="student-table" class="table">
-                <tr class="active">
-                  <th>Num</th>
-                  <th>Student</th>
-                  <th>Description</th>
-                  <th>Date submitted</th>
-                </tr>
-              </table>
-            </div>
+        <div id="clock-out-area" class="panel panel-default" style="display:none;">
+          <div class="panel-heading">You are hosting office hours</div>
+          <div class="panel-body">
+            <form id="clock-out-form">
+              <button id="clock-out-btn" type="submit" class="btn btn-default">Leave office hours</button>
+            </form>
+            <hr>
+            <h4>Hourly passcode:</h4>
+            <h2 style="display:inline-block;padding-bottom:15px;width:100px"><span id="passcode" class="label label-success">n/a</span></h2>
           </div>
-          <div id="clock-in-area" class="panel panel-default">
-            <div class="panel-heading">You are not in office hours</div>
-            <div class="panel-body">
-              <form id="clock-in-form">
-                <button id="clock-in-btn" type="submit" class="btn btn-default">Join office hours</button>
-              </form>
+        </div>
+        <hr>
+
+        <div class="panel panel-primary">
+          <div class="panel-heading">TAs hosting office hours</div>
+          <table id="ta-table" class="table">
+          </table>
+        </div>
+      </div>
+      <div class="col-md-8">
+        <p class="lead">Students in queue: <strong id="students-in-queue"></strong></p>
+        <hr>
+        <div id="current-student-area" class="panel panel-default" style="display:none;">
+          <div class="panel-heading">Current Student</div>
+          <div class="panel-body">
+            <h4 id="current-student-name"></h4>
+            <p id="current-student-ticket-createtime"></p>
+            <p id="current-student-time-warn" class="warning-text" style="display:none;">Warning: You have spent over 5 minutes assisting this student</p>
+            <label> Student's issue:</label>
+            <div class="well">
+              <p id="current-student-issue-text">No description provided</p>
             </div>
+            <form id="student-notes-form">
+              <div class="form-group">
+                <label>Did the student seem to know what they were doing?</label>
+                <div class="radio">
+                  <label class="radio-inline">
+                    <input type="radio" id="inlineCheckbox1" value="option1" name="radio1"> Yes
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" id="inlineCheckbox2" value="option2" name="radio1"> No
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" id="inlineCheckbox3" value="option3" name="radio1" checked> Not sure
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label>Do you think you might have told the student too much?</label>
+                <div class="radio">
+                  <label class="radio-inline">
+                    <input type="radio" id="inlineCheckbox1" value="option1" name="radio2"> Yes
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" id="inlineCheckbox2" value="option2" name="radio2"> No
+                  </label>
+                  <label class="radio-inline">
+                    <input type="radio" id="inlineCheckbox3" value="option3" name="radio2" checked> Not sure
+                  </label>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="student-notes-box">Comments</label>
+                <textarea class="form-control" rows=4 id="student-notes-box" placeholder="Briefly, what did you assist the student with."></textarea>
+              </div>
+            </form>
+            <form id="close-ticket-form">
+              <button id="close-ticket-btn" type="submit" class="btn btn-default">Close ticket</button>
+            </form>
+          </div>
+        </div>
+        <div id="student-queue-area" class="panel panel-default" style="display:none;">
+          <div class="panel-heading">Student queue</div>
+          <div class="panel-body">
+            <form id="student-dequeue-form">
+              <button id="student-dequeue-btn" type="submit" class="btn btn-success" style="display:none;">Dequeue Student</button>
+            </form>
+            <table id="student-table" class="table">
+              <tr class="active">
+                <th>Num</th>
+                <th>Student</th>
+                <th>Description</th>
+                <th>Date submitted</th>
+              </tr>
+            </table>
           </div>
         </div>
       </div>
     </div>
   </div>
-  <footer id="footer" class="footer" style="display:none;position:absolute;bottom:0;width:100%;background-color:#e6fff2;height:40px;line-height:40px">
-    <div class="container">
-      <p>You are currently hosting office hours. Do not forget to press the leave button before departing. </p>
-    </div>
-  </footer>
+</div>
+<footer id="footer" class="footer" style="display:none;position:absolute;bottom:0;width:100%;background-color:#e6fff2;height:40px;line-height:40px">
+  <div class="container">
+    <p>You are currently hosting office hours. Do not forget to press the leave button before departing. </p>
+  </div>
+</footer>
 </body>
 </html>

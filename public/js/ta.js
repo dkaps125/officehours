@@ -116,26 +116,78 @@ function updateStudentQueue() {
 function clockIn() {
   $("#student-queue-area").show();
   $("#clock-in-area").hide();
+  $("#clock-out-area").show();
   $("#footer").show();
   setAvailableTAs();
   updateStudentQueue();
   setPasscode();
+  getCurrentStudent();
 }
 
 function clockOut() {
   $("#student-queue-area").hide();
   $("#clock-in-area").show();
+  $("#clock-out-area").hide();
   $("#footer").hide();
   setAvailableTAs();
 }
 
 function dequeueStudent() {
-  client.service('dequeue-student').create({}).then(result => {
+  client.service('dequeue-student').create({})
+  .then(result => {
     //console.log(result);
+    getCurrentStudent();
     updateStudentQueue();
-  }).catch(function (err) {
-    console.log(err);
   })
+  .catch(function (err) {
+    console.error(err);
+  })
+}
+var currentTicket;
+
+function getCurrentStudent() {
+  client.service('tokens').find(
+    {
+      query: {
+        $limit: 1,
+        fulfilled: true,
+        isBeingHelped: true,
+        fulfilledBy: client.get('user')._id,
+        $sort: {
+          createdAt: 1
+        }
+      }
+    }).then((ticket) => {
+      if (ticket.total >= 1) {
+        currentTicket = ticket.data[0];
+        showCurrentTicket(currentTicket);
+      }
+    }).catch(function (err) {
+      console.error(err);
+    });
+}
+
+function showCurrentTicket(ticket) {
+  $("#current-student-name").html("Assisting: " + ticket.user.name);
+  $("#current-student-issue-text").html(ticket.desc || "No description provided");
+  $("#current-student-ticket-createtime").html("Ticket created at: " + (new Date(ticket.createdAt)).toLocaleString());
+  $("#current-student-area").show();
+
+}
+
+function closeTicket() {
+  if ((!!currentTicket) && window.confirm("Are you sure you want to permanently close this ticket?")) {
+    $("#current-student-area").hide();
+    client.service('tickets').patch(currentTicket._id, {
+      isBeingHelped: false,
+      isClosed: true,
+      closedAt: Date.now(),
+      // TODO: shouldIgnoreInTokenCount: false/true
+    }).then(updatedTicket => {
+      // TODO: comment service create
+    })
+    currentTicket = null;
+  }
 }
 
 $(function() {
