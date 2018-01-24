@@ -101,14 +101,46 @@ function refreshUsers() {
 }
 
 function deleteUser(user) {
-  users.remove(user).then( res => {
+  if (window.confirm("Are you sure you want to permanently delete this user?")) {
+    users.remove(user).then( res => {
+      refreshUsers();
+    }).catch(function(err) {
+      console.error(err);
+    })
+  }
+}
+
+function deleteAllStudents() {
+  if (window.confirm("Are you sure you want to permanently delete ALL students?")) {
+    deleteAllWithRole("Student");
+  }
+}
+
+function deleteAllTAs() {
+  if (window.confirm("Are you sure you want to permanently delete ALL TA's?")) {
+    deleteAllWithRole("TA");
+  }
+}
+
+function deleteAllWithRole(role) {
+  users.remove(null, {
+    query: {
+      role: role
+    }
+  }).then( res => {
     refreshUsers();
   }).catch(function(err) {
-    console.log(err);
-  })
+    console.error(err);
+  });
 }
 
 $(function() {
+  // Delete all students button
+  $('#delete-all-students').click(deleteAllStudents);
+
+  // Delete all TAs button
+  $('#delete-all-tas').click(deleteAllTAs);
+
   // Add user button
   $('#add-user').submit(function(e) {
     e.preventDefault();
