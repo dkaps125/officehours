@@ -214,7 +214,7 @@ function showCurrentTicket(ticket) {
           r.insertCell(1).innerHTML = (new Date(ticket.closedAt)).toLocaleString();
           r.insertCell(2).innerHTML = ticket.fulfilledByName || "N/A";
           r.insertCell(3).innerHTML = ticket.desc || "No description";
-          r.insertCell(4).innerHTML = "<small>Coming soon</small>"
+          r.insertCell(4).innerHTML = "<small style=\"color:gray;\">Coming soon</small>"
           row++;
         });
       }
