@@ -14,6 +14,10 @@ module.exports = function (app) {
     name: {
       type: String
     },
+    location: {
+      type: String,
+      default: "TA Room",
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
   });
