@@ -65,6 +65,7 @@ client.authenticate()
     clockOut();
   }
 
+  // TODO: these should only run once
   socket.on("passcode updated", function() {
     setPasscode();
     toastr.success("Passcode updated.", {timeout: 300000});
@@ -141,7 +142,6 @@ function clockIn() {
   $("#student-queue-area").show();
   $("#clock-in-area").hide();
   $("#clock-out-area").show();
-  $("#footer").show();
   setAvailableTAs();
   updateStudentQueue();
   setPasscode();
@@ -152,7 +152,6 @@ function clockOut() {
   $("#student-queue-area").hide();
   $("#clock-in-area").show();
   $("#clock-out-area").hide();
-  $("#footer").hide();
   setAvailableTAs();
 }
 
@@ -194,11 +193,40 @@ function getCurrentStudent() {
 }
 
 function showCurrentTicket(ticket) {
-  $("#current-student-name").html("Assisting: " + ticket.user.name);
-  $("#current-student-issue-text").html(ticket.desc || "No description provided");
-  $("#current-student-ticket-createtime").html("Ticket created " + (new Date(ticket.createdAt)).toLocaleString());
-  $("#current-student-area").show();
-
+  client.service('tokens').find(
+    {
+      query: {
+        $limit: 10,
+        fulfilled: true,
+        isBeingHelped: false,
+        user: ticket.user._id,
+        $sort: {
+          createdAt: 1
+        }
+      }
+    }).then(prevTickets => {
+      var row = 1;
+      var stable = $("#prev-tickets-table")[0];
+      if ((!! prevTickets.data) && prevTickets.data.length > 0) {
+        prevTickets.data.map(ticket => {
+          var r = stable.insertRow(row);
+          r.insertCell(0).innerHTML = row;
+          r.insertCell(1).innerHTML = (new Date(ticket.closedAt)).toLocaleString();
+          r.insertCell(2).innerHTML = ticket.fulfilledByName || "N/A";
+          r.insertCell(3).innerHTML = ticket.desc || "No description";
+          r.insertCell(4).innerHTML = "<small>Coming soon</small>"
+          row++;
+        });
+      }
+      $("#current-student-name").html("Assisting: " + ticket.user.name);
+      $("#current-student-name-2").html("Recent tickets for " + ticket.user.name);
+      $("#current-student-issue-text").html(ticket.desc || "No description provided");
+      $("#current-student-ticket-createtime").html("Ticket created " + (new Date(ticket.createdAt)).toLocaleString());
+      $("#current-student-area").show();
+      console.log(prevTickets);
+    }).catch(function (err) {
+      console.error(err);
+    });
 }
 
 function closeTicket() {
@@ -219,8 +247,7 @@ function closeTicket() {
         student: currentTicket.user._id,
         ticket: currentTicket._id
       }).then(comment => {
-        console.log("new comment");
-        console.log(comment);
+        $('#student-notes-box').val("")
         toastr.success("Ticket closed and comment successfully saved");
         currentTicket = null;
       }).catch(function(err) {

@@ -60,6 +60,9 @@
           <div class="panel-body">
             <form id="clock-out-form">
               <button id="clock-out-btn" type="submit" class="btn btn-default">Leave office hours</button>
+              <div class="alert alert-success alert-dismissable" role="alert" style="margin-top:15px;">
+                <button type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                Don't forget to press the leave button before you depart.</div>
             </form>
             <hr>
             <h4>Hourly passcode:</h4>
@@ -74,14 +77,14 @@
           </table>
         </div>
       </div>
-      <div class="col-md-8">
+      <div class="col-md-9">
         <p class="lead">Students in queue: <strong id="students-in-queue"></strong></p>
         <hr>
         <div id="current-student-area" class="panel panel-default" style="display:none;">
           <div class="panel-heading">Current Student</div>
           <div class="panel-body">
             <h4 id="current-student-name"></h4>
-            <p id="current-student-ticket-createtime"></p>
+            <p id="current-student-ticket-createtime" style="color:gray;"></p>
             <p id="current-student-time-warn" class="warning-text" style="display:none;">Warning: You have spent over 5 minutes assisting this student</p>
             <label> Student's issue:</label>
             <div class="well">
@@ -124,6 +127,21 @@
             <form id="close-ticket-form">
               <button id="close-ticket-btn" type="submit" class="btn btn-default">Close ticket</button>
             </form>
+            <hr>
+            <h4 id="current-student-name-2"></h4>
+            <table class="table table-striped" id="prev-tickets-table">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Closed date</th>
+                  <th>TA</th>
+                  <th>Description</th>
+                  <th>Comments</th>
+                </tr>
+              </thead>
+              <tbody>
+              </tbody>
+            </table>
           </div>
         </div>
         <div id="student-queue-area" class="panel panel-default" style="display:none;">
@@ -139,6 +157,8 @@
                 <th>Description</th>
                 <th>Date submitted</th>
               </tr>
+              <tr>
+              </tr>
             </table>
           </div>
         </div>
@@ -146,9 +166,8 @@
     </div>
   </div>
 </div>
-<footer id="footer" class="footer" style="display:none;position:absolute;bottom:0;width:100%;background-color:#e6fff2;height:40px;line-height:40px">
+<footer id="footer" class="footer" style="display:none;position:fixed;bottom:0;width:100%;background-color:#e6fff2;height:40px;line-height:40px">
   <div class="container">
-    <p>You are currently hosting office hours. Do not forget to press the leave button before departing. </p>
   </div>
 </footer>
 </body>
