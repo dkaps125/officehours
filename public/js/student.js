@@ -90,14 +90,15 @@ function submitToken() {
   })
   .then(ticket => {
     setNumTokens();
-    toastr.success("Your help request has been submitted!")
+    toastr.success("Your help request has been submitted!");
+    desc: $("#ticket-desc").val("");
   })
   .catch(function (err) {
     var errMsg = "Your help request could not be submitted: ";
     if (numTokens <= 0) {
       errMsg += "You are out of tokens."
     } else {
-      errMsg += (!!err.message) ? err.message+"." : "" ;
+      errMsg += (!!err.message) ? err.message + "." : "" ;
     }
     toastr.error(errMsg);
   })
@@ -163,7 +164,7 @@ function getCurrentTicket() {
 }
 
 function showCurrentTicket(ticket) {
-  $("#ticket-responder-name").html(ticket.fulfilledByName + " is assisting you");
+  $("#ticket-responder-name").html("TA " + ticket.fulfilledByName + " is assisting you");
   $("#ticket-description").html(ticket.desc || "No description provided");
   $("#current-ticket-area").show();
   $("#ticket-submit-area").hide();
