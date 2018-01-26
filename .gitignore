@@ -110,6 +110,9 @@ config/production.json
 # Windows shortcuts
 *.lnk
 
+# Package lock
+package-lock.json
+
 # Others
 lib/
 data/
