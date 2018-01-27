@@ -73,3 +73,7 @@ body {
 #searchBox {
     width: 100%;
 }
+
+#userTable th {
+  cursor: pointer;
+}
