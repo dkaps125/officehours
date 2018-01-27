@@ -170,6 +170,9 @@
           <button id="delete-all-tas" class="btn btn-warning">Delete all TAs</button>
           <hr id="roster">
           <h3>All users</h3>
+          <form class="form-inline">
+            <input type="text" class="form-control" onkeyup="search()" id="searchBox" placeholder="Search..." />
+          </form>
           <table id="userTable" class="table table-striped">
             <tr class="active">
               <th>#</th>
