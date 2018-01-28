@@ -11,6 +11,7 @@ class Service {
         query: {
           $limit: 1,
           fulfilled: false,
+          cancelledByStudent: false,
           $sort: {
             createdAt: 1
           }
