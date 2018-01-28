@@ -42,6 +42,10 @@ module.exports = function (app) {
       type: Boolean,
       default: false
     },
+    comment: {
+      type: Schema.Types.ObjectId,
+      ref: 'comment'
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     dequeuedAt: { type: Date },

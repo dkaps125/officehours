@@ -192,6 +192,50 @@ function getCurrentStudent() {
     });
 }
 
+// https://stackoverflow.com/questions/1199352/smart-way-to-shorten-long-strings-with-javascript
+String.prototype.trunc = function(n, useWordBoundary) {
+  if (this.length <= n) {
+    return this;
+  }
+  var subString = this.substr(0, n-1);
+  return (useWordBoundary ? subString.substr(0, subString.lastIndexOf(' '))
+  : subString) + "...";
+}
+
+function generateComment(comment) {
+  var result = ""
+  if (!comment) {
+    return "";
+  }
+  if (!!comment.text) {
+    result += comment.text + " ";
+  }
+
+  if (comment.knowledgeable !== "Not sure" && comment.toldTooMuch !== "Not sure") {
+    result += "[From questionnaire]: "
+  }
+  if (comment.knowledgeable == "Yes") {
+    result += "Student seemed knowledgeable";
+    if (comment.toldTooMuch !== "Not sure") {
+      result += " -- "
+    }
+  } else if (comment.knowledgeable == "No") {
+    result += "Student did not seem knowledgeable";
+    if (comment.toldTooMuch !== "Not sure") {
+      result += " -- "
+    }
+  }
+
+  if (comment.toldTooMuch == "Yes") {
+    result += "Student may have been able to solve problem with less TA help";
+  } else if (comment.toldTooMuch == "No") {
+    result += "Student probably needed TA help to solve problem";
+  }
+
+  return result;
+
+}
+
 function showCurrentTicket(ticket) {
   client.service('tokens').find(
     {
@@ -199,25 +243,45 @@ function showCurrentTicket(ticket) {
         $limit: 10,
         fulfilled: true,
         isBeingHelped: false,
+        cancelledByStudent: false,
         user: ticket.user._id,
         $sort: {
-          createdAt: 1
+          createdAt: -1
         }
       }
     }).then(prevTickets => {
+      $("#prev-tickets-table").find("tr:gt(0)").remove();
       var row = 1;
       var stable = $("#prev-tickets-table")[0];
+
       if ((!! prevTickets.data) && prevTickets.data.length > 0) {
         prevTickets.data.map(ticket => {
           var r = stable.insertRow(row);
-          r.insertCell(0).innerHTML = row;
-          r.insertCell(1).innerHTML = (new Date(ticket.closedAt)).toLocaleString();
-          r.insertCell(2).innerHTML = ticket.fulfilledByName || "N/A";
-          r.insertCell(3).innerHTML = ticket.desc || "No description";
-          r.insertCell(4).innerHTML = "<small>Coming soon</small>"
+          var comment = generateComment(ticket.comment);
+          var desc = ticket.desc || "No description";
+
+          r.insertCell(0).innerHTML = '<small>' + row + '</small>';
+          r.insertCell(1).innerHTML = '<small>' + (new Date(ticket.closedAt)).toLocaleString() + '</small>';
+          r.insertCell(2).innerHTML = '<small>' + ticket.fulfilledByName || "N/A" + "</small>";
+          if (desc.length > 60) {
+            r.insertCell(3).innerHTML = '<small title="Full Description for #'+row
+            +'" data-placement="bottom" data-toggle="popover" data-content="'+desc+'">'
+            + (desc).trunc(60, true) + '</small>';
+          } else {
+            r.insertCell(3).innerHTML = '<small>' + desc + '</small>';
+          }
+          if (comment.length > 60) {
+            r.insertCell(4).innerHTML = '<small title="All TA Comments for #'+row
+            +'" data-placement="bottom" data-toggle="popover" data-content="'+comment+'">'
+            + (comment).trunc(60, true) + '</small>';
+          } else {
+            r.insertCell(4).innerHTML = '<small>' + comment + '<small>';
+          }
+
           row++;
         });
       }
+      $("[data-toggle=popover]").popover({ trigger: "hover" });
       $("#current-student-name").html("Assisting: " + ticket.user.name);
       $("#current-student-name-2").html("Recent tickets for " + ticket.user.name);
       $("#current-student-issue-text").html(ticket.desc || "No description provided");
@@ -232,30 +296,29 @@ function showCurrentTicket(ticket) {
 function closeTicket() {
   if ((!!currentTicket) && window.confirm("Are you sure you want to permanently close this ticket?")) {
     $("#current-student-area").hide();
-    console.log("patching "+currentTicket._id)
-    client.service('tokens').patch(currentTicket._id, {
-      isBeingHelped: false,
-      isClosed: true,
-      closedAt: Date.now(),
-      // TODO: shouldIgnoreInTokenCount: false/true
-    }).then(updatedTicket => {
-      // TODO: comment service create
-      client.service('comment').create({
-        text:  $('#student-notes-box').val(),
-        knowledgeable: $('input[name=radio1]:checked').val(),
-        toldTooMuch: $('input[name=radio2]:checked').val(),
-        student: currentTicket.user._id,
-        ticket: currentTicket._id
-      }).then(comment => {
+    client.service('comment').create({
+      text:  $('#student-notes-box').val(),
+      knowledgeable: $('input[name=radio1]:checked').val(),
+      toldTooMuch: $('input[name=radio2]:checked').val(),
+      student: currentTicket.user._id,
+      ticket: currentTicket._id
+    }).then(comment => {
+      client.service('tokens').patch(currentTicket._id, {
+        isBeingHelped: false,
+        isClosed: true,
+        closedAt: Date.now(),
+        comment: comment._id,
+        // TODO: shouldIgnoreInTokenCount: false/true
+      }).then(updatedTicket => {
         $('#student-notes-box').val("")
         toastr.success("Ticket closed and comment successfully saved");
         currentTicket = null;
-      }).catch(function(err) {
-        toastr.error("Error closing ticket and submitting comments");
-        console.error(err);
-        currentTicket = null;
-      })
-    })
+      });
+    }).catch(function(err) {
+      toastr.error("Error closing ticket and submitting comments");
+      console.error(err);
+      currentTicket = null;
+    });
   }
 }
 

@@ -27,11 +27,21 @@ const userSchema = {
   }
 }
 
-const populateUserIfTA =
+const commentSchema = {
+  include: {
+    service: 'comment',
+    nameAs: 'comment',
+    parentField: 'comment',
+    childField: '_id'
+  }
+}
+
+const populateFieldsIfTA =
 commonHooks.when(hook => !!hook.params.user &&
   (hook.params.user.role === "Instructor"
   || hook.params.user.role === "TA"),
-  commonHooks.populate({schema: userSchema})
+  [commonHooks.populate({schema: userSchema}),
+    commonHooks.populate({schema: commentSchema})]
 );
 
 const validatePasscode = context => {
@@ -115,8 +125,8 @@ module.exports = {
 
   after: {
     all: [],
-    find: [populateUserIfTA],
-    get: [populateUserIfTA],
+    find: [populateFieldsIfTA],
+    get: [populateFieldsIfTA],
     create: [emitQueuePositionUpdate],
     update: [emitQueuePositionUpdate, commonHooks.setUpdatedAt()],
     patch: [emitQueuePositionUpdate, commonHooks.setUpdatedAt()],
