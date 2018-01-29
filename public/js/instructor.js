@@ -63,7 +63,10 @@ function updateStudentQueue() {
       r.insertCell(0).innerHTML = row;
       r.insertCell(1).innerHTML = ticket.user.name || ticket.user.directoryID;
       r.insertCell(2).innerHTML = ticket.desc || "No description";
-      r.insertCell(3).innerHTML = (new Date(ticket.createdAt)).toLocaleString();
+      var dateCell = r.insertCell(3);
+      dateCell.innerHTML = (formatTime(new Date(ticket.createdAt)));
+      dateCell.classList.add("time");
+      dateCell.dataset.time = new Date(ticket.createdAt);
       row++;
     });
     $("#students-in-queue").html(tickets.total);
@@ -311,3 +314,13 @@ function sortTable(n) {
     }
   }
 }
+
+setInterval(function() {
+  Array.from(document.getElementsByClassName("time")).map(ele => {
+    ele.innerHTML = formatTime(ele.dataset.time)
+  });
+
+  Array.from(document.getElementsByClassName("timeSmall")).map(ele => {
+    ele.innerHTML = formatTime('<small>' + ele.dataset.time + '</small>');
+  });
+}, 1000);
