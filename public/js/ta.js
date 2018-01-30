@@ -126,7 +126,10 @@ function updateStudentQueue() {
       r.insertCell(0).innerHTML = row;
       r.insertCell(1).innerHTML = ticket.user.name || ticket.user.directoryID;
       r.insertCell(2).innerHTML = ticket.desc || "No description";
-      r.insertCell(3).innerHTML = (new Date(ticket.createdAt)).toLocaleString();
+      var dateCell = r.insertCell(3);
+      dateCell.innerHTML = (formatTime(new Date(ticket.createdAt)));
+      dateCell.classList.add("time");
+      dateCell.dataset.time = new Date(ticket.createdAt);
       row++;
     });
     $("#students-in-queue").html(tickets.total);
@@ -261,7 +264,12 @@ function showCurrentTicket(ticket) {
           var desc = ticket.desc || "No description";
 
           r.insertCell(0).innerHTML = '<small>' + row + '</small>';
-          r.insertCell(1).innerHTML = '<small>' + (new Date(ticket.closedAt)).toLocaleString() + '</small>';
+
+          var dateCell = r.insertCell(1);
+          dateCell.innerHTML = '<small>' + (formatTime(new Date(ticket.closedAt))) + '</small>';
+          dateCell.classList.add("timeSmall");
+          dateCell.dataset.time = new Date(ticket.closedAt);
+
           r.insertCell(2).innerHTML = '<small>' + ticket.fulfilledByName || "N/A" + "</small>";
           if (desc.length > 60) {
             r.insertCell(3).innerHTML = '<small title="Full Description for #'+row
@@ -348,3 +356,13 @@ $(function() {
     });
   });
 });
+
+setInterval(function() {
+  Array.from(document.getElementsByClassName("time")).map(ele => {
+    ele.innerHTML = formatTime(ele.dataset.time)
+  });
+
+  Array.from(document.getElementsByClassName("timeSmall")).map(ele => {
+    ele.innerHTML = '<small>' + formatTime(ele.dataset.time) + '</small>';
+  });
+}, 1000);
