@@ -1,6 +1,7 @@
 const { authenticate } = require('feathers-authentication').hooks;
 const auth  = require('feathers-authentication-hooks');
 const commonHooks = require('feathers-hooks-common');
+const search = require('feathers-mongodb-fuzzy-search');
 const errors = require('feathers-errors');
 const xss = require('xss');
 
@@ -110,7 +111,9 @@ module.exports = {
   before: {
     all: [ authenticate('jwt') ],
     find: [restrictToTAOrSelf],
-    get: [restrictToTAOrSelf],
+    get: [restrictToTAOrSelf, search({
+      fields: ['user', 'fulfilledByName', 'desc']
+    })],
     // TODO: validate description length
     create: [auth.associateCurrentUser({as: 'user'}),
       validatePasscode,
