@@ -64,6 +64,7 @@ app.hooks(appHooks);
 
 function setPasscode() {
   app.passcode = randomstring.generate({
+    charset: 'hex',
     length: 5,
     capitalization: 'lowercase'
   })
