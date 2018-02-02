@@ -87,9 +87,12 @@ client.authenticate()
 });
 
 function logout() {
-  // log out of feathers and redirect to login page
-  client.logout();
-  window.location.href = '/login.html';
+  // go off duty, then logout and redirect to login page
+  users.patch(client.get('user')._id, {onDuty: false})
+  .then(newMe => {
+    client.logout();
+    window.location.href = '/login.html';
+  });
 }
 
 function setPasscode() {
