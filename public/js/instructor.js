@@ -271,46 +271,32 @@ function search() {
       }
     }
   }
+
+  $('html, body').animate({
+    scrollTop: ($('#searchBox').offset().top)
+  },100);
 }
 
 function sortTable(n) {
-  var table, rows, switching, i, x, y, shouldSwitch, dir, switchcount = 0;
-  table = document.getElementById("userTable");
-  switching = true;
-  dir = "asc";
+  var sortOrder = parseInt(document.getElementById("userTable").dataset.sortorder);
+  document.getElementById("userTable").dataset.sortorder = -sortOrder + "";
 
-  // Booble sort
-  while (switching) {
-    switching = false;
-    rows = table.getElementsByTagName("TR");
+  var field = "createdAt";
 
-    for (i = 1; i < (rows.length - 1); i++) {
-      shouldSwitch = false;
-
-      x = rows[i].getElementsByTagName("TD")[n];
-      y = rows[i + 1].getElementsByTagName("TD")[n];
-
-      if (dir == "asc") {
-        if (x.innerHTML.toLowerCase() > y.innerHTML.toLowerCase()) {
-          shouldSwitch= true;
-          break;
-        }
-      } else if (dir == "desc") {
-        if (x.innerHTML.toLowerCase() < y.innerHTML.toLowerCase()) {
-          shouldSwitch= true;
-          break;
-        }
-      }
-    }
-    if (shouldSwitch) {
-      rows[i].parentNode.insertBefore(rows[i + 1], rows[i]);
-      switching = true;
-      switchcount ++;
-    } else {
-      if (switchcount == 0 && dir == "asc") {
-        dir = "desc";
-        switching = true;
-      }
-    }
+  if (n === 1) {
+    field = "directoryID";
+  } else if (n === 2) {
+    field = "name";
+  } else if (n === 3) {
+    field = "role";
   }
+
+  var searchQuery = {query: {$limit: 5000, $sort: {}}};
+  searchQuery.query.$sort[field] = sortOrder;
+
+  users.find(searchQuery).then(results => {
+    renderUsers(results);
+  }).catch(function(err) {
+    console.error(err);
+  });
 }
