@@ -314,13 +314,3 @@ function sortTable(n) {
     }
   }
 }
-
-setInterval(function() {
-  Array.from(document.getElementsByClassName("time")).map(ele => {
-    ele.innerHTML = formatTime(ele.dataset.time)
-  });
-
-  Array.from(document.getElementsByClassName("timeSmall")).map(ele => {
-    ele.innerHTML = formatTime('<small>' + ele.dataset.time + '</small>');
-  });
-}, 1000);

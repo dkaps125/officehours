@@ -53,5 +53,7 @@ module.exports = function (app) {
     // TODO: verifier for closedAt
   });
 
+  tokens.index({desc: 'text', user: 'text', fulfilledByName: 'text'});
+
   return mongooseClient.model('tokens', tokens);
 };

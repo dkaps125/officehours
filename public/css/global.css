@@ -77,3 +77,31 @@ body {
 #userTable th {
   cursor: pointer;
 }
+
+#ticket-list {
+  table-layout: fixed;
+}
+
+#ticketnumber {
+  width: 51px;
+}
+
+#ticketstatus {
+  width: 131px;
+}
+
+#ticketstudent {
+  width: 175px;
+}
+
+#ticketdate {
+  width: 283px;
+}
+
+#ticketTA {
+  width: 153px;
+}
+
+#ticketdesc {
+  width: 370px;
+}

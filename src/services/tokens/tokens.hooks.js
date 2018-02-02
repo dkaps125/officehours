@@ -110,10 +110,10 @@ const validateTokens = context => {
 module.exports = {
   before: {
     all: [ authenticate('jwt') ],
-    find: [restrictToTAOrSelf],
-    get: [restrictToTAOrSelf, search({
+    find: [restrictToTAOrSelf, search({
       fields: ['user', 'fulfilledByName', 'desc']
     })],
+    get: [restrictToTAOrSelf],
     // TODO: validate description length
     create: [auth.associateCurrentUser({as: 'user'}),
       validatePasscode,
