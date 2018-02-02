@@ -92,6 +92,9 @@ function logout() {
   .then(newMe => {
     client.logout();
     window.location.href = '/login.html';
+  }).catch(function(err) {
+    client.logout();
+    window.location.href = '/login.html';
   });
 }
 
