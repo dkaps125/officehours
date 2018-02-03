@@ -19,7 +19,7 @@
   </head>
   <body>
     <script src="/js/instructor.js"></script>
-    <nav class="navbar navbar-inverse">
+    <nav class="navbar">
       <div class="container-fluid">
         <div class="navbar-header">
           <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
@@ -89,42 +89,110 @@
           </div>
           <hr id="student-stats">
           <h3>Student statistics</h3>
-          <div class="well stats">
+          <div id="student-stats-well" class="well stats" style="display:none;">
             <div class="statsBlock" style="display:inline-block;">
               <div class="statsPanel">
-                <div class=""> 330 </div>
+                <div id="stats-tix-total" class=""> </div>
               </div>
               <div class="statsFooter">
-                <p class="statsText lead">Total tickets</p>
+                <p class="statsText lead">Tickets (total)</p>
               </div>
             </div>
             <div class="statsBlock" style="display:inline-block;">
               <div class="statsPanel">
-                <div class=""> 37 </div>
+                <div id="stats-tix-week" class=""> </div>
               </div>
               <div class="statsFooter">
-                <p class="statsText lead">Tickets this week</p>
+                <p class="statsText lead">Tickets (1 week)</p>
               </div>
             </div>
             <div class="statsBlock" style="display:inline-block;">
               <div class="statsPanel">
-                <div class=""> 11 </div>
+                <div id="stats-tix-today" class=""> </div>
               </div>
               <div class="statsFooter">
-                <p class="statsText lead">Tickets today</p>
+                <p class="statsText lead">Tickets (today)</p>
               </div>
             </div>
             <div class="statsBlock" style="display:inline-block;">
               <div class="statsPanel">
-                <div class=""> 2.5 </div>
+                <div id="stats-wait-avg" class="">N/A </div>
               </div>
               <div class="statsFooter">
                 <p class="statsText lead">Avg Wait (mins)</p>
               </div>
             </div>
           </div>
+          <table id="top-student-table" class="table">
+            <thead>
+              <tr class="active">
+                <th>Name</th>
+                <th>Total Tickets</th>
+                <th>Tickets/week</th>
+                <th>Last ticket date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>John Smith</td>
+                <td>27</td>
+                <td>9</td>
+                <td>3 hours ago</td>
+              </tr>
+              <tr>
+                <td>Daniel Kapit</td>
+                <td>10</td>
+                <td>1</td>
+                <td>4 days ago</td>
+              </tr>
+            </tbody>
+          </table>
           <hr id="ta-stats">
           <h3>TA statistics</h3>
+          <div class="well stats">
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div class=""> 12 </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead">TAs</p>
+              </div>
+            </div>
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div class=""> 8 </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead"> Mins/session </p>
+              </div>
+            </div>
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div class=""> 3 </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead"> Sessions/week </p>
+              </div>
+            </div>
+          </div>
+          <table id="top-ta-table" class="table">
+            <thead>
+              <tr class="active">
+                <th>Total tickets</th>
+                <th>This week</th>
+                <th>Name</th>
+                <th>Last comment date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Greg Bekher</td>
+                <td>47</td>
+                <td>14</td>
+                <td>3 hours ago</td>
+              </tr>
+            </tbody>
+          </table>
           <hr id="manage-user">
           <h3>Add user</h3>
           <form id="add-user" class="form-inline">

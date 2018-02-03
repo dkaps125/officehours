@@ -1,9 +1,18 @@
 html { height: 100%; }
 
+@font-face {
+  font-family: "Main";
+  src: url("/fonts/OpenSans-Regular.ttf")
+}
+
 body {
     min-height:100%;
     position:relative;
     padding-bottom:40 px;
+}
+
+body {
+  font-family: 'Main', sans-serif !important;
 }
 
 .navbar {
@@ -11,7 +20,12 @@ body {
   width:100%;
   z-index:3;
   overflow:auto;
-  /*TODO: background-color: 990000;*/
+  background-color: 990000;
+  color: white;
+}
+
+.navbar a {
+  color: white
 }
 
 #main {

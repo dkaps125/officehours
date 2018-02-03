@@ -26,6 +26,7 @@ client.authenticate()
   }
   client.set('user', user);
   refreshUsers();
+  updateStats();
 
   socket.on("tokens created", function(token) {
     updateStudentQueue();
@@ -35,11 +36,15 @@ client.authenticate()
     updateStudentQueue();
     toastr.success("Ticket status updated");
   });
+  socket.on("stats updated", function(stats) {
+    updateStats();
+    toastr.success("Analytics updated");
+  });
   updateStudentQueue();
 })
 .catch(error => {
   console.log("auth error or not authenticated, redirecting...", error);
-  window.location.href = '/login.html';
+  //window.location.href = '/login.html';
 });
 
 // toastr config
@@ -134,6 +139,46 @@ function deleteAllWithRole(role) {
     refreshUsers();
   }).catch(function(err) {
     console.error(err);
+  });
+}
+
+// stats
+function updateStats() {
+  const lastMidnight = new Date();
+  lastMidnight.setHours(0,0,0,0);
+  const lastWeek = new Date();
+  lastWeek.setDate(lastWeek.getDate() - 7);
+  $("#student-stats-well").hide();
+
+  client.service('/tokens').find({
+    query: {
+      createdAt: {
+        $gt: lastMidnight.getTime(),
+      },
+      $limit: 0,
+    }
+  }).then(res => {
+    $("#stats-tix-today").html(res.total);
+    return client.service('/tokens').find({
+      query: {
+        createdAt: {
+          $gt: lastWeek.getTime(),
+        },
+        $limit: 0,
+      }
+    }).then(res => {
+      $("#stats-tix-week").html(res.total);
+      return client.service('/tokens').find({
+        query: {
+          $limit: 0,
+        }
+      });
+    }).then(res => {
+      $("#stats-tix-total").html(res.total);
+      $("#student-stats-well").show();
+    }).catch(function(err) {
+      console.err(err);
+    })
   });
 }
 
