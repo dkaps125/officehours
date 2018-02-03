@@ -48,22 +48,18 @@
     <div class="col-md-12" style="padding-top:15px;">
       <h3 id="all-tickets-label">All tickets</h3>
       <form class="form-inline">
-        <input type="text" class="form-control" onkeyup="" id="searchBox" placeholder="Search..." />
+        <input type="text" class="form-control" onkeyup="searchTokens()" id="searchBox" placeholder="Search..." />
       </form>
       <table id="ticket-list" class="table">
-        <thead>
           <tr class="active">
-            <th>#</th>
-            <th>Status</th>
-            <th>Student</th>
-            <th>Date</th>
-            <th>TA</th>
-            <th class="col-xs-4">Description</th>
+            <th id="ticketnumber">#</th>
+            <th id="ticketstatus">Status</th>
+            <th id="ticketstudent">Student</th>
+            <th id="ticketdate">Date</th>
+            <th id="ticketTA">TA</th>
+            <th id="ticketdesc" class="col-xs-4">Description</th>
           </tr>
-        </thead>
-        <tbody>
           <tr></tr>
-        </tbody>
       </table>
     </div>
   </div>

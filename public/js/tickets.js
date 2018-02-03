@@ -40,7 +40,7 @@ client.authenticate()
   }
 
   client.set('user', user);
-  updateTicketList(currentPage);
+  updateTicketList(currentPage, []);
 
   // TODO: these should only run once
   socket.on("passcode updated", function() {
@@ -66,7 +66,7 @@ function logout() {
   window.location.href = '/login.html';
 }
 
-function updateTicketList(page) {
+function updateTicketList(page, tokenQuery) {
   console.log("updating ticket list for page "+page)
   if (pagesLoaded.includes(page)) {
     console.log("page already loaded");
@@ -75,15 +75,32 @@ function updateTicketList(page) {
   }
   pagesLoaded.push(page);
 
-  client.service('/tokens').find({
-    query: {
-      $limit: itemsPerPage,
-      $skip: page * itemsPerPage,
-      $sort: {
-        createdAt: -1
+  var q = {};
+
+  if (tokenQuery.length === 0) {
+    q = {
+      query: {
+        $limit: itemsPerPage,
+        $skip: page * itemsPerPage,
+        $sort: {
+          createdAt: -1
+        }
+      }
+    };
+  } else {
+    q = {
+      query: {
+        $limit: itemsPerPage,
+        $skip: page * itemsPerPage,
+        $sort: {
+          createdAt: -1
+        },
+        $or: tokenQuery
       }
     }
-  }).then(tickets => {
+  }
+
+  client.service('/tokens').find(q).then(tickets => {
     //$("#ticket-list").find("tr:gt(0)").remove();
 
     if (tickets.data.length < itemsPerPage) {
@@ -145,13 +162,48 @@ function setModal(ticket) {
   $("#ticket-modal-body").html(finalHTML);
 }
 
+const tokens = client.service('/tokens');
+let tokenQuery = [];
+let timeOutID = null;
+
+function searchTokens() {
+  if (timeOutID !== null) {
+    clearTimeout(timeOutID);
+  }
+
+  timeOutID = setTimeout(() => {
+    var input, filter, table, tr, td, i;
+    input = document.getElementById("searchBox");
+    filter = input.value.toUpperCase();
+    table = document.getElementById("ticket-list");
+    tr = table.getElementsByTagName("tr");
+
+    if (filter === "") {
+      tokenQuery = [];
+    } else {
+      tokenQuery = [
+          { desc: { $search: filter } },
+          { fulfilledByName: { $search: filter } }
+      ];
+    }
+
+    currentPage = 0;
+    pagesLoaded = [];
+    $("#ticket-list").hide();
+    $("#ticket-list").find("tr:gt(0)").remove();
+
+    updateTicketList(currentPage, tokenQuery);
+    $("#ticket-list").show();
+  }, 100);
+}
+
 $(document).ready(function() {
   $(window).scroll(function() {
    if($(window).scrollTop() + $(window).height() == $(document).height()) {
      currentPage += 1;
      // we load too fast otherwise
      setTimeout(function() {
-       updateTicketList(currentPage);
+       updateTicketList(currentPage, tokenQuery);
      }, 200);
    }
   });
