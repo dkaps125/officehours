@@ -22,6 +22,7 @@
     "npm": ">= 3.0.0"
   },
   "scripts": {
+    "build": "gulp",
     "test": "npm run eslint && npm run mocha",
     "eslint": "eslint src/. test/. --config .eslintrc.json",
     "start": "node src/",
@@ -61,6 +62,9 @@
   },
   "devDependencies": {
     "eslint": "^4.3.0",
+    "gulp": "^3.9.1",
+    "gulp-csso": "^3.0.1",
+    "gulp-less": "^3.4.0",
     "mocha": "^3.4.2",
     "request": "^2.81.0",
     "request-promise": "^4.2.1"
