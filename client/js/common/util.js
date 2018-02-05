@@ -40,6 +40,6 @@ setInterval(function() {
   });
 
   Array.from(document.getElementsByClassName("timeSmall")).map(ele => {
-    ele.innerHTML = formatTime('<small>' + ele.dataset.time + '</small>');
+    ele.innerHTML = '<small>' + formatTime(ele.dataset.time) + '</small>';
   });
 }, 1000);
