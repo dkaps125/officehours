@@ -79,7 +79,8 @@ const validateTokens = context => {
       createdAt: {
         $gt: lastMidnight.getTime(),
       },
-      user: context.params.user._id
+      user: context.params.user._id,
+      cancelledByStudent: false,
     }
   })
   .then(res => {
