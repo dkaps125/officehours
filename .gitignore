@@ -118,6 +118,5 @@ package-lock.json
 client/scss/sass-cache/
 
 # Others
-lib/
 data/
 csvUploads/*
