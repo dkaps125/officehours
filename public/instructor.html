@@ -1,0 +1,257 @@
+<html>
+  <head>
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0, maximum-scale=1, user-scalable=0" />
+    <title>Instructor Dashboard</title>
+    <link rel="shortcut icon" href="favicon.ico">
+
+    <div id="app" class="flex flex-column"></div>
+    <script src="/js/bundle.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="/css/bootstrap.min.css">
+    <link rel="stylesheet" href="/css/global.min.css">
+    <link rel="stylesheet" href="/css/toastr.min.css">
+  </head>
+  <body>
+    <script src="/js/instructor.js"></script>
+    <nav class="navbar">
+      <div class="container-fluid">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+            <span class="sr-only">Toggle navigation</span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="/">CMSC330 Office Hours</a>
+        </div>
+        <!-- Collect the nav links, forms, and other content for toggling -->
+        <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Instructor Home <span class="sr-only">(current)</span></a></li>
+            <li> <a href="/ta.html">TA Home</a></li>
+            <li><a href="/tickets.html">Ticket history</a></li>
+            <li><a href="http://cs.umd.edu/class/spring2018/cmsc330/#officehours">OH Schedule</a></li>
+          </ul>
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href="#" onclick="logout()">Logout</a></li>
+          </ul>
+        </div>
+      </div>
+    </nav>
+    <div id="main" class="container">
+      <div class="row">
+        <!-- Full screen sidebar -->
+        <div class="col-xl-3 col-md-3 col-lg-3 device-xl device-lg device-md visible-xl visible-lg visible-md">
+          <div class="sidebar-nav-fixed affix" id="instructor-sidebar-lg">
+            <h3>Dashboard</h3>
+            <div class="list-group" style="width:220px;">
+              <a href="#live-queue" id="live-queue-nav-lg" class="list-group-item active"><span id="students-in-queue" class="badge"></span>Live student queue</a>
+              <a href="#student-stats" id="student-stats-nav-lg" class="list-group-item">Student statistics</a>
+              <a href="#ta-stats" id="ta-stats-nav-lg" class="list-group-item">TA statistics</a>
+              <a href="#manage-user" id="manage-user-nav-lg" class="list-group-item">User management</a>
+              <a href="#roster" id="roster-nav-lg" class="list-group-item">User roster</a>
+            </div>
+          </div>
+        </div>
+        <!-- Mobile sidebar -->
+        <div class="col-md-3 device-sm device-xs visible-sm visible-xs">
+          <div class="sidebar-nav" id="instructor-sidebar-sm">
+            <h3>Dashboard</h3>
+            <div class="list-group">
+              <a href="#live-queue" id="live-queue-nav-sm" class="list-group-item active"><span id="students-in-queue-sm" class="badge">14</span>Live student queue</a>
+              <a href="#student-stats" id="student-stats-nav-sm" class="list-group-item">Student statistics</a>
+              <a href="#ta-stats" id="ta-stats-nav-sm" class="list-group-item">TA statistics</a>
+              <a href="#manage-user" id="manage-user-nav-sm" class="list-group-item">User management</a>
+              <a href="#roster" id="roster-nav-sm" class="list-group-item">User roster</a>
+            </div>
+          </div>
+          <hr>
+        </div>
+        <!-- Main content -->
+        <div class="col-xl-9 col-lg-9 col-md-9">
+          <span id="live-queue"></span>
+          <h3>Live student queue</h3>
+          <div>
+            <table id="student-table" class="table">
+              <tr class="active">
+                <th>Num</th>
+                <th>Student</th>
+                <th>Description</th>
+                <th>Date submitted</th>
+              </tr>
+            </table>
+          </div>
+          <hr id="student-stats">
+          <h3>Student statistics</h3>
+          <div id="student-stats-well" class="well stats" style="display:none;">
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div id="stats-tix-total" class=""> </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead">Tickets (total)</p>
+              </div>
+            </div>
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div id="stats-tix-week" class=""> </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead">Tickets (1 week)</p>
+              </div>
+            </div>
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div id="stats-tix-today" class=""> </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead">Tickets (today)</p>
+              </div>
+            </div>
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div id="stats-wait-avg" class="">N/A </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead">Avg Wait (mins)</p>
+              </div>
+            </div>
+          </div>
+          <table id="top-student-table" class="table">
+            <thead>
+              <tr class="active">
+                <th>Name</th>
+                <th>Total Tickets</th>
+                <th>Tickets/week</th>
+                <th>Last ticket date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>John Smith</td>
+                <td>27</td>
+                <td>9</td>
+                <td>3 hours ago</td>
+              </tr>
+              <tr>
+                <td>Daniel Kapit</td>
+                <td>10</td>
+                <td>1</td>
+                <td>4 days ago</td>
+              </tr>
+            </tbody>
+          </table>
+          <hr id="ta-stats">
+          <h3>TA statistics</h3>
+          <div class="well stats">
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div class=""> 12 </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead">TAs</p>
+              </div>
+            </div>
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div class=""> 8 </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead"> Mins/session </p>
+              </div>
+            </div>
+            <div class="statsBlock" style="display:inline-block;">
+              <div class="statsPanel">
+                <div class=""> 3 </div>
+              </div>
+              <div class="statsFooter">
+                <p class="statsText lead"> Sessions/week </p>
+              </div>
+            </div>
+          </div>
+          <table id="top-ta-table" class="table">
+            <thead>
+              <tr class="active">
+                <th>Total tickets</th>
+                <th>This week</th>
+                <th>Name</th>
+                <th>Last comment date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Greg Bekher</td>
+                <td>47</td>
+                <td>14</td>
+                <td>3 hours ago</td>
+              </tr>
+            </tbody>
+          </table>
+          <hr id="manage-user">
+          <h3>Add user</h3>
+          <form id="add-user" class="form-inline">
+            <div class="form-group">
+              <label for="userName">Name</label>
+              <input type="text" class="form-control" id="add-user-name" placeholder="John Smith">
+            </div>
+            <div class="form-group">
+              <label for="directoryID">&nbsp;Directory ID</label>
+              <input type="text" class="form-control" id="add-user-directoryid" placeholder="example">
+            </div>
+            <div class="form-group">
+              <label for="role">&nbsp;Role</label>
+              <select class="form-control" id="add-user-role">
+              <option>Student</option>
+              <option>TA</option>
+              <option>Instructor</option>
+            </select>
+            </div>
+            &nbsp;
+            <button type="submit" class="btn btn-default">Create user</button>
+          </form>
+          <hr>
+          <h3>Bulk user creation</h3>
+            <a href="example.csv">Download example CSV file</a>
+
+            <p>Upload a CSV, must be comma separated. Names cannot contain commas.
+              <br>Only include columns: <strong>name,directoryID,role</strong> where role is either "Instructor", "Student", or "TA"
+            </p>
+
+            <br>
+            <form action="" method="post" enctype="multipart/form-data" id="js-upload-form" accept=".csv">
+              <div class="form-inline">
+                <div class="form-group">
+                  <input type="file" name="files[]" id="js-upload-files">
+                </div>
+                <div class="form-group">
+                  <button type="submit" class="btn btn-sm btn-primary" id="js-upload-submit">Upload CSV</button>
+                </div>
+              </div>
+            </form>
+          <hr>
+          <h3>Bulk user deletion</h3>
+          <button id="delete-all-students" class="btn btn-warning">Delete all students</button>
+          <button id="delete-all-tas" class="btn btn-warning">Delete all TAs</button>
+          <hr id="roster">
+          <h3>All users</h3>
+          <form class="form-inline">
+            <input type="text" class="form-control" onkeyup="search()" id="searchBox" placeholder="Search..." />
+          </form>
+          <table id="userTable" class="table table-striped" data-sortorder="1">
+            <tr class="active">
+              <th onclick="sortTable(0)">#</th>
+              <th onclick="sortTable(1)">Directory ID</th>
+              <th onclick="sortTable(2)">Name</th>
+              <th onclick="sortTable(3)">Role</th>
+              <th>Actions</th>
+            </tr>
+            <tr>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
