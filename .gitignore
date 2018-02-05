@@ -113,6 +113,10 @@ config/production.json
 # Package lock
 package-lock.json
 
+# SASS
+.sass-cache/
+client/scss/sass-cache/
+
 # Others
 lib/
 data/
