@@ -113,7 +113,7 @@ function updateTicketList(page, tokenQuery) {
       var r = stable.insertRow(row);
       ticket.curStatus = ticket.isClosed ? "Closed" :
         (!ticket.fulfilled ? "Queued" :
-        (!ticket.cancelledByStudent ? "In progress" : "Cancelled"))
+        (!ticket.cancelledByStudent ? "In progress" : "Canceled"))
       r.insertCell(0).innerHTML = row;
       r.insertCell(1).innerHTML = ticket.curStatus;
       r.insertCell(2).innerHTML = ticket.user.name || ticket.user.directoryID;
@@ -156,7 +156,7 @@ function setModal(ticket) {
       }
     }
   } else if (ticket.cancelledByStudent) {
-    finalHTML += "<hr><h4> This ticket was cancelled by the student</h4>";
+    finalHTML += "<hr><h4> This ticket was canceled by the student</h4>";
   }
 
   $("#ticket-modal-body").html(finalHTML);

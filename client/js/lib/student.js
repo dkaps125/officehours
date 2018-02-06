@@ -115,7 +115,7 @@ function cancelRequest() {
     }
   }).then((tickets) => {
       if (tickets.total == 0) {
-        toastr.warning("There are no open tickets that can be cancelled");
+        toastr.warning("There are no open tickets that can be canceled");
       } else {
         // if the student has multiple tickets open for some reason, kill them all
         tickets.data.map(ticket => {
@@ -124,7 +124,7 @@ function cancelRequest() {
             cancelledByStudent: true
           }).then(ticket => {
             lastTicketCancelled = true
-            toastr.warning("Your help ticket has cancelled")
+            toastr.warning("Your help ticket has canceled")
             setNumTokens()
           }).catch( function (err) {
             toastr.error((!!err.message) ? err.message : "Cannot cancel ticket")
