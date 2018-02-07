@@ -44,7 +44,7 @@ client.authenticate()
 })
 .catch(error => {
   console.log("auth error or not authenticated, redirecting...", error);
-  //window.location.href = '/login.html';
+  window.location.href = '/login.html';
 });
 
 // toastr config
@@ -302,6 +302,8 @@ $(function() {
       }
     });
   });
+
+
 });
 
 function search() {
