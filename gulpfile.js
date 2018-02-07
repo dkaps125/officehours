@@ -62,7 +62,7 @@ gulp.task('assets', function() {
 
 gulp.task('fonts', function() {
   return gulp.src('./client/fonts/*')
-    .pipe(gulp.dest('./public'));
+    .pipe(gulp.dest('./public/fonts'));
 });
 
 gulp.task('sass:watch', function() {
