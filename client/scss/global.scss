@@ -94,28 +94,29 @@ body {
 
 #ticket-list {
   table-layout: fixed;
+  min-width: 800px;
 }
 
 #ticketnumber {
-  width: 51px;
+  width: 5%;
 }
 
 #ticketstatus {
-  width: 131px;
+  width: 10%;
 }
 
 #ticketstudent {
-  width: 175px;
+  width: 15%;
 }
 
 #ticketdate {
-  width: 283px;
+  width: 16%;
 }
 
 #ticketTA {
-  width: 153px;
+  width: 16%;
 }
 
 #ticketdesc {
-  width: 370px;
+  width: 40%;
 }
