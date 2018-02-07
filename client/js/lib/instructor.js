@@ -144,6 +144,11 @@ function deleteAllWithRole(role) {
 
 // stats
 function updateStats() {
+  // we're not ready yet 
+  if (!cfg.statsAvailable) {
+    return;
+  }
+
   const lastMidnight = new Date();
   lastMidnight.setHours(0,0,0,0);
   const lastWeek = new Date();

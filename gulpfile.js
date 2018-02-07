@@ -74,5 +74,5 @@ gulp.task('clean', del.bind(null, ['./public/*']));
 gulp.task('default', gulp.series(['clean', 'css', 'js-vendor', 'js-build', 'assets', 'fonts']));
 
 gulp.task('watch', function() {
-  gulp.watch('./client', gulp.series(['css', 'js-vendor', 'js-dev', 'assets', 'fonts']));
+  gulp.watch('./client', gulp.series(['css', 'js-dev', 'assets']));
 });

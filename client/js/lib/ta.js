@@ -193,6 +193,7 @@ function getCurrentStudent() {
       if (ticket.total >= 1) {
         currentTicket = ticket.data[0];
         showCurrentTicket(currentTicket);
+        $("#student-dequeue-btn").hide();
       } else {
         $("#current-student-area").hide();
       }
@@ -327,6 +328,7 @@ function closeTicket() {
         $('#student-notes-box').val("")
         toastr.success("Ticket closed and comment successfully saved");
         currentTicket = null;
+        updateStudentQueue();
       });
     }).catch(function(err) {
       toastr.error("Error closing ticket and submitting comments");
