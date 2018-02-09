@@ -36,10 +36,6 @@ client.authenticate()
     updateStudentQueue();
     toastr.success("Ticket status updated");
   });
-  socket.on("stats updated", function(stats) {
-    updateStats();
-    toastr.success("Analytics updated");
-  });
   updateStudentQueue();
 })
 .catch(error => {
@@ -144,7 +140,7 @@ function deleteAllWithRole(role) {
 
 // stats
 function updateStats() {
-  // we're not ready yet 
+  // we're not ready yet
   if (!cfg.statsAvailable) {
     return;
   }
@@ -302,8 +298,6 @@ $(function() {
       }
     });
   });
-
-
 });
 
 function search() {

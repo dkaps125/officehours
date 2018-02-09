@@ -12,7 +12,7 @@ var del = require('del');
 const jsLoc = './client/js/lib/*.js';
 const commonLoc = './client/js/common/*.js'
 // order matters here
-const vendorLoc = ['./client/js/vendor/jquery.js','./client/js/vendor/bootstrap.js', './client/js/vendor/feathers.js', './client/js/vendor/toastr.js'];
+const vendorLoc = ['./client/js/vendor/jquery.js','./client/js/vendor/bootstrap.js', './client/js/vendor/feathers.js', './client/js/vendor/toastr.js', './client/js/vendor/d3.v4.js'];
 
 gulp.task('js-vendor', function() {
   return gulp.src(vendorLoc.concat(commonLoc))
