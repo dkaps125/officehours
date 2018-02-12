@@ -151,36 +151,84 @@ function updateStats() {
   lastWeek.setDate(lastWeek.getDate() - 7);
   $("#student-stats-well").hide();
 
-  client.service('/tokens').find({
+  client.service('users').find({
     query: {
-      createdAt: {
-        $gt: lastMidnight.getTime(),
+      totalTickets: {
+        $gt: -1,
       },
-      $limit: 0,
+      $sort: {
+        totalTickets: -1
+      }
     }
   }).then(res => {
-    $("#stats-tix-today").html(res.total);
-    return client.service('/tokens').find({
-      query: {
-        createdAt: {
-          $gt: lastWeek.getTime(),
-        },
-        $limit: 0,
+    $("#top-ta-table").find("tr:gt(0)").remove();
+    var trow = 1;
+    var ttable = $("#top-ta-table")[0];
+
+    $("#top-student-table").find("tr:gt(0)").remove();
+    var srow = 1;
+    var stable = $("#top-student-table")[0];
+
+    res.data.forEach(user => {
+      var utable;
+      var row;
+
+      if (user.role === "Student") {
+        utable = stable;
+        row = srow;
+      } else {
+        utable = ttable;
+        row = trow;
       }
-    }).then(res => {
-      $("#stats-tix-week").html(res.total);
-      return client.service('/tokens').find({
-        query: {
-          $limit: 0,
-        }
-      });
-    }).then(res => {
-      $("#stats-tix-total").html(res.total);
-      $("#student-stats-well").show();
-    }).catch(function(err) {
-      console.err(err);
+
+      var r = utable.insertRow(row);
+      r.insertCell(0).innerHTML = user.name;
+      r.insertCell(1).innerHTML = user.totalTickets;
+      r.insertCell(2).innerHTML = -1;
+      r.insertCell(3).innerHTML = -1;
     })
+  }).catch(err => {
+    console.log(err);
   });
+
+  // client.service('/tokens').find({
+  //   query: {
+  //     createdAt: {
+  //       $gt: lastMidnight.getTime(),
+  //     },
+  //     $limit: 0,
+  //   }
+  // }).then(res => {
+  //   $("#stats-tix-today").html(res.total);
+  //   return client.service('/tokens').find({
+  //     query: {
+  //       createdAt: {
+  //         $gt: lastWeek.getTime(),
+  //       },
+  //       $limit: 0,
+  //     }
+  //   }).then(res => {
+  //     $("#stats-tix-week").html(res.total);
+  //     return client.service('/tokens').find({
+  //       query: {
+  //         $limit: 0,
+  //       }
+  //     });
+  //   }).then(res => {
+  //     $("#stats-tix-total").html(res.total);
+  //     $("#student-stats-well").show();
+  //   }).catch(function(err) {
+  //     console.err(err);
+  //   })
+  // });
+
+  // TODO: Graph generation here
+  var svg = d3.select("svg"),
+    margin = {top: 20, right: 20, bottom: 30, left: 50},
+    width = +svg.attr("width") - margin.left - margin.right,
+    height = +svg.attr("height") - margin.top - margin.bottom,
+    g = svg.append("g").attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+
 }
 
 $(function() {

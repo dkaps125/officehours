@@ -20,6 +20,7 @@ module.exports = function (app) {
     },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
+    totalTickets: {type: Number, default: 0}
   });
 
   return mongooseClient.model('users', users);
