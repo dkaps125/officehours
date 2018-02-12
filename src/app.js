@@ -42,7 +42,6 @@ app.use('/', feathers.static(app.get('public')));
 // Set up Plugins and providers
 app.configure(hooks());
 app.configure(mongoose);
-app.configure(mongoose);
 app.configure(rest());
 const io = socketio();
 app.configure(io);
