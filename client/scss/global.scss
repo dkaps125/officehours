@@ -24,8 +24,12 @@ body {
   color: white;
 }
 
-.navbar a {
-  color: white
+.navbar-brand, .navbar-nav > li > a {
+  color: white;
+}
+
+.icon-bar {
+  background-color: white;
 }
 
 #main {
