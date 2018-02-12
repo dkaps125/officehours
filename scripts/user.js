@@ -11,7 +11,7 @@ if (process.env.NODE_ENV === 'production') {
 
 mongoose.Promise = global.Promise;
 
-mongoose.connect(config.mongodb);
+//this isn't needed mongoose.connect(config.mongodb);
 
 program
   .command('adduser <username> <role> <firstname> <lastname>')

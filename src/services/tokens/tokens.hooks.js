@@ -112,7 +112,7 @@ module.exports = {
   before: {
     all: [ authenticate('jwt') ],
     find: [restrictToTAOrSelf, search({
-      fields: ['user', 'fulfilledByName', 'desc']
+      fields: ['userName', 'fulfilledByName', 'desc']
     })],
     get: [restrictToTAOrSelf],
     // TODO: validate description length
