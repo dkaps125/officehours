@@ -13,7 +13,11 @@ var del = require('del');
 const jsLoc = ['./client/js/vendor/dist/d3.v4.js', './client/js/lib/*.js'];
 const commonLoc = './client/js/common/*.js'
 // order matters here
-const vendorLoc = ['./client/js/vendor/jquery.js','./client/js/vendor/bootstrap.js', './client/js/vendor/feathers.js', './client/js/vendor/toastr.js'];
+const vendorLoc = ['./client/js/vendor/jquery.js',
+  './client/js/vendor/bootstrap.js', 
+  './client/js/vendor/feathers.js', 
+  './client/js/vendor/toastr.js'
+];
 
 gulp.task('js-vendor', function() {
   return gulp.src(vendorLoc.concat(commonLoc))
@@ -40,8 +44,8 @@ gulp.task('js-build', function() {
 
 gulp.task('js-dev', function() {
   return gulp.src(jsLoc)
-    .pipe(cache(jsLoc))
-    .pipe(remember(jsLoc))
+    .pipe(cache())
+    .pipe(remember())
     .pipe(gulp.dest('./public/js'));
 });
 

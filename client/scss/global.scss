@@ -37,6 +37,37 @@ body {
   z-index:1000;
 }
 
+/* login */
+.login-body {
+  background-image: url('/login-bg.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.login-box {
+  padding: 50px 25px 50px 25px;
+  margin: 0 auto;
+  width:55%;
+  background:#fff;
+}
+
+.login-btn-box {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 auto;
+}
+
+.login-container {
+  padding-top: 17%;
+}
+
+.login-btn {
+  padding-top: 45px;
+}
+
 /* drag and drop upload css */
 .upload-drop-zone {
     height: 200px;

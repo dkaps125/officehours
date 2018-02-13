@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="/css/global.min.css">
     <link rel="stylesheet" href="/css/toastr.min.css">
   </head>
-  <body>
+  <body class="login-body">
     <script src="/js/login.js"></script>
     <nav class="navbar">
       <div class="container-fluid">
@@ -37,13 +37,25 @@
     </nav>
     <div id="main" class="container">
       <div class="row">
-        <div class="col-sm-4 col-md-offset-1">
-          <br>
-          <p class="lead">Log in with your university credentials</p>
-          <hr>
-          <a href="/cas_login" class="btn btn-info" role="button">CAS Login</a>
+        <div class="col-md-offset-1 col-md-10">
+
         </div>
       </div>
     </div>
+    <div class="container login-container">
+      <div class="login-box">
+        <div class="login-btn-box">
+          <p class="lead">Log in with your university credentials</p>
+        </div>
+        <hr style="padding: 11px; margin: 0;">
+        <div id="unauthorized-alert" class="alert alert-warning fade in" role="alert" style="display:none;">
+          <strong>User not authorized &nbsp;</strong>
+          Please contact an instructor or administrator for this course
+        </div>
+        <div class="login-btn-box login-btn">
+          <a href="/cas_login" class="btn btn-info btn-lg" role="button">CAS Login</a>
+        </div>
+      </div>
+    <div>
   </body>
 </html>
