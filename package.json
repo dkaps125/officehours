@@ -5,7 +5,9 @@
   "homepage": "",
   "main": "src",
   "keywords": [
-    "queue", "office", "hours"
+    "queue",
+    "office",
+    "hours"
   ],
   "author": {
     "name": "Greg Bekher",
@@ -35,7 +37,7 @@
     "cors": "^2.8.4",
     "csv": "^2.0.0",
     "feathers": "^2.1.4",
-    "feathers-authentication": "^1.2.7",
+    "feathers-authentication": "1.2.7",
     "feathers-authentication-hooks": "^0.1.4",
     "feathers-authentication-jwt": "^0.3.2",
     "feathers-configuration": "^0.4.1",

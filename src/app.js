@@ -51,13 +51,12 @@ app.configure(services);
 
 // Configure other middleware (see `middleware/index.js`)
 app.configure(authentication);
-
+app.use(passport.initialize());
 app.configure(middleware);
 
 // Configure a middleware for 404s and the error handler
 app.use(notFound());
 app.use(handler());
-app.use(passport.initialize());
 
 app.hooks(appHooks);
 
