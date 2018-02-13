@@ -44,12 +44,27 @@ setInterval(function() {
   });
 }, 1000);
 
-var precisionRound = function(number, precision) {
+var precisionRoundDecimals = function(number, precision) {
   var factor = Math.pow(10, precision);
   return Math.round(number * factor) / factor;
 }
 
+var precisionRoundWhole = function(number, precision) {
+  var factor = Math.pow(10, precision);
+  return Math.round(number / factor) * factor;
+}
+
 var millisToTime = function(t) {
   t = t / 60000;
-  return precisionRound(t, 1);
+  return precisionRoundDecimals(t, 1);
+}
+
+var toDataArray = function(hash) {
+  var t = [];
+
+  for (var k in hash) {
+    t.push({x: parseInt(k), y: hash[k], date: new Date(parseInt(k))});
+  }
+
+  return t;
 }
