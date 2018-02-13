@@ -151,76 +151,94 @@ function updateStats() {
   lastWeek.setDate(lastWeek.getDate() - 7);
   $("#student-stats-well").hide();
 
-  client.service('users').find({
+  client.service('tokens').find({
     query: {
-      totalTickets: {
-        $gt: -1,
-      },
-      $sort: {
-        totalTickets: -1
+      _aggregate: {
+        $group: {
+          _id: null,
+          waitAvg: { $avg: { $subtract: ["$dequeuedAt", "$createdAt"]} },
+          sessAvg: { $avg: { $subtract: ["$closedAt", "$dequeuedAt"]} }
+        }
       }
     }
-  }).then(res => {
-    $("#top-ta-table").find("tr:gt(0)").remove();
-    var trow = 1;
-    var ttable = $("#top-ta-table")[0];
+  }).then(toks => {
+    $("#stats-wait-avg").html(millisToTime(toks[0].waitAvg));
+    $("#minutes-session").html(millisToTime(toks[0].sessAvg));
 
-    $("#top-student-table").find("tr:gt(0)").remove();
-    var srow = 1;
-    var stable = $("#top-student-table")[0];
-
-    res.data.forEach(user => {
-      var utable;
-      var row;
-
-      if (user.role === "Student") {
-        utable = stable;
-        row = srow;
-      } else {
-        utable = ttable;
-        row = trow;
+    console.log(toks);
+    client.service('users').find({
+      query: {
+        totalTickets: {
+          $gt: -1,
+        },
+        $sort: {
+          totalTickets: -1
+        }
       }
+    }).then(res => {
+      $("#top-ta-table").find("tr:gt(0)").remove();
+      var trow = 0;
+      var ttable = $("#top-ta-table")[0];
 
-      var r = utable.insertRow(row);
-      r.insertCell(0).innerHTML = user.name;
-      r.insertCell(1).innerHTML = user.totalTickets;
-      r.insertCell(2).innerHTML = -1;
-      r.insertCell(3).innerHTML = -1;
-    })
-  }).catch(err => {
-    console.log(err);
+      $("#top-student-table").find("tr:gt(0)").remove();
+      var srow = 0;
+      var stable = $("#top-student-table")[0];
+
+      res.data.forEach(user => {
+        var utable;
+        var row;
+
+        if (user.role === "Student") {
+          utable = stable;
+          srow++;
+          row = srow;
+        } else {
+          utable = ttable;
+          trow++;
+          row = trow;
+        }
+
+        var r = utable.insertRow(row);
+        r.insertCell(0).innerHTML = user.name;
+        r.insertCell(1).innerHTML = user.totalTickets;
+        r.insertCell(2).innerHTML = -1;
+        r.insertCell(3).innerHTML = -1;
+      });
+    }).catch(err => {
+      console.log(err);
+    });
   });
 
-  // client.service('/tokens').find({
-  //   query: {
-  //     createdAt: {
-  //       $gt: lastMidnight.getTime(),
-  //     },
-  //     $limit: 0,
-  //   }
-  // }).then(res => {
-  //   $("#stats-tix-today").html(res.total);
-  //   return client.service('/tokens').find({
-  //     query: {
-  //       createdAt: {
-  //         $gt: lastWeek.getTime(),
-  //       },
-  //       $limit: 0,
-  //     }
-  //   }).then(res => {
-  //     $("#stats-tix-week").html(res.total);
-  //     return client.service('/tokens').find({
-  //       query: {
-  //         $limit: 0,
-  //       }
-  //     });
-  //   }).then(res => {
-  //     $("#stats-tix-total").html(res.total);
-  //     $("#student-stats-well").show();
-  //   }).catch(function(err) {
-  //     console.err(err);
-  //   })
-  // });
+  client.service('/tokens').find({
+    query: {
+      createdAt: {
+        $gt: lastMidnight.getTime(),
+      },
+      $limit: 0,
+    }
+  }).then(res => {
+    $("#stats-tix-today").html(res.total);
+    return client.service('/tokens').find({
+      query: {
+        createdAt: {
+          $gt: lastWeek.getTime(),
+        },
+        $limit: 0,
+      }
+    }).then(res => {
+      $("#stats-tix-week").html(res.total);
+      return client.service('/tokens').find({
+        query: {
+          $limit: 0,
+        }
+      });
+    }).then(res => {
+      $("#stats-tix-total").html(res.total);
+      $("#student-stats-well").show();
+    }).catch(function(err) {
+      console.err(err);
+    })
+  });
 
   // TODO: Graph generation here
   var svg = d3.select("svg"),

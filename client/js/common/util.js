@@ -43,3 +43,13 @@ setInterval(function() {
     ele.innerHTML = '<small>' + formatTime(ele.dataset.time) + '</small>';
   });
 }, 1000);
+
+var precisionRound = function(number, precision) {
+  var factor = Math.pow(10, precision);
+  return Math.round(number * factor) / factor;
+}
+
+var millisToTime = function(t) {
+  t = t / 60000;
+  return precisionRound(t, 1);
+}
