@@ -182,8 +182,9 @@ function searchTokens() {
       tokenQuery = [];
     } else {
       tokenQuery = [
+          { userName: { $search: filter } },
           { desc: { $search: filter } },
-          { fulfilledByName: { $search: filter } }
+          { fulfilledByName: { $search: filter } },
       ];
     }
 

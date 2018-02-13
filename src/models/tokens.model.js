@@ -11,6 +11,9 @@ module.exports = function (app) {
       ref: 'user',
       required: true
     },
+    userName: {
+      type: String
+    },
     fulfilled: {
       type: Boolean,
       default: false,
@@ -53,7 +56,7 @@ module.exports = function (app) {
     // TODO: verifier for closedAt
   });
 
-  tokens.index({desc: 'text', user: 'text', fulfilledByName: 'text'});
+  tokens.index({desc: 'text', userName: 'text', fulfilledByName: 'text'});
 
   return mongooseClient.model('tokens', tokens);
 };

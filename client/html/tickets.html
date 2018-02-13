@@ -43,7 +43,7 @@
   <div id="main" class="container">
     <div class="col-md-12" style="padding-top:15px;">
       <h3 id="all-tickets-label">All tickets</h3>
-      <form class="form-inline">
+      <form class="form-inline" onsubmit="event.preventDefault();">
         <input type="text" class="form-control" onkeyup="searchTokens()" id="searchBox" placeholder="Search..." />
       </form>
       <table id="ticket-list" class="table">
