@@ -361,6 +361,31 @@ function markNoshow() {
   }
 }
 
+function endOH() {
+  if ((!currentTicket) && window.confirm("Warning: By ending office hours you will permenantly cancel all tickets in the queue. Are you sure?")) {
+    client.service('/tokens').find({query:
+      {
+        $limit: 100,
+        fulfilled: false,
+      }
+    }).then(tickets => {
+      // should we move this into our own service or no?
+      tickets.data.map(ticket => {
+        client.service('tokens').patch(ticket._id,
+          {
+            cancelledByTA: true,
+            fulfilled: true,
+            fulfilledBy: client.get('user')._id,
+            fulfilledByName: client.get('user').name,
+            isClosed: true,
+            dequeuedAt: new Date(),
+            closedAt: new Date()
+        });
+      });
+    });
+  }
+}
+
 $(function() {
   $("#close-ticket-form").submit(function(e) {
     e.preventDefault();

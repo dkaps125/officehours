@@ -115,10 +115,24 @@ function updateTicketList(page, tokenQuery) {
     tickets.data.map(ticket => {
       // TODO: this goes out of bounds sometimes for some unknown reason
       var r = stable.insertRow(row);
-      ticket.curStatus = ticket.isClosed ?
-        (ticket.noShow ?  "No-Show" : "Closed") :
-        (!ticket.fulfilled ? "Queued" :
-        (!ticket.cancelledByStudent ? "In progress" : "Canceled"))
+
+      if (ticket.isClosed) {
+        if (ticket.noShow) {
+          ticket.curStatus = "No-Show";
+        } else if (ticket.cancelledByTA) {
+          ticket.curStatus = "Canceled (TA)";
+        } else {
+          ticket.curStatus = "Closed";
+        }
+      } else {
+        if (!ticket.fulfilled) {
+          ticket.curStatus = "Queued";
+        } else if (!ticket.cancelledByStudent) {
+          ticket.curStatus = "In Progress";
+        } else {
+          ticket.curStatus = "Canceled";
+        }
+      }
       r.insertCell(0).innerHTML = row;
       r.insertCell(1).innerHTML = ticket.curStatus;
       r.insertCell(2).innerHTML = ticket.user.name || ticket.user.directoryID;
