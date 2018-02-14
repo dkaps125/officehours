@@ -65,6 +65,9 @@
             <hr>
             <h4>Hourly passcode:</h4>
             <h2 style="display:inline-block;padding-bottom:15px;width:100px"><span id="passcode" class="label label-success">n/a</span></h2>
+            <hr>
+            <h4>End office hours:</h4>
+            <button id="end-oh-btn" onclick="endOH()" type="submit" class="btn btn-warning" style="margin-top:10px;">Cancel all tickets</button>
           </div>
         </div>
         <hr>
@@ -122,8 +125,11 @@
                 <textarea class="form-control" rows=4 id="student-notes-box" placeholder="Briefly, what did you assist the student with."></textarea>
               </div>
             </form>
-            <form id="close-ticket-form">
+            <form id="close-ticket-form" style="display:inline;">
               <button id="close-ticket-btn" type="submit" class="btn btn-default">Close ticket</button>
+            </form>
+            <form id="noshow-form" style="display:inline;margin-left:8px;">
+              <button id="noshow-btn" type="submit" class="btn ">No show</button>
             </form>
             <hr>
             <h4 id="current-student-name-2"></h4>
