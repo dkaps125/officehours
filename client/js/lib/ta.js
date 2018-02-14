@@ -343,10 +343,32 @@ function closeTicket() {
   }
 }
 
+function markNoshow() {
+  if ((!!currentTicket) && window.confirm("Warning: Marking this student as a no show. Are you sure?")) {
+    $("#current-student-area").hide();
+      client.service('tokens').patch(currentTicket._id, {
+        isBeingHelped: false,
+        isClosed: true,
+        noShow: true,
+        closedAt: Date.now(),
+        // TODO: shouldIgnoreInTokenCount: false/true
+      }).then(updatedTicket => {
+        $('#student-notes-box').val("")
+        toastr.success("Student marked as a no-show and ticket closed");
+        currentTicket = null;
+        updateStudentQueue();
+      });
+  }
+}
+
 $(function() {
   $("#close-ticket-form").submit(function(e) {
     e.preventDefault();
     closeTicket();
+  });
+  $("#noshow-form").submit(function(e) {
+    e.preventDefault();
+    markNoshow();
   });
   $('#student-dequeue-form').submit(function(e) {
     e.preventDefault();

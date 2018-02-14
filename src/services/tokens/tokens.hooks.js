@@ -45,6 +45,24 @@ commonHooks.when(hook => !!hook.params.user &&
     commonHooks.populate({schema: commentSchema})]
 );
 
+const discardFieldsIfStudent =
+commonHooks.when(hook => !!hook.params.user &&
+  (hook.params.user.role === 'Student'),
+  [
+    commonHooks.discard('user','userName',
+    'fulfilledBy', 'fulfilledByName',
+    'desc', 'isBeingHelped', 'cancelledByTA',
+    'noShow', 'shouldIgnoreInTokenCount',
+    'comment', 'dequeuedAt', 'closedAt')
+  ]
+);
+
+const setUserName = context => {
+  if (!!context.data && !!context.params.user) {
+    context.params.userName = context.params.user.name || context.params.user.directoryID;
+  }
+}
+
 const validatePasscode = context => {
   if (!!context.data && ((typeof context.data.passcode) === "string")
     && context.data.passcode.toLowerCase().trim() === context.app.passcode) {
@@ -119,11 +137,12 @@ module.exports = {
     create: [auth.associateCurrentUser({as: 'user'}),
       validatePasscode,
       validateTokens,
+      setUserName,
       commonHooks.discard('passcode'),
       filterXSS
     ],
-    update: [restrictToTAOrSelf, filterXSS],
-    patch: [restrictToTAOrSelf, filterXSS],
+    update: [restrictToTAOrSelf, discardFieldsIfStudent, filterXSS],
+    patch: [restrictToTAOrSelf, discardFieldsIfStudent, filterXSS],
     remove: [commonHooks.disallow()] // tickets should be immutable
   },
 

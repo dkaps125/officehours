@@ -41,6 +41,14 @@ module.exports = function (app) {
       type: Boolean,
       default: false
     },
+    cancelledByTA: {
+      type: Boolean,
+      default: false
+    },
+    noShow: {
+      type: Boolean,
+      default: false
+    },
     shouldIgnoreInTokenCount: {
       type: Boolean,
       default: false

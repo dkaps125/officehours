@@ -48,7 +48,7 @@ body {
   padding: 50px 25px 50px 25px;
   margin: 0 auto;
   width:55%;
-  background:#fff;
+  background:rgba(255, 255, 255, 0.92);
 }
 
 .login-btn-box {
@@ -66,6 +66,10 @@ body {
 
 .login-btn {
   padding-top: 45px;
+}
+
+#unauthorized-alert {
+  margin-bottom:35px;
 }
 
 /* drag and drop upload css */
