@@ -362,7 +362,7 @@ function markNoshow() {
 }
 
 function endOH() {
-  if ((!currentTicket) && window.confirm("Warning: By ending office hours you will permenantly cancel all tickets in the queue. Are you sure?")) {
+  if ((!currentTicket) && window.confirm("Warning: By ending office hours you will permanently cancel all tickets in the queue. Are you sure?")) {
     client.service('/tokens').find({query:
       {
         $limit: 100,
