@@ -7,6 +7,7 @@ const client = feathers()
   cookie: 'feathers-jwt',
 }));
 
+const taAlertTimeoutSeconds = 10;
 // toastr config
 toastr.options.closeDuration = 12000;
 toastr.options.positionClass = "toast-bottom-right";
@@ -251,6 +252,12 @@ function generateComment(comment) {
 
 }
 
+var tooMuchTimeTimeout = undefined;
+
+function addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes*60000);
+}
+
 function showCurrentTicket(ticket) {
   client.service('tokens').find(
     {
@@ -307,7 +314,17 @@ function showCurrentTicket(ticket) {
       $("#current-student-issue-text").html(ticket.desc || "No description provided");
       $("#current-student-ticket-createtime").html("Ticket created " + (new Date(ticket.createdAt)).toLocaleString());
       $("#current-student-area").show();
-      console.log(prevTickets);
+
+      const alertTime = addMinutes(new Date(ticket.dequeuedAt), taAlertTimeoutSeconds);
+      const nowTime = new Date();
+
+      if (alertTime <= nowTime) {
+        $("#current-student-time-warn").show();
+      } else {
+        tooMuchTimeTimeout = setTimeout(function() {
+          $("#current-student-time-warn").show();
+        }, (alertTime-nowTime));
+      }
     }).catch(function (err) {
       console.error(err);
     });
@@ -331,6 +348,11 @@ function closeTicket() {
         // TODO: shouldIgnoreInTokenCount: false/true
       }).then(updatedTicket => {
         $('#student-notes-box').val("")
+        if (!!tooMuchTimeTimeout) {
+          clearTimeout(tooMuchTimeTimeout);
+          tooMuchTimeTimeout = undefined;
+        }
+        $('#current-student-time-warn').hide();
         toastr.success("Ticket closed and comment successfully saved");
         currentTicket = null;
         updateStudentQueue();
