@@ -16,7 +16,7 @@ class Service {
           isBeingHelped: true,
           cancelledByStudent: false,
           $sort: {
-            createdAt: -1
+            createdAt: 1
           }
         }
     }).then(tokens => {
@@ -31,7 +31,7 @@ class Service {
               fulfilled: false,
               cancelledByStudent: false,
               $sort: {
-                createdAt: -1
+                createdAt: 1
               }
             }
         });
