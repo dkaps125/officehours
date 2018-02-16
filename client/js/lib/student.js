@@ -24,15 +24,15 @@ client.authenticate()
     window.location.href = '/';
     return;
   }
-  console.log("user",user);
   client.set('user', user);
+  reqNotificationPermission();
   setNumTokens();
   setAvailableTAs();
 
 })
 .catch(error => {
   console.log("auth error or not authenticated, redirecting...", error);
-  window.location.href = '/login.html';
+  //window.location.href = '/login.html';
 });
 
 // toastr config
@@ -63,19 +63,21 @@ function setNumTokens() {
     )
   }).then(unfulfilledTokens => {
       client.service('/queue-position').get().then(positionInfo => {
+        var shouldPushNotif = false;
         if (unfulfilledTokens.total > 0) {
           lastTotal = unfulfilledTokens.total;
           hideRequestOH(positionInfo.peopleAheadOfMe+1);
         } else {
           if (unfulfilledTokens.total == 0 && lastTotal > 0 && !lastTicketCancelled) {
             toastr.success("You have been dequeued by a TA!", {timeout: 15000});
+            shouldPushNotif = true;
           }
           lastTotal = unfulfilledTokens.total;
           lastTicketCancelled = false;
           showRequestOH();
         }
         $("#students-in-queue").html(positionInfo.sizeOfQueue);
-        getCurrentTicket();
+        getCurrentTicket(shouldPushNotif);
       })
       .catch(function(err) {
         console.error(err);
@@ -136,7 +138,7 @@ function cancelRequest() {
 
 var currentTicket = null;
 
-function getCurrentTicket() {
+function getCurrentTicket(shouldPushNotif) {
   client.service('/tokens').find({
     query: {
       $limit: 1,
@@ -149,6 +151,9 @@ function getCurrentTicket() {
   }).then((ticket) => {
     if (ticket.total >= 1) {
       currentTicket = ticket.data[0];
+      if (shouldPushNotif) {
+        pushNotification(cfg.navbarTitle+": Dequeued", "You have been dequeued by "+currentTicket.fulfilledByName);
+      }
       showCurrentTicket(currentTicket);
     } else {
       currentTicket = null;

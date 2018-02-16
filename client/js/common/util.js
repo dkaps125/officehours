@@ -1,3 +1,27 @@
+// Notifications
+var hasPermissions = false;
+var notifyDing = undefined;
+
+var reqNotificationPermission = function() {
+  if("Notification" in window) {
+    notifyDing = new Audio('/ding.ogg');
+    Notification.requestPermission().then(function (permission) {
+      hasPermissions = (permission === "granted");
+    });
+  }
+}
+
+var pushNotification = function(title, text) {
+  if (!title) {
+    title = "Office hours";
+  }
+  if (!!notifyDing) {
+    notifyDing.play();
+  }
+  return new Notification(title, {"body":text});
+}
+
+// Time
 var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 var formatTime = function(date) {
