@@ -146,8 +146,10 @@ function updateStudentQueue() {
     });
     $("#students-in-queue").html(tickets.total);
     if (tickets.total == 0) {
+      $("#end-oh-area").hide();
       $("#student-dequeue-btn").hide();
     } else {
+      $("#end-oh-area").show();
       $("#student-dequeue-btn").show();
     }
   });
@@ -199,6 +201,7 @@ function getCurrentStudent() {
       if (ticket.total >= 1) {
         currentTicket = ticket.data[0];
         showCurrentTicket(currentTicket);
+        $("#end-oh-area").hide();
         $("#student-dequeue-btn").hide();
       } else {
         $("#current-student-area").hide();
