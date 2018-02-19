@@ -104,6 +104,7 @@ $RECYCLE.BIN/
 
 # Hide the production config
 config/production.json
+config/local.json
 *.msm
 *.msp
 
