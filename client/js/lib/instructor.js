@@ -112,8 +112,10 @@ function refreshUsers() {
 function deleteUser(user) {
   if (window.confirm("Are you sure you want to permanently delete this user?")) {
     users.remove(user).then( res => {
+      toastr.success("User successfully removed");
       refreshUsers();
     }).catch(function(err) {
+      toastr.error("Error removing user");
       console.error(err);
     })
   }
