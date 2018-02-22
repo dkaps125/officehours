@@ -304,13 +304,14 @@ $(function() {
     e.preventDefault();
     users.patch(curUser._id, {
       name: $('#edit-user-name').val(),
-      directoryID: $("#edit-user-directoryid").val(),
+      directoryID: $("#edit-user-id").val(),
       role: $("#edit-user-role").find(":selected").text()
     }).then(res => {
       console.log("user patched");
-      toastr.success("User has been updated");
+      displayUser(res);
+      toastr.success("User "+(res.name || res.directoryID)+" has been updated");
     }).catch(err => {
-      console.err(err);
+      console.error(err);
       toastr.error("Error updating user");
     });
     // refreshUsers();
