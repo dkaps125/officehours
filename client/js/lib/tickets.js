@@ -163,7 +163,7 @@ function setModal(ticket) {
   finalHTML += '<p> Description: </p> <div class="well">' + (ticket.desc || "No description") +"</div>";
   if (ticket.fulfilled && !ticket.cancelledByStudent && !ticket.noShow) {
     // TODO: link to TA stats for this TA somehow
-    finalHTML += '<hr><h5 style="display:inline-block;">Responding TA:</h5> ' + ticket.fulfilledByName + "<br>"
+    finalHTML += '<hr><h5 style="display:inline-block;">Responding TA:</h5> ' + genUserElt(ticket.user, ticket.fulfilledByName) + "<br>"
     if (ticket.isClosed) {
       finalHTML += '<h5 style="display:inline-block;">Ticket closed on:</h5> ' + (new Date(ticket.closedAt)).toLocaleString() + "<br>";
       if (!!ticket.comment) {
@@ -181,6 +181,7 @@ function setModal(ticket) {
     finalHTML += '<h4> Student was not present</h4>';
     finalHTML += '<hr><h5 style="display:inline-block;">Responding TA:</h5> ' + ticket.fulfilledByName + "<br>"
   }
+  finalHTML += genUserElt(ticket.user,  'View all tickets for '+(ticket.user.name || ticket.user.directoryID));
 
   $("#ticket-modal-body").html(finalHTML);
 }

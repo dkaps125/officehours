@@ -29,6 +29,14 @@ function getUrlParameter(name) {
   return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
 };
 
+function genUserElt(user, text) {
+  return '<a href="/user.html?id='+(user._id || user)+'">'+text+'</a>';
+}
+
+function genUserURL(user) {
+  return '/user.html?id='+(user._id || user);
+}
+
 // Time
 var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 

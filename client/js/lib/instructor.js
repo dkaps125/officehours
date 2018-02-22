@@ -86,9 +86,12 @@ function renderUsers(users) {
   var utable = $("#userTable")[0];
   users.data.map(user => {
     var r = utable.insertRow(row);
+    /*$(r).click(() => {
+      window.location.href = genUserURL(user);
+    });*/
     r.insertCell(0).innerHTML = row;
-    r.insertCell(1).innerHTML = user.directoryID;
-    r.insertCell(2).innerHTML = user.name || user.directoryID;
+    r.insertCell(1).innerHTML = genUserElt(user, user.directoryID);
+    r.insertCell(2).innerHTML = genUserElt(user, user.name || user.directoryID);
     r.insertCell(3).innerHTML = user.role;
     if (client.get('user')._id !== user._id) {
       r.insertCell(4).innerHTML = '<a href="javascript:deleteUser(\''+user._id+'\')">Delete ✖</a>';

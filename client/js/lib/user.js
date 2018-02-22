@@ -47,6 +47,10 @@ client.authenticate()
   }
   client.service('/users').get(qUser)
   .then(user => {
+    if (user.role !== 'Student' && (client.get('user').role === 'TA')) {
+      displayUserErr();
+      return;
+    }
     curUser = user;
     displayUser(user);
     updateStats(user);

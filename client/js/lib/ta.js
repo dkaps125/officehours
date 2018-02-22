@@ -312,8 +312,8 @@ function showCurrentTicket(ticket) {
         });
       }
       $("[data-toggle=popover]").popover({ trigger: "hover" });
-      $("#current-student-name").html("Assisting: " + ticket.user.name);
-      $("#current-student-name-2").html("Recent tickets for " + ticket.user.name);
+      $("#current-student-name").html("Assisting: " + genUserElt(ticket.user, ticket.user.name));
+      $("#current-student-name-2").html("Recent tickets for " + genUserElt(ticket.user, ticket.user.name));
       $("#current-student-issue-text").html(ticket.desc || "No description provided");
       $("#current-student-ticket-createtime").html("Ticket created " + (new Date(ticket.createdAt)).toLocaleString());
       $("#current-student-area").show();
