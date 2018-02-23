@@ -74,8 +74,8 @@ toastr.options.positionClass = "toast-bottom-right";
 
 function logout() {
   // log out of feathers and redirect to login page
-  //client.logout();
-  //window.location.href = '/login.html';
+  client.logout();
+  window.location.href = '/login.html';
 }
 
 /**********/
