@@ -55,7 +55,12 @@ function logout() {
 
 /**********/
 function updateStudentQueue() {
-  client.service('/tokens').find({query: {fulfilled: false}}).then(tickets => {
+  client.service('/tokens').find({query:
+    {
+      $limit: 100,
+      fulfilled: false,
+    }
+  }).then(tickets => {
     $("#student-table").find("tr:gt(0)").remove();
     var row = 1;
     var stable = $("#student-table")[0];
@@ -81,9 +86,12 @@ function renderUsers(users) {
   var utable = $("#userTable")[0];
   users.data.map(user => {
     var r = utable.insertRow(row);
+    /*$(r).click(() => {
+      window.location.href = genUserURL(user);
+    });*/
     r.insertCell(0).innerHTML = row;
-    r.insertCell(1).innerHTML = user.directoryID;
-    r.insertCell(2).innerHTML = user.name || user.directoryID;
+    r.insertCell(1).innerHTML = genUserElt(user, user.directoryID);
+    r.insertCell(2).innerHTML = genUserElt(user, user.name || user.directoryID);
     r.insertCell(3).innerHTML = user.role;
     if (client.get('user')._id !== user._id) {
       r.insertCell(4).innerHTML = '<a href="javascript:deleteUser(\''+user._id+'\')">Delete ✖</a>';
@@ -107,8 +115,10 @@ function refreshUsers() {
 function deleteUser(user) {
   if (window.confirm("Are you sure you want to permanently delete this user?")) {
     users.remove(user).then( res => {
+      toastr.success("User successfully removed");
       refreshUsers();
     }).catch(function(err) {
+      toastr.error("Error removing user");
       console.error(err);
     })
   }

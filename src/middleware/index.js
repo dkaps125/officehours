@@ -54,7 +54,7 @@ module.exports = function () {
   if (environment !== "production") {
     app.use('/loginAsFakeUser', function(req, res, next) {
       console.log('logging in as fake user')
-      app.passport.createJWT({ userId: '' },
+      app.passport.createJWT({ userId: app.get("autologin").fakeUser0 },
         app.get('authentication')).then(accessToken => {
 
         res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })

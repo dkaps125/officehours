@@ -1,3 +1,43 @@
+// Notifications
+var hasPermissions = false;
+var notifyDing = undefined;
+
+var reqNotificationPermission = function() {
+  if("Notification" in window) {
+    notifyDing = new Audio('/ding.ogg');
+    Notification.requestPermission().then(function (permission) {
+      hasPermissions = (permission === "granted");
+    });
+  }
+}
+
+var pushNotification = function(title, text) {
+  if (!title) {
+    title = "Office hours";
+  }
+  if (!!notifyDing) {
+    notifyDing.play();
+  }
+  return new Notification(title, {"body":text});
+}
+
+// util
+function getUrlParameter(name) {
+  name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
+  var regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
+  var results = regex.exec(location.search);
+  return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+};
+
+function genUserElt(user, text) {
+  return '<a href="/user.html?id='+(user._id || user)+'">'+text+'</a>';
+}
+
+function genUserURL(user) {
+  return '/user.html?id='+(user._id || user);
+}
+
+// Time
 var months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
 
 var formatTime = function(date) {

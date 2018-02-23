@@ -6,18 +6,37 @@ class Service {
   }
 
   create (data, params) {
+    // prevent double-dequeuing
     return this.app.service('tokens').find(
       {
         query: {
           $limit: 1,
-          fulfilled: false,
+          fulfilled: true,
+          fulfilledBy: params.user._id,
+          isBeingHelped: true,
           cancelledByStudent: false,
           $sort: {
             createdAt: 1
           }
         }
-      })
-    .then(tokens => {
+    }).then(tokens => {
+      // there's already a dequeued ticket
+      if (tokens.total >= 1) {
+        return tokens;
+      } else {
+        return this.app.service('tokens').find(
+          {
+            query: {
+              $limit: 1,
+              fulfilled: false,
+              cancelledByStudent: false,
+              $sort: {
+                createdAt: 1
+              }
+            }
+        });
+      }
+    }).then(tokens => {
       if (tokens.total >= 1) {
         return this.app.service('tokens').patch(tokens.data[0]._id,
         {

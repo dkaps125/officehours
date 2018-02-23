@@ -42,7 +42,6 @@ app.use('/', feathers.static(app.get('public')));
 // Set up Plugins and providers
 app.configure(hooks());
 app.configure(mongoose);
-app.configure(mongoose);
 app.configure(rest());
 const io = socketio();
 app.configure(io);
@@ -52,13 +51,12 @@ app.configure(services);
 
 // Configure other middleware (see `middleware/index.js`)
 app.configure(authentication);
-
+app.use(passport.initialize());
 app.configure(middleware);
 
 // Configure a middleware for 404s and the error handler
 app.use(notFound());
 app.use(handler());
-app.use(passport.initialize());
 
 app.hooks(appHooks);
 

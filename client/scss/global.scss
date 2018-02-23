@@ -24,13 +24,57 @@ body {
   color: white;
 }
 
-.navbar a {
-  color: white
+.navbar-brand, .navbar-nav > li > a {
+  color: white;
+}
+
+.icon-bar {
+  background-color: white;
 }
 
 #main {
   padding-top:60px;
   z-index:1000;
+}
+
+/* login */
+.login-body {
+  background-image: url('/login-bg.jpg');
+  background-size: cover;
+  background-position: center;
+}
+
+.login-box {
+  padding: 50px 25px 50px 25px;
+  margin: 0 auto;
+  width:55%;
+  background:rgba(255, 255, 255, 0.92);
+}
+
+.login-btn-box {
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 auto;
+}
+
+.login-container {
+  padding-top: 17%;
+}
+
+.login-btn {
+  padding-top: 45px;
+}
+
+#unauthorized-alert {
+  margin-bottom:35px;
+}
+
+/* instr */
+.instr-sidebar-container {
+  height:100%;
 }
 
 /* drag and drop upload css */

@@ -7,6 +7,7 @@ const client = feathers()
   cookie: 'feathers-jwt',
 }));
 
+const taAlertTimeoutSeconds = 10;
 // toastr config
 toastr.options.closeDuration = 12000;
 toastr.options.positionClass = "toast-bottom-right";
@@ -123,7 +124,12 @@ function setAvailableTAs() {
 }
 
 function updateStudentQueue() {
-  client.service('/tokens').find({query: {$limit: 100, fulfilled: false}}).then(tickets => {
+  client.service('/tokens').find({query:
+    {
+      $limit: 100,
+      fulfilled: false,
+    }
+  }).then(tickets => {
     $("#student-table").find("tr:gt(0)").remove();
     var row = 1;
     var stable = $("#student-table")[0];
@@ -140,8 +146,10 @@ function updateStudentQueue() {
     });
     $("#students-in-queue").html(tickets.total);
     if (tickets.total == 0) {
+      $("#end-oh-area").hide();
       $("#student-dequeue-btn").hide();
     } else {
+      $("#end-oh-area").show();
       $("#student-dequeue-btn").show();
     }
   });
@@ -193,6 +201,7 @@ function getCurrentStudent() {
       if (ticket.total >= 1) {
         currentTicket = ticket.data[0];
         showCurrentTicket(currentTicket);
+        $("#end-oh-area").hide();
         $("#student-dequeue-btn").hide();
       } else {
         $("#current-student-area").hide();
@@ -246,6 +255,12 @@ function generateComment(comment) {
 
 }
 
+var tooMuchTimeTimeout = undefined;
+
+function addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes*60000);
+}
+
 function showCurrentTicket(ticket) {
   client.service('tokens').find(
     {
@@ -297,12 +312,22 @@ function showCurrentTicket(ticket) {
         });
       }
       $("[data-toggle=popover]").popover({ trigger: "hover" });
-      $("#current-student-name").html("Assisting: " + ticket.user.name);
-      $("#current-student-name-2").html("Recent tickets for " + ticket.user.name);
+      $("#current-student-name").html("Assisting: " + genUserElt(ticket.user, ticket.user.name));
+      $("#current-student-name-2").html("Recent tickets for " + genUserElt(ticket.user, ticket.user.name));
       $("#current-student-issue-text").html(ticket.desc || "No description provided");
       $("#current-student-ticket-createtime").html("Ticket created " + (new Date(ticket.createdAt)).toLocaleString());
       $("#current-student-area").show();
-      console.log(prevTickets);
+
+      const alertTime = addMinutes(new Date(ticket.dequeuedAt), taAlertTimeoutSeconds);
+      const nowTime = new Date();
+
+      if (alertTime <= nowTime) {
+        $("#current-student-time-warn").show();
+      } else {
+        tooMuchTimeTimeout = setTimeout(function() {
+          $("#current-student-time-warn").show();
+        }, (alertTime-nowTime));
+      }
     }).catch(function (err) {
       console.error(err);
     });
@@ -326,6 +351,11 @@ function closeTicket() {
         // TODO: shouldIgnoreInTokenCount: false/true
       }).then(updatedTicket => {
         $('#student-notes-box').val("")
+        if (!!tooMuchTimeTimeout) {
+          clearTimeout(tooMuchTimeTimeout);
+          tooMuchTimeTimeout = undefined;
+        }
+        $('#current-student-time-warn').hide();
         toastr.success("Ticket closed and comment successfully saved");
 
         users.get(currentTicket.user._id).then(res => {
@@ -370,10 +400,57 @@ function closeTicket() {
   }
 }
 
+function markNoshow() {
+  if ((!!currentTicket) && window.confirm("Warning: Marking this student as a no show. Are you sure?")) {
+    $("#current-student-area").hide();
+      client.service('tokens').patch(currentTicket._id, {
+        isBeingHelped: false,
+        isClosed: true,
+        noShow: true,
+        closedAt: Date.now(),
+        // TODO: shouldIgnoreInTokenCount: false/true
+      }).then(updatedTicket => {
+        $('#student-notes-box').val("")
+        toastr.success("Student marked as a no-show and ticket closed");
+        currentTicket = null;
+        updateStudentQueue();
+      });
+  }
+}
+
+function endOH() {
+  if ((!currentTicket) && window.confirm("Warning: By ending office hours you will permanently cancel all tickets in the queue. Are you sure?")) {
+    client.service('/tokens').find({query:
+      {
+        $limit: 100,
+        fulfilled: false,
+      }
+    }).then(tickets => {
+      // should we move this into our own service or no?
+      tickets.data.map(ticket => {
+        client.service('tokens').patch(ticket._id,
+          {
+            cancelledByTA: true,
+            fulfilled: true,
+            fulfilledBy: client.get('user')._id,
+            fulfilledByName: client.get('user').name,
+            isClosed: true,
+            dequeuedAt: new Date(),
+            closedAt: new Date()
+        });
+      });
+    });
+  }
+}
+
 $(function() {
   $("#close-ticket-form").submit(function(e) {
     e.preventDefault();
     closeTicket();
+  });
+  $("#noshow-form").submit(function(e) {
+    e.preventDefault();
+    markNoshow();
   });
   $('#student-dequeue-form').submit(function(e) {
     e.preventDefault();

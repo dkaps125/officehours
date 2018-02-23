@@ -67,7 +67,10 @@ function logout() {
 }
 
 function updateTicketList(page, tokenQuery) {
-  console.log("updating ticket list for page "+page)
+  console.log("updating ticket list for page "+page);
+
+  $('#load-more-btn').hide();
+
   if (pagesLoaded.includes(page)) {
     console.log("page already loaded");
     currentPage -= 1;
@@ -110,10 +113,26 @@ function updateTicketList(page, tokenQuery) {
     var row = 1 + page * itemsPerPage;
     var stable = $("#ticket-list")[0];
     tickets.data.map(ticket => {
+      // TODO: this goes out of bounds sometimes for some unknown reason
       var r = stable.insertRow(row);
-      ticket.curStatus = ticket.isClosed ? "Closed" :
-        (!ticket.fulfilled ? "Queued" :
-        (!ticket.cancelledByStudent ? "In progress" : "Canceled"))
+
+      if (ticket.isClosed) {
+        if (ticket.noShow) {
+          ticket.curStatus = "No-Show";
+        } else if (ticket.cancelledByTA) {
+          ticket.curStatus = "Canceled (TA)";
+        } else {
+          ticket.curStatus = "Closed";
+        }
+      } else {
+        if (!ticket.fulfilled) {
+          ticket.curStatus = "Queued";
+        } else if (!ticket.cancelledByStudent) {
+          ticket.curStatus = "In Progress";
+        } else {
+          ticket.curStatus = "Canceled";
+        }
+      }
       r.insertCell(0).innerHTML = row;
       r.insertCell(1).innerHTML = ticket.curStatus;
       r.insertCell(2).innerHTML = ticket.user.name || ticket.user.directoryID;
@@ -134,6 +153,7 @@ function updateTicketList(page, tokenQuery) {
     });
     allTickets = allTickets.concat(tickets);
     $("#all-tickets-label").html("All tickets ("+tickets.total+")");
+    $('#load-more-btn').show();
   });
 }
 
@@ -141,9 +161,9 @@ function setModal(ticket) {
   var finalHTML = '';
   finalHTML += '<h4>Ticket status: <span style="color:gray">' + ticket.curStatus + '</span></h4>';
   finalHTML += '<p> Description: </p> <div class="well">' + (ticket.desc || "No description") +"</div>";
-  if (ticket.fulfilled && !ticket.cancelledByStudent) {
+  if (ticket.fulfilled && !ticket.cancelledByStudent && !ticket.noShow) {
     // TODO: link to TA stats for this TA somehow
-    finalHTML += '<hr><h5 style="display:inline-block;">Responding TA:</h5> ' + ticket.fulfilledByName + "<br>"
+    finalHTML += '<hr><h5 style="display:inline-block;">Responding TA:</h5> ' + genUserElt(ticket.user, ticket.fulfilledByName) + "<br>"
     if (ticket.isClosed) {
       finalHTML += '<h5 style="display:inline-block;">Ticket closed on:</h5> ' + (new Date(ticket.closedAt)).toLocaleString() + "<br>";
       if (!!ticket.comment) {
@@ -156,8 +176,12 @@ function setModal(ticket) {
       }
     }
   } else if (ticket.cancelledByStudent) {
-    finalHTML += "<hr><h4> This ticket was canceled by the student</h4>";
+    finalHTML += '<hr><h4> This ticket was canceled by the student</h4>';
+  } else if (ticket.noShow) {
+    finalHTML += '<h4> Student was not present</h4>';
+    finalHTML += '<hr><h5 style="display:inline-block;">Responding TA:</h5> ' + ticket.fulfilledByName + "<br>"
   }
+  finalHTML += genUserElt(ticket.user,  'View all tickets for '+(ticket.user.name || ticket.user.directoryID));
 
   $("#ticket-modal-body").html(finalHTML);
 }
@@ -182,8 +206,9 @@ function searchTokens() {
       tokenQuery = [];
     } else {
       tokenQuery = [
+          { userName: { $search: filter } },
           { desc: { $search: filter } },
-          { fulfilledByName: { $search: filter } }
+          { fulfilledByName: { $search: filter } },
       ];
     }
 
@@ -196,6 +221,11 @@ function searchTokens() {
     $("#ticket-list").show();
   }, 100);
 }
+
+function loadmore() {
+  currentPage += 1;
+  updateTicketList(currentPage, tokenQuery);
+};
 
 $(document).ready(function() {
   $(window).scroll(function() {

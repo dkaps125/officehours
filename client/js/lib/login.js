@@ -19,3 +19,9 @@ client.authenticate()
 .catch(error => {
   console.log("not authenticated, as expected", error);
 });
+
+$(function() {
+  if (window.location.search.substring(1) === "invalid") {
+    $("#unauthorized-alert").show();
+  }
+})

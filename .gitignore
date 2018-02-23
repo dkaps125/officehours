@@ -104,6 +104,7 @@ $RECYCLE.BIN/
 
 # Hide the production config
 config/production.json
+config/local.json
 *.msm
 *.msp
 
@@ -120,3 +121,6 @@ client/scss/sass-cache/
 # Others
 data/
 csvUploads/*
+
+# Temp-I'm rebuliding in producton for different classnames anyway
+public/*
