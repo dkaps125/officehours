@@ -357,8 +357,40 @@ function closeTicket() {
         }
         $('#current-student-time-warn').hide();
         toastr.success("Ticket closed and comment successfully saved");
-        currentTicket = null;
-        updateStudentQueue();
+
+        users.get(currentTicket.user._id).then(res => {
+          var t = 1;
+
+          if (res.totalTickets !== undefined) {
+            t = res.totalTickets + 1;
+          }
+
+          users.patch(currentTicket.user._id, {
+            totalTickets: t,
+          }).then(updatedStudent => {
+            console.log(updatedStudent);
+            currentTicket = null;
+            updateStudentQueue();
+          });
+        }).catch(err => {
+          console.log(err);
+        });
+
+        users.get(client.get('user')._id).then(res => {
+          var t = 1;
+
+          if (res.totalTickets !== undefined) {
+            t = res.totalTickets + 1;
+          }
+
+          users.patch(client.get('user')._id, {
+            totalTickets: t,
+          }).then(updatedStudent => {
+            console.log(updatedStudent);
+          });
+        }).catch(err => {
+          console.log(err);
+        });
       });
     }).catch(function(err) {
       toastr.error("Error closing ticket and submitting comments");

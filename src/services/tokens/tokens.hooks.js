@@ -126,6 +126,12 @@ const validateTokens = context => {
   });
 }
 
+function aggregateToks(hook) {
+	if('_aggregate' in hook.params.query) {
+		hook.result = hook.service.Model.aggregate(hook.params.query._aggregate);
+	}
+}
+
 module.exports = {
   before: {
     all: [ authenticate('jwt') ],
