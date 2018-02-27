@@ -8,6 +8,7 @@
 
     <div id="app" class="flex flex-column"></div>
     <script src="/js/bundle.js"></script>
+    <script src="/js/d3.v4.js"></script>
     <script src="/socket.io/socket.io.js"></script>
     <link rel="stylesheet" href="/css/bootstrap.min.css">
     <link rel="stylesheet" href="/css/global.min.css">
@@ -83,8 +84,8 @@
               </tr>
             </table>
           </div>
-          <hr id="student-stats">
-          <h3>Student statistics</h3>
+          <hr>
+          <h3 id="student-stats">Student statistics</h3>
           <div id="student-stats-well" class="well stats" style="display:none;">
             <div class="statsBlock" style="display:inline-block;">
               <div class="statsPanel">
@@ -124,7 +125,7 @@
               <tr class="active">
                 <th>Name</th>
                 <th>Total Tickets</th>
-                <th>Tickets/week</th>
+                <th>Avg tickets/week</th>
                 <th>Last ticket date</th>
               </tr>
             </thead>
@@ -133,12 +134,12 @@
               </tr>
             </tbody>
           </table>
-          <hr id="ta-stats">
-          <h3>TA statistics</h3>
+          <hr>
+          <h3 id="ta-stats">TA statistics</h3>
           <div class="well stats">
             <div class="statsBlock" style="display:inline-block;">
               <div class="statsPanel">
-                <div class="" id="num-tas"> 12 </div>
+                <div class="" id="num-tas"> N/A </div>
               </div>
               <div class="statsFooter">
                 <p class="statsText lead">TAs</p>
@@ -146,7 +147,7 @@
             </div>
             <div class="statsBlock" style="display:inline-block;">
               <div class="statsPanel">
-                <div class="" id="minutes-session"> 8 </div>
+                <div class="" id="minutes-session"> N/A </div>
               </div>
               <div class="statsFooter">
                 <p class="statsText lead"> Mins/session </p>
@@ -154,7 +155,7 @@
             </div>
             <div class="statsBlock" style="display:inline-block;">
               <div class="statsPanel">
-                <div class="" id="sessions-week"> 3 </div>
+                <div class="" id="sessions-week"> N/A </div>
               </div>
               <div class="statsFooter">
                 <p class="statsText lead"> Sessions/week </p>
@@ -166,7 +167,7 @@
               <tr class="active">
                 <th>Name</th>
                 <th>Total tickets</th>
-                <th>This week</th>
+                <th>Avg tickets/week</th>
                 <th>Last closed ticket</th>
               </tr>
             </thead>
@@ -175,7 +176,7 @@
               </tr>
             </tbody>
           </table>
-          <hr id="stats">
+          <hr id="stats-hr">
           <svg id="stats" height="500" width="800"></svg>
           <hr id="manage-user">
           <h3>Add user</h3>

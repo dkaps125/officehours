@@ -122,7 +122,17 @@
                   <p class="statsText lead">Tickets (today)</p>
                 </div>
               </div>
-              <div class="statsBlock" style="display:inline-block;">
+              <div class="statsBlock" style="display:inline-block;"
+              data-placement="bottom" data-toggle="popover"
+              data-content="How often a TA rates this student as knowledgeable during a help session.">
+                <div class="statsPanel">
+                  <div id="stats-know-percent" class=""> N/A </div>
+                </div>
+                <div class="statsFooter">
+                  <p class="statsText lead">Knowledgeable</p>
+                </div>
+              </div>
+              <div class="statsBlock" style="display:none;">
                 <div class="statsPanel">
                   <div id="stats-wait-avg" class="">N/A </div>
                 </div>
@@ -157,14 +167,6 @@
                 </div>
                 <div class="statsFooter">
                   <p class="statsText lead"> Mins/session </p>
-                </div>
-              </div>
-              <div class="statsBlock" style="display:inline-block;">
-                <div class="statsPanel">
-                  <div class="" id="stats-ta-mins-student"> N/A </div>
-                </div>
-                <div class="statsFooter">
-                  <p class="statsText lead"> Mins w/student </p>
                 </div>
               </div>
             </div>

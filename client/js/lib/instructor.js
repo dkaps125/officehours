@@ -150,11 +150,6 @@ function deleteAllWithRole(role) {
 
 // stats
 function updateStats() {
-  // we're not ready yet
-  if (!cfg.statsAvailable) {
-    return;
-  }
-
   const lastMidnight = new Date();
   lastMidnight.setHours(0,0,0,0);
   const lastWeek = new Date();
@@ -163,55 +158,219 @@ function updateStats() {
 
   client.service('tokens').find({
     query: {
-      _aggregate: {
+      _aggregate: [{
+        $match: {
+          noShow: false,
+          cancelledByTA: false,
+          cancelledByStudent: false,
+          fulfilled: true,
+          isBeingHelped: false
+        },
+      },
+      {
         $group: {
           _id: null,
           waitAvg: { $avg: { $subtract: ["$dequeuedAt", "$createdAt"]} },
           sessAvg: { $avg: { $subtract: ["$closedAt", "$dequeuedAt"]} }
         }
-      }
+      }]
     }
   }).then(toks => {
-    $("#stats-wait-avg").html(millisToTime(toks[0].waitAvg));
-    $("#minutes-session").html(millisToTime(toks[0].sessAvg));
+    if (toks.length > 0) {
+      $("#stats-wait-avg").html(millisToTime(toks[0].waitAvg));
+      $("#minutes-session").html(millisToTime(toks[0].sessAvg));
+    }
+    var getAvgTicketsWeekTAs = client.service('/tokens').find({
+        query: {
+          _aggregate: [
+            {
+              $match: {
+                noShow: false,
+                cancelledByTA: false,
+                cancelledByStudent: false,
+                fulfilled: true,
+                isBeingHelped: false
+              }
+            },
+            {
+              $project: {
+                 year: { $year: "$createdAt" },
+                 week: { $week: "$createdAt" },
+               }
+            },
+            {
+              $group: {
+              _id: { year: "$year", week:"$week" },
+              total : { $sum: 1 }
+            }},
+            {
+              $group: {
+              _id: null,
+              avgTotal: {$avg: "$total"}
+              }
+            }
+          ]
+      }
+    }).then(res => {
+      $("#sessions-week").html(res.length > 0 ? precisionRoundDecimals(res[0].avgTotal) : "N/A");
+    })
+
+    // Top students
+    client.service('users').find({
+      query: {
+        totalTickets: {
+          $gt: 0,
+        },
+        $sort: {
+          totalTickets: -1
+        },
+        $limit: 15,
+        role: 'Student'
+      }
+    }).then(res => {
+      // TODO: put this in a $project
+      console.log('top users', res);
+      $("#top-student-table").find("tr:gt(0)").remove();
+      var row = 0;
+      var stable = $("#top-student-table")[0];
+
+      res.data.forEach(user => {
+        /* total per week
+        var getTokenCount = client.service('/tokens').find({
+          query: {
+            user: user._id,
+            createdAt: {
+              $gt: new Date(new Date() - 7 * 60 * 60 * 24 * 1000)
+            },
+            $limit: 0
+          }
+        });
+        */
+        var getAvgTicketsWeek = client.service('/tokens').find({
+            query: {
+              _aggregate: [{
+        		    $match: {
+        			     user: user._id
+        		    }},{
+        		      $project: {
+        			       year: { $year: "$createdAt" },
+        			       week: { $week: "$createdAt" },
+        		       }
+                },
+        		    {
+                  $group: {
+                  _id: { year: "$year", week:"$week", user: "$user" },
+                  total : { $sum: 1 }
+                }},
+                {
+                  $group: {
+                  _id: null,
+                  avgTotal: {$avg: "$total"}
+                  }
+                }
+              ]
+        	}
+        });
+        var getLastToken = client.service('/tokens').find({
+          query: {
+            user: user._id,
+            $limit:1,
+            $sort: {
+              createdAt: -1
+            }
+          }
+        });
+
+        Promise.all([getAvgTicketsWeek, getLastToken])
+        .then(function([avgTicketsWeek, getLastToken]){
+          row++;
+          var r = stable.insertRow(row);
+          r.insertCell(0).innerHTML = genUserElt(user, user.name);
+          r.insertCell(1).innerHTML = user.totalTickets;
+          r.insertCell(2).innerHTML = avgTicketsWeek.length > 0 ?
+            precisionRoundDecimals(avgTicketsWeek[0].avgTotal, 3) || "N/A" : "N/A";
+          r.insertCell(3).innerHTML = (getLastToken.total >= 1) ? formatTime(getLastToken.data[0].createdAt) : "N/A";
+        })
+      });
+    }).catch(err => {
+      console.log(err);
+    });
 
     client.service('users').find({
       query: {
         totalTickets: {
-          $gt: -1,
+          $gt: 0,
         },
         $sort: {
           totalTickets: -1
-        }
+        },
+        $limit: 10,
+        $or: [
+          { role: 'TA' },
+          { role: 'Instructor' }
+        ]
       }
     }).then(res => {
       $("#top-ta-table").find("tr:gt(0)").remove();
-      var trow = 0;
+      var row = 0;
       var ttable = $("#top-ta-table")[0];
 
-      $("#top-student-table").find("tr:gt(0)").remove();
-      var srow = 0;
-      var stable = $("#top-student-table")[0];
-
       res.data.forEach(user => {
-        var utable;
-        var row;
-
-        if (user.role === "Student") {
-          utable = stable;
-          srow++;
-          row = srow;
-        } else {
-          utable = ttable;
-          trow++;
-          row = trow;
-        }
-
-        var r = utable.insertRow(row);
-        r.insertCell(0).innerHTML = user.name;
-        r.insertCell(1).innerHTML = user.totalTickets;
-        r.insertCell(2).innerHTML = -1;
-        r.insertCell(3).innerHTML = -1;
+        var getTokenCount = client.service('/tokens').find({
+          query: {
+            fulfilledBy: user._id,
+            createdAt: {
+              $gt: new Date(new Date() - 7 * 60 * 60 * 24 * 1000)
+            },
+            $limit: 0
+          }
+        });
+        var getAvgTicketsWeek = client.service('/tokens').find({
+            query: {
+              _aggregate: [{
+        		    $match: {
+        			     fulfilledBy: user._id,
+                   fulfilled: true,
+                   isBeingHelped: false
+        		    }},{
+        		      $project: {
+        			       year: { $year: "$createdAt" },
+        			       week: { $week: "$createdAt" },
+        		       }
+                },
+        		    {
+                  $group: {
+                  _id: { year: "$year", week:"$week", fulfilledBy: "$fulfilledBy" },
+                  total : { $sum: 1 }
+                }},
+                {
+                  $group: {
+                  _id: null,
+                  avgTotal: {$avg: "$total"}
+                  }
+                }
+              ]
+        	}
+        });
+        var getLastToken = client.service('/tokens').find({
+          query: {
+            fulfilledBy: user._id,
+            $limit:1,
+            $sort: {
+              closedAt: -1
+            }
+          }
+        });
+        Promise.all([getAvgTicketsWeek, getLastToken])
+        .then(function([avgTicketsWeek, getLastToken]){
+          row++;
+          var r = ttable.insertRow(row);
+          console.log(avgTicketsWeek);
+          r.insertCell(0).innerHTML = genUserElt(user, user.name);
+          r.insertCell(1).innerHTML = user.totalTickets;
+          r.insertCell(2).innerHTML = avgTicketsWeek.length > 0 ? precisionRoundDecimals(avgTicketsWeek[0].avgTotal, 3) || "N/A" : "N/A";
+          r.insertCell(3).innerHTML = (getLastToken.total >= 1) ? formatTime(getLastToken.data[0].closedAt) : "N/A";
+        });
       });
     }).catch(err => {
       console.log(err);
@@ -259,6 +418,11 @@ function updateStats() {
       console.err(err);
     })
   });
+
+  if (!cfg.statsGraph) {
+    $('#stats').hide();
+    return;
+  }
 
   client.service('tokens').find({
     query: {

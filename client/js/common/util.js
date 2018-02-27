@@ -84,19 +84,20 @@ setInterval(function() {
   });
 }, 1000);
 
-var precisionRoundDecimals = function(number, precision) {
+var precisionRoundDecimals = function(number, precision = 1) {
   var factor = Math.pow(10, precision);
   return Math.round(number * factor) / factor;
 }
 
-var precisionRoundWhole = function(number, precision) {
+var precisionRoundWhole = function(number, precision = 1) {
   var factor = Math.pow(10, precision);
   return Math.round(number / factor) * factor;
 }
 
 var millisToTime = function(t) {
   t = t / 60000;
-  return precisionRoundDecimals(t, 1);
+  const ret = precisionRoundDecimals(t, 1);
+  return ret > 999 ? ">999" : ret;
 }
 
 var toDataArray = function(hash) {
