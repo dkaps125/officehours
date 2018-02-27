@@ -52,6 +52,9 @@ program
     .description('update columns for user total')
     .action(function() {
       app.service('/users').find({
+        query: {
+          $limit: 1500
+        }
       }).then(users => {
         users.data.map(user => {
           var q = {

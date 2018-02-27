@@ -229,12 +229,12 @@ function updateStats() {
       }
     }).then(res => {
       // TODO: put this in a $project
-      console.log('top users', res);
       $("#top-student-table").find("tr:gt(0)").remove();
       var row = 0;
       var stable = $("#top-student-table")[0];
 
-      res.data.forEach(user => {
+      for (var i = 0; i < res.data.length; i++) {
+        const user = res.data[i];
         /* total per week
         var getTokenCount = client.service('/tokens').find({
           query: {
@@ -291,7 +291,7 @@ function updateStats() {
             precisionRoundDecimals(avgTicketsWeek[0].avgTotal, 3) || "N/A" : "N/A";
           r.insertCell(3).innerHTML = (getLastToken.total >= 1) ? formatTime(getLastToken.data[0].createdAt) : "N/A";
         })
-      });
+      }
     }).catch(err => {
       console.log(err);
     });
@@ -315,7 +315,8 @@ function updateStats() {
       var row = 0;
       var ttable = $("#top-ta-table")[0];
 
-      res.data.forEach(user => {
+      for (var i = 0; i < res.data.length; i++) {
+        const user = res.data[i];
         var getTokenCount = client.service('/tokens').find({
           query: {
             fulfilledBy: user._id,
@@ -365,13 +366,12 @@ function updateStats() {
         .then(function([avgTicketsWeek, getLastToken]){
           row++;
           var r = ttable.insertRow(row);
-          console.log(avgTicketsWeek);
           r.insertCell(0).innerHTML = genUserElt(user, user.name);
           r.insertCell(1).innerHTML = user.totalTickets;
           r.insertCell(2).innerHTML = avgTicketsWeek.length > 0 ? precisionRoundDecimals(avgTicketsWeek[0].avgTotal, 3) || "N/A" : "N/A";
           r.insertCell(3).innerHTML = (getLastToken.total >= 1) ? formatTime(getLastToken.data[0].closedAt) : "N/A";
         });
-      });
+      }
     }).catch(err => {
       console.log(err);
     });
