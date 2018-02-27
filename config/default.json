@@ -4,7 +4,7 @@
   "public": "../public/",
   "paginate": {
     "default": 10,
-    "max": 1000
+    "max": 1500
   },
   "authentication": {
     "secret": "supersecret",
