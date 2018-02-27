@@ -4,6 +4,8 @@ const commonHooks = require('feathers-hooks-common');
 const search = require('feathers-mongodb-fuzzy-search');
 const errors = require('feathers-errors');
 const xss = require('xss');
+const mongoose = require('mongoose');
+const ObjectId = mongoose.Types.ObjectId;
 
 const MAX_DESC_LEN = 200;
 
@@ -60,6 +62,22 @@ commonHooks.when(hook => !!hook.params.user &&
 const setUserName = context => {
   if (!!context.data && !!context.params.user) {
     context.params.userName = context.params.user.name || context.params.user.directoryID;
+  }
+}
+
+const incrTotalTickets = context => {
+  if (!!context.data && !!context.params.user) {
+    return context.app.service('/users').get(context.params.user._id).then(res => {
+      var totalTickets = 1;
+      if (!!res.totalTickets) {
+        totalTickets = res.totalTickets + 1;
+      }
+      return context.app.service('/users').patch(context.params.user._id, {
+        totalTickets,
+      }).then(res => {
+        return context;
+      });
+    });
   }
 }
 
@@ -126,16 +144,26 @@ const validateTokens = context => {
   });
 }
 
-function aggregateToks(hook) {
-	if('_aggregate' in hook.params.query) {
-		hook.result = hook.service.Model.aggregate(hook.params.query._aggregate);
+const aggregateToks = hook => {
+	if ('_aggregate' in hook.params.query && !!hook.params.query._aggregate) {
+    // ugly
+    if (hook.params.query._aggregate.length > 0 && '$match' in hook.params.query._aggregate[0]) {
+      if ('fulfilledBy' in hook.params.query._aggregate[0].$match) {
+        const fulfilledBy = hook.params.query._aggregate[0].$match.fulfilledBy;
+        hook.params.query._aggregate[0].$match.fulfilledBy = ObjectId(fulfilledBy);
+      } else if ('user' in hook.params.query._aggregate[0].$match) {
+        const user = hook.params.query._aggregate[0].$match.user;
+        hook.params.query._aggregate[0].$match.user = ObjectId(user);
+      }
+    }
+    hook.result = hook.service.Model.aggregate(hook.params.query._aggregate);
 	}
 }
 
 module.exports = {
   before: {
     all: [ authenticate('jwt') ],
-    find: [restrictToTAOrSelf, search({
+    find: [restrictToTAOrSelf, aggregateToks, search({
       fields: ['userName', 'fulfilledByName', 'desc']
     })],
     get: [restrictToTAOrSelf],
@@ -144,6 +172,7 @@ module.exports = {
       validatePasscode,
       validateTokens,
       setUserName,
+      incrTotalTickets,
       commonHooks.discard('passcode'),
       filterXSS
     ],

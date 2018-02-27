@@ -18,9 +18,12 @@ module.exports = function (app) {
       type: String,
       default: "TA Room",
     },
+    totalTickets: {
+      type: Number,
+      default: 0
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
-    totalTickets: {type: Number, default: 0}
   });
 
   return mongooseClient.model('users', users);
