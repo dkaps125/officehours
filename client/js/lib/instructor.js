@@ -235,6 +235,7 @@ function updateStats() {
 
       for (var i = 0; i < res.data.length; i++) {
         const user = res.data[i];
+        const curRow = row+1;
         /* total per week
         var getTokenCount = client.service('/tokens').find({
           query: {
@@ -283,14 +284,14 @@ function updateStats() {
 
         Promise.all([getAvgTicketsWeek, getLastToken])
         .then(function([avgTicketsWeek, getLastToken]){
-          row++;
-          var r = stable.insertRow(row);
+          var r = stable.insertRow(curRow);
           r.insertCell(0).innerHTML = genUserElt(user, user.name);
           r.insertCell(1).innerHTML = user.totalTickets;
           r.insertCell(2).innerHTML = avgTicketsWeek.length > 0 ?
             precisionRoundDecimals(avgTicketsWeek[0].avgTotal, 3) || "N/A" : "N/A";
           r.insertCell(3).innerHTML = (getLastToken.total >= 1) ? formatTime(getLastToken.data[0].createdAt) : "N/A";
-        })
+        });
+        row++;
       }
     }).catch(err => {
       console.log(err);
@@ -317,6 +318,7 @@ function updateStats() {
 
       for (var i = 0; i < res.data.length; i++) {
         const user = res.data[i];
+        const curRow = row + 1;
         var getTokenCount = client.service('/tokens').find({
           query: {
             fulfilledBy: user._id,
@@ -364,13 +366,13 @@ function updateStats() {
         });
         Promise.all([getAvgTicketsWeek, getLastToken])
         .then(function([avgTicketsWeek, getLastToken]){
-          row++;
-          var r = ttable.insertRow(row);
+          var r = ttable.insertRow(curRow);
           r.insertCell(0).innerHTML = genUserElt(user, user.name);
           r.insertCell(1).innerHTML = user.totalTickets;
           r.insertCell(2).innerHTML = avgTicketsWeek.length > 0 ? precisionRoundDecimals(avgTicketsWeek[0].avgTotal, 3) || "N/A" : "N/A";
           r.insertCell(3).innerHTML = (getLastToken.total >= 1) ? formatTime(getLastToken.data[0].closedAt) : "N/A";
         });
+        row++;
       }
     }).catch(err => {
       console.log(err);

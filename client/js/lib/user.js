@@ -127,47 +127,36 @@ function updateStats(curUser) {
               _aggregate: [{
           	    $match: {
           		     student: curUser._id,
-                   $or: [{knowledgeable: "Yes"}, {knowledgeable: "No"}]
           	    }},{
-          	      $project: {
-          		       knowledgeable: "$knowledgeable" ,
-          	       }
+                  $project: {
+                     knowledgeable: "$knowledgeable" ,
+                   }
+                }, {
+                  $project: {
+                    ctotal: {
+                     $cond: {
+                      if: {
+                        $eq: ["$knowledgeable", "Yes"]
+                      },
+                      then: 1,
+                      else: 0
+                    }}
+                  }
                 }, {
                   $group: {
-                    _id: {knowledgeable: "$knowledgeable"},
-                    total: {$sum: 1}
+                    _id: null,
+                    yesTotal: {$sum: "$ctotal"},
+                    totalTotal: {$sum: 1}
                   },
                 }
               ]
           	} //too many curly braces
         });
       }).then(res => {
-        if (res.length == 2) {
-          var yesTotal = 1;
-          var noTotal = 1;
-          if (res[0]._id.knowledgeable === "Yes") {
-            yesTotal = res[0].total;
-            noTotal = res[1].total;
-          } else {
-            yesTotal = res[1].total;
-            noTotal = res[0].total;
-          }
-          const knowPercent = yesTotal/(noTotal + yesTotal) * 100;
+        if (res.length >= 1 && res[0].totalTotal >= 0) {
+          const knowPercent = res[0].yesTotal*100/res[0].totalTotal;
+          console.log(knowPercent);
           $("#stats-know-percent").html(precisionRoundDecimals(knowPercent,0)+"%");
-        } else if (res.length == 1) {
-          if (res[0]._id.knowledgeable === "Yes") {
-            // there are no "No" stats
-            $("#stats-know-percent").html("100%");
-          } else if (res[0]._id.knowledgeable === "No") {
-            // there are no "Yes" stats
-            $("#stats-know-percent").html("0%");
-          } else {
-            // there are no stats
-            $("#stats-know-percent").html("N/A");
-          }
-        } else {
-          // no stats
-          $("#stats-know-percent").html("N/A");
         }
         $("#student-stats").show();
       }).catch(function(err) {
@@ -370,7 +359,7 @@ function setModal(ticket) {
 $(function() {
   // Popovers
   $("[data-toggle=popover]").popover({ trigger: "hover" });
-  
+
   // Delete user button
   $('#delete-user').click(deleteUser);
 
