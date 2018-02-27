@@ -163,7 +163,7 @@ function setModal(ticket) {
   finalHTML += '<p> Description: </p> <div class="well">' + (ticket.desc || "No description") +"</div>";
   if (ticket.fulfilled && !ticket.cancelledByStudent && !ticket.noShow) {
     // TODO: link to TA stats for this TA somehow
-    finalHTML += '<hr><h5 style="display:inline-block;">Responding TA:</h5> ' + genUserElt(ticket.user, ticket.fulfilledByName) + "<br>"
+    finalHTML += '<hr><h5 style="display:inline-block;">Responding TA:</h5> ' + genUserElt(ticket.fulfilledBy, ticket.fulfilledByName) + "<br>"
     if (ticket.isClosed) {
       finalHTML += '<h5 style="display:inline-block;">Ticket closed on:</h5> ' + (new Date(ticket.closedAt)).toLocaleString() + "<br>";
       if (!!ticket.comment) {
