@@ -224,7 +224,7 @@ function updateStats() {
         $sort: {
           totalTickets: -1
         },
-        $limit: 15,
+        $limit: 10,
         role: 'Student'
       }
     }).then(res => {
@@ -295,7 +295,7 @@ function updateStats() {
           r.insertCell(0).innerHTML = genUserElt(user, user.name);
           r.insertCell(1).innerHTML = user.totalTickets;
           r.insertCell(2).innerHTML = avgTicketsWeek.length > 0 ? precisionRoundDecimals(avgTicketsWeek[0].avgTotal, 3) || "N/A" : "N/A";
-          r.insertCell(3).innerHTML = (getLastToken.total >= 1) ? formatTime(getLastToken.data[0].closedAt) : "N/A";
+          r.insertCell(3).innerHTML = (getLastToken.total >= 1) ? formatTime(getLastToken.data[0].createdAt) : "N/A";
         }
       });
     }).catch(err => {
