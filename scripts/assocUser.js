@@ -112,7 +112,7 @@ program
               q
             ).then(tokens => {
               console.log(user.name + ': ' + tokens.total);
-              tokens.data.map(token._id => {
+              tokens.data.map(token => {
                 return app.service('/tokens').patch(token._id, {
                   cancelledByTA: false,
                   noShow: false
