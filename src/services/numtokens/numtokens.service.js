@@ -1,7 +1,6 @@
 // Initializes the `numtokens` service on path `/numtokens`
 const createService = require('./numtokens.class.js');
 const hooks = require('./numtokens.hooks');
-const filters = require('./numtokens.filters');
 
 module.exports = function () {
   const app = this;
@@ -21,8 +20,4 @@ module.exports = function () {
   const service = app.service('numtokens');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };

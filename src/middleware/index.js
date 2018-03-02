@@ -1,5 +1,5 @@
 const passport = require('passport');
-const auth = require('feathers-authentication');
+const auth = require('@feathersjs/authentication');
 const multer = require('multer');
 const csvUpload = require('./csv');
 const casLogin = require('./cas-login');

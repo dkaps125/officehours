@@ -1,7 +1,6 @@
 // Initializes the `availabletas` service on path `/availabletas`
 const createService = require('./availabletas.class.js');
 const hooks = require('./availabletas.hooks');
-const filters = require('./availabletas.filters');
 
 module.exports = function () {
   const app = this;
@@ -20,8 +19,4 @@ module.exports = function () {
   const service = app.service('availabletas');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };

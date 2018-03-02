@@ -1,5 +1,5 @@
 const passport = require('passport');
-const auth = require('feathers-authentication');
+const auth = require('@feathersjs/authentication');
 
 module.exports = function (options = {}) {
   const app = options.app

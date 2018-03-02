@@ -1,4 +1,4 @@
-const auth = require('feathers-authentication');
+const auth = require('@feathersjs/authentication');
 const xss = require('xss');
 const transform = require('stream-transform');
 const stringify = require('csv-stringify');
