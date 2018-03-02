@@ -92,5 +92,35 @@ program
       });
     });
 
+    program
+      .command('addAttrs')
+      .description('update columns for user attrs')
+      .action(function() {
+        app.service('/users').find({
+          query: {
+            $limit: 1500
+          }
+        }).then(users => {
+          users.data.map(user => {
+              app.service('/users').patch(user._id, {
+                noShow: false,
+                cancelledByTA: false
+              });
+            }).catch(err => {
+              console.error('mongoose error 2');
+              console.error(err);
+              process.exit(1);
+            });
+          });
+          // map is synchronous apparently
+          //process.exit(0);
+
+        }).catch(function(err) {
+            console.error('mongoose error');
+            console.error(err);
+            process.exit(1);
+        });
+      });
+
 
 program.parse(process.argv);
