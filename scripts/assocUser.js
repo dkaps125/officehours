@@ -102,10 +102,23 @@ program
           }
         }).then(users => {
           users.data.map(user => {
-              app.service('/users').patch(user._id, {
-                noShow: false,
-                cancelledByTA: false
-              });
+            var q = {
+              query: {
+                user: user._id
+                $limit: 1500
+              }
+            }
+            app.service('/tokens').find(
+              q
+            ).then(tokens => {
+              console.log(user.name + ': ' + tokens.total);
+              tokens.data.map(token => {
+                return app.service('/tokens').patch(, {
+                  cancelledByTA: false,
+                  noShow: false
+                });
+              })
+
             }).catch(err => {
               console.error('mongoose error 2');
               console.error(err);
