@@ -104,7 +104,7 @@ program
           users.data.map(user => {
             var q = {
               query: {
-                user: user._id
+                user: user._id,
                 $limit: 1500
               }
             }
@@ -112,8 +112,8 @@ program
               q
             ).then(tokens => {
               console.log(user.name + ': ' + tokens.total);
-              tokens.data.map(token => {
-                return app.service('/tokens').patch(, {
+              tokens.data.map(token._id => {
+                return app.service('/tokens').patch(token._id, {
                   cancelledByTA: false,
                   noShow: false
                 });
