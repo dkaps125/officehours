@@ -32,6 +32,10 @@ body {
   background-color: white;
 }
 
+.inline {
+  display: inline;
+}
+
 #main {
   padding-top:60px;
   z-index:1000;
@@ -75,6 +79,13 @@ body {
 /* instr */
 .instr-sidebar-container {
   height:100%;
+}
+
+/* TA */
+.passcode {
+  display:inline-block;
+  padding-bottom:15px;
+  width:100px;
 }
 
 /* drag and drop upload css */

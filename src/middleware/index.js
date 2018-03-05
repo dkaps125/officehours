@@ -58,15 +58,16 @@ module.exports = function () {
         app.get('authentication')).then(accessToken => {
 
         res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })
-        res.redirect('/student.html')
+        res.redirect('/')
       });
     });
   }
   app.use('/csvUpload', auth.express.authenticate('jwt'),
     upload.single('userfile'), csvUpload({app}))
-
+/*
   app.use('/', function(req, res, next) {
     // we do this for lazy routing
     res.redirect('/cas_login');
   });
+  */
 };
