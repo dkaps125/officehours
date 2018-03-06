@@ -1,6 +1,6 @@
 // Course config & globals
 const cfg = {
-  navbarTitle: 'CMSC330 Office Hours',
+  navbarTitle: 'CMSC131 Office Hours',
   ohSchedURL: 'http://cs.umd.edu/class/spring2018/cmsc330/#officehours',
   ohSchedTitle: 'OH Schedule',
   statsAvailable: true
