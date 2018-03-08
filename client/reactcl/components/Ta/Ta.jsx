@@ -1,18 +1,66 @@
 import React from 'react';
+import AvailableTas from '../AvailableTas';
+import QueuedStudentsTable from '../QueuedStudentsTable';
+import Comments from './Comments.jsx';
+import Utils from '../../Utils';
 
 class Ta extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
-      isInOH: true,
+      onDuty: false,
       numTas: 0,
       studentsInQueue: 0,
-      studentQueue: []
+      studentQueue: [],
+      currentTicket: null
     };
+
+    const user = props.client.get('user');
+    const socket = props.client.get('socket');
+
+    socket.on('tokens created', this.updateQueueCount);
+    socket.on('tokens updated', this.updateQueueCount);
+
+    if (!! user) {
+      this.state.onDuty = user.onDuty;
+      this.setPasscode();
+      this.getCurrentStudent();
+    }
+    this.updateQueueCount();
   }
 
   componentDidMount() {
+    const client = this.props.client;
+    const socket = client.get('socket');
     this.setState({numTas: 1});
+
+    // if loaded early
+    socket.on('authWithUser', user => {
+      this.setState({onDuty: user.onDuty});
+      // this would be better if we used flux or redux
+    });
+  }
+
+  componentDidUpdate(prevProps, prevState) {
+    // onDuty status updated
+    if (!prevState.onDuty && this.state.onDuty) {
+      this.setPasscode();
+      this.getCurrentStudent();
+    } else if (prevState.onDuty && !this.state.onDuty) {
+      this.setState({passcode: null});
+    }
+  }
+
+  updateQueueCount = () => {
+    const client = this.props.client;
+    client.service('/tokens').find({query:
+      {
+        $limit: 0,
+        fulfilled: false,
+      }
+    }).then(tickets => {
+      this.setState({studentsInQueue: tickets.total});
+    });
   }
 
   cancelAllTix = () => {
@@ -20,170 +68,118 @@ class Ta extends React.Component {
   }
 
   toggleOH = () => {
-    console.log("join oh");
-    this.setState({isInOH: !this.state.isInOH});
+    const client = this.props.client;
+    const onDuty = !this.state.onDuty;
+    client.service('/users').patch(client.get('user')._id, {onDuty})
+    .then(newMe => {
+      toastr.success("You are now in office hours");
+      this.setState({onDuty});
+    }).catch(err => {
+      toastr.error("Cannot change on duty status");
+    })
   }
 
-  updateStudentQueue = () => {
-    client.service('/tokens').find({query:
+  getCurrentStudent = () => {
+    const client = this.props.client;
+    client.service('/tokens').find(
       {
-        $limit: 100,
-        fulfilled: false,
+        query: {
+          $limit: 1,
+          fulfilled: true,
+          isBeingHelped: true,
+          fulfilledBy: client.get('user')._id,
+          $sort: {
+            createdAt: 1
+          }
+        }
       }
-    }).then(tickets => {
-      this.setState({studentQueue: tickets.data,
-        studentsInQueue: tickets.data.length});
+    ).then(tickets => {
+      // Have a current student
+      var currentTicket = null;
+      if (tickets.total > 0) {
+        currentTicket = tickets.data[0];
+      }
+
+      this.setState({currentTicket});
+    });
+  }
+
+  dequeueStudent = () => {
+    const client = this.props.client;
+    client.service('/dequeue-student').create({}).then(result => {
+      this.getCurrentStudent();
+    })
+    .catch(err => {
+      console.error(err);
+    });
+  }
+
+  setPasscode = () => {
+    const client = this.props.client;
+
+    client.service('/passcode').get({}).then(res => {
+      this.setState({passcode: res.passcode});
     });
   }
 
   render() {
     return <div className="row" style={{paddingTop:"15px"}}>
       <div className="col-md-3">
-        <p className="lead">Available TAs: <strong>{this.state.numTas}</strong></p>
+        <AvailableTas client={this.props.client} />
         <hr/>
-        <div id="clock-in-area" className="panel panel-default">
-          <div className="panel-heading">You are not in office hours</div>
-          <div className="panel-body">
-            <button id="clock-in-btn" onClick={this.toggleOH} className="btn btn-default">Join office hours</button>
-          </div>
-        </div>
-        <div id="clock-out-area" className="panel panel-default" style={{display:"none"}}>
-          <div className="panel-heading">You are hosting office hours</div>
-          <div className="panel-body">
-            <form id="clock-out-form">
-              <button id="clock-out-btn" type="submit" className="btn btn-default">Leave office hours</button>
+        {
+          this.state.onDuty ?
+          <div className="panel panel-default">
+            <div className="panel-heading">You are hosting office hours</div>
+            <div className="panel-body">
+              <h4>Hourly passcode:</h4>
+              <h2 className="passcode">
+                <span className="label label-success">{this.state.passcode }</span>
+              </h2>
+              <hr/>
+              <button onClick={this.toggleOH} className="btn btn-default">Leave office hours</button>
               <div className="alert alert-success alert-dismissable" role="alert" style={{marginTop:"15px"}}>
                 <button type="button" className="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                Do not forget to press the leave button before you depart.</div>
-            </form>
-            <hr/>
-            <h4>Hourly passcode:</h4>
-            <h2 className="passcode"><span id="passcode" className="label label-success">n/a</span></h2>
-            <div id="end-oh-area">
+                Do not forget to press the leave button before you depart.
+              </div>
               <hr/>
-              <h4>End office hours:</h4>
-              <button id="end-oh-btn" onClick={this.cancelAllTix} type="submit" className="btn btn-warning" style={{marginTop:"10px"}}>Cancel all tickets</button>
+              <div id="end-oh-area">
+                <h4>End office hours:</h4>
+                <button onClick={this.cancelAllTix} className="btn btn-warning" style={{marginTop:"10px"}}>Cancel all tickets</button>
+              </div>
             </div>
           </div>
-        </div>
+          : <div className="panel panel-default">
+            <div className="panel-heading">You are not in office hours</div>
+            <div className="panel-body">
+              <button onClick={this.toggleOH} className="btn btn-default">Join office hours</button>
+            </div>
+          </div>
+        }
         <hr/>
 
-        <div className="panel panel-primary">
-          <div className="panel-heading">TAs hosting office hours</div>
-          <table id="ta-table" className="table">
-          </table>
-        </div>
       </div>
       {
-        this.state.isInOH ? <div className="col-md-9">
+        this.state.onDuty ? <div className="col-md-9">
           <p className="lead">Students in queue: <strong id="students-in-queue">{this.state.studentsInQueue}</strong></p>
           <hr />
           {
-            !!this.state.currentStudent ?
-            <div id="current-student-area" className="panel panel-default">
-              <div className="panel-heading">Current Student</div>
-              <div className="panel-body">
-                <h4 id="current-student-name"></h4>
-                <p id="current-student-ticket-createtime" style={{color:"gray"}}></p>
-                <h3 id="current-student-time-warn" style={{paddingBottom:"15px"}}>
-                  <span className="label label-warning">
-                  Warning: You have spent over 10 minutes assisting this student
-                  </span>
-                </h3>
-                <label> Student's issue:</label>
-                <div className="well">
-                  <p id="current-student-issue-text">No description provided</p>
-                </div>
-                <form id="student-notes-form">
-                  <div className="form-group">
-                    <label>Did the student seem to know what they were doing?</label>
-                    <div className="radio">
-                      <label className="radio-inline">
-                        <input type="radio" id="inlineCheckbox1" value="Yes" name="radio1" /> Yes
-                      </label>
-                      <label className="radio-inline">
-                        <input type="radio" id="inlineCheckbox2" value="No" name="radio1" /> No
-                      </label>
-                      <label className="radio-inline">
-                        <input type="radio" id="inlineCheckbox3" value="Not sure" name="radio1" defaultChecked /> Not sure
-                      </label>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label>Do you think the student could have still solved the problem with less help?</label>
-                    <div className="radio">
-                      <label className="radio-inline">
-                        <input type="radio" id="inlineCheckbox1" value="Yes" name="radio2" /> Yes
-                      </label>
-                      <label className="radio-inline">
-                        <input type="radio" id="inlineCheckbox2" value="No" name="radio2" /> No
-                      </label>
-                      <label className="radio-inline">
-                        <input type="radio" id="inlineCheckbox3" value="Not sure" name="radio2" defaultChecked /> Not sure
-                      </label>
-                    </div>
-                  </div>
-                  <div className="form-group">
-                    <label htmlFor="student-notes-box">Comments</label>
-                    <textarea className="form-control" rows="4" id="student-notes-box" placeholder="Briefly, what did you assist the student with."></textarea>
-                  </div>
-                </form>
-                <form id="close-ticket-form inline">
-                  <button id="close-ticket-btn" type="submit" className="btn btn-default">Close ticket</button>
-                </form>
-                <form id="noshow-form" style={{display:"inline", marginLeft:"8px"}}>
-                  <button id="noshow-btn" type="submit" className="btn ">No show</button>
-                </form>
-                <hr />
-                <h4 id="current-student-name-2"></h4>
-                <table className="table table-striped" id="prev-tickets-table">
-                  <thead>
-                    <tr>
-                      <th>#</th>
-                      <th>Closed date</th>
-                      <th>TA</th>
-                      <th>Description</th>
-                      <th>TA Comments</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-            : <div></div>
+            <Comments ticket={this.state.currentTicket} onSubmit="TODO" />
           }
 
           <div id="student-queue-area" className="panel panel-default">
             <div className="panel-heading">Student queue</div>
             <div className="panel-body">
-              <form id="student-dequeue-form">
-                <button id="student-dequeue-btn" type="submit" className="btn btn-success">Dequeue Student</button>
-              </form>
-              <table id="student-table" className="table">
-                <tbody>
-                  <tr className="active">
-                    <th>Num</th>
-                    <th>Student</th>
-                    <th>Description</th>
-                    <th>Date submitted</th>
-                  </tr>
-                  {
-                    this.state.studentQueue.map((ticket, row) =>
-                        <tr key={row}>
-                          <td>{row}</td>
-                          <td>{ticket.user.name || ticket.user.directoryID}</td>
-                          <td>{ticket.desc || "No description"}</td>
-                          <td>{new Date(ticket.createdAt)}</td>
-                        </tr>
-                    )
-                  }
-                </tbody>
-              </table>
+              {
+                this.state.studentsInQueue > 0 ?
+                <button onClick={this.dequeueStudent} className="btn btn-success" style={{marginBottom: "15px"}}>Dequeue Student</button>
+                : <div></div>
+              }
+              <QueuedStudentsTable client={this.props.client} />
             </div>
           </div>
         </div>
-        : <div></div>
+        : <div>NOT ON DUTY</div>
       }
     </div>
   }

@@ -1,9 +1,10 @@
-import React, { Component } from 'react';
+import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
 import { BrowserRouter as Router, Switch, Route, Link, browserHistory } from 'react-router-dom';
 import Ta from './components/Ta';
 import Student from './components/Student';
+import Login from './components/Login';
 
 const render = (Comp) => {
   ReactDOM.render(
@@ -27,6 +28,8 @@ class Application extends React.Component {
     }));
     const users = client.service('/users');
 
+    client.set('socket', socket);
+
     // Try to authenticate with the JWT stored in localStorage
     client.authenticate()
     .then(response => {
@@ -39,6 +42,7 @@ class Application extends React.Component {
       return users.get(payload.userId);
     })
     .then(user => {
+      client.set('user', user);
       client.emit('authWithUser', user);
     })
     .catch((err) => {console.log(err)});
@@ -117,7 +121,8 @@ class Home extends React.Component {
     };
 
     props.client.on("authWithUser", (user) => {
-      this.setState(user);
+      console.log(user);
+      this.setState({user});
     });
   }
 
@@ -126,38 +131,14 @@ class Home extends React.Component {
   }
 
   render() {
-    console.log(this.state.user);
     if (!this.state.user) {
       return <Login />;
     } else if (this.state.user.role === "TA") {
-        return <Ta client={this.props.client} />
+        return <Ta client={this.props.client} user={this.state.user} />
     } else if (this.state.user.role === "Instructor") {
         return <Ta client={this.props.client} />
     }
-    return <Student client={this.props.client} />
-  }
-}
-
-class Login extends React.Component {
-  componentDidMount() {
-    document.body.classList.add('login-body');
-  }
-
-  componentWillUnmount() {
-    document.body.classList.remove('login-body');
-  }
-
-  render() {
-    return <main className="container login-container text-center">
-      <div className="login-box">
-        <div className="login-btn-box">
-          <p className="lead">Log in with your university credentials</p>
-        </div>
-        <div className="login-btn-box login-btn">
-          <a href="/cas_login" className="btn btn-info btn-lg" role="button">CAS Login</a>
-        </div>
-      </div>
-    </main>
+    return <Student client={this.props.client} user={this.state.user} />
   }
 }
 
