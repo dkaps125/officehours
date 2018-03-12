@@ -16,6 +16,7 @@ const notFound = require('feathers-errors/not-found');
 
 const middleware = require('./middleware');
 const services = require('./services');
+const channels = require('./channels');
 const appHooks = require('./app.hooks');
 
 const authentication = require('./authentication');
@@ -41,13 +42,12 @@ app.use('/', express.static(app.get('public')));
 
 app.configure(mongoose);
 app.configure(rest());
-const io = socketio(io => {
-  // add io ops in future
-});
+const io = socketio();
 app.configure(io);
 
 // Set up our services (see `services/index.js`)
 app.configure(services);
+app.configure(channels);
 
 // Configure other middleware (see `middleware/index.js`)
 app.configure(authentication);
