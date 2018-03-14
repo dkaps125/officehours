@@ -13,6 +13,12 @@ class AvailableTas extends React.Component {
     this.getAvailableTAs();
   }
 
+  componentWillUnmount() {
+    const socket = this.props.client.get('socket');
+
+    socket.removeListener('availabletas updated', this.getAvailableTAs)
+  }
+
   getAvailableTAs = () => {
     const client = this.props.client;
     client.service('/availabletas').find().then(tas => {

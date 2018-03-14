@@ -16,6 +16,10 @@ class Student extends React.Component {
       lastTicketCancelled: false
     };
     this.setNumTokens();
+    const client = this.props.client;
+    const socket = client.get('socket');
+    socket.on('queue update', this.setNumTokens);
+    socket.on('queue update', console.log);
   }
 
   componentDidMount() {
@@ -23,7 +27,7 @@ class Student extends React.Component {
   }
 
   setNumTokens = () => {
-    const client = this.props.client
+    const client = this.props.client;
     const getNumToks = client.service('/numtokens').get();
     const getUnfulfilledToks = client.service('/tokens').find(
       { query: { fulfilled: false, $limit:0 } }
@@ -44,7 +48,7 @@ class Student extends React.Component {
         this.getCurrentTicket();
       }
       this.setState({numTokens, numUnfulfilledTickets,
-        studentsInQueue, numStudentsAheadOfMe});
+        studentsInQueue, numStudentsAheadOfMe, lastTicketCancelled: false});
 
       console.log(this.state);
     }).catch(err => {
@@ -87,7 +91,9 @@ class Student extends React.Component {
         }
       }
     }).then(tickets => {
-      if (tickets.total >= 1) {
+      if (tickets.total >= 1 && tickets.data[0].fulfilled) {
+        const ticket = tickets.data[0];
+
         if (shouldPushNotif) {
           // TODO: push notif
         }
@@ -115,8 +121,8 @@ class Student extends React.Component {
           cancelledByStudent: true
         }).then(ticket => {
           this.setState({lastTicketCancelled: true });
-          toastr.warning("Your help ticket has canceled")
-          setNumTokens()
+          toastr.warning("Your help ticket has been canceled")
+          this.setNumTokens()
         }).catch( function (err) {
           toastr.error((!!err.message) ? err.message : "Cannot cancel ticket")
         })

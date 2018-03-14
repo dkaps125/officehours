@@ -1,16 +1,46 @@
 import React from 'react';
+import PreviousComments from './PreviousComments.jsx';
 
 class Comments extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      knowledgeable: "Not sure",
+      toldTooMuch: "Not sure",
+      text: ""
+    };
+  }
+
+  componentDidUpdate(oldProps, oldState) {
+    if (!oldProps.ticket && !! this.props.ticket) {
+      this.setState({
+        student: this.props.ticket.user._id,
+        ticket: this.props.ticket._id
+      })
+    }
   }
 
   handleInputChange = (event) => {
+    const target = event.target;
+    const value = target.type === 'checkbox' ? target.checked : target.value;
+    const name = target.name;
 
+    this.setState({
+      [name]: value
+    });
   }
 
   render() {
+    // https://stackoverflow.com/questions/1199352/smart-way-to-shorten-long-strings-with-javascript
+    String.prototype.trunc = function(n, useWordBoundary) {
+      if (this.length <= n) {
+        return this;
+      }
+      var subString = this.substr(0, n-1);
+      return (useWordBoundary ? subString.substr(0, subString.lastIndexOf(' '))
+      : subString) + "...";
+    }
+    
     return !! this.props.ticket ?
     <div className="panel panel-default">
       <div className="panel-heading">Current Student</div>
@@ -21,7 +51,7 @@ class Comments extends React.Component {
         </p>
         <h3 id="current-student-time-warn" style={{paddingBottom:"15px"}}>
           <span className="label label-warning">
-          Warning: You have spent over 10 minutes assisting this student
+            Warning: You have spent over 10 minutes assisting this student
           </span>
         </h3>
         <label>Student's issue:</label>
@@ -33,60 +63,57 @@ class Comments extends React.Component {
             <label>Did the student seem to know what they were doing?</label>
             <div className="radio">
               <label className="radio-inline">
-                <input type="radio" id="inlineCheckbox1" value="Yes" name="radio1" /> Yes
+                <input type="radio" value="Yes" name="knowledgeable"
+                  onChange={this.handleInputChange}
+                  checked={this.state.knowledgeable === "Yes"}/> Yes
               </label>
               <label className="radio-inline">
-                <input type="radio" id="inlineCheckbox2" value="No" name="radio1" /> No
+                <input type="radio" value="No" name="knowledgeable"
+                  onChange={this.handleInputChange}
+                  checked={this.state.knowledgeable === "No"} /> No
               </label>
               <label className="radio-inline">
-                <input type="radio" id="inlineCheckbox3" value="Not sure" name="radio1" defaultChecked /> Not sure
+                <input type="radio" value="Not sure" name="knowledgeable"
+                  onChange={this.handleInputChange}
+                  checked={this.state.knowledgeable === "Not sure"} /> Not sure
               </label>
+              </div>
             </div>
-          </div>
-          <div className="form-group">
-            <label>Do you think the student could have still solved the problem with less help?</label>
-            <div className="radio">
-              <label className="radio-inline">
-                <input type="radio" id="inlineCheckbox1" value="Yes" name="radio2" /> Yes
-              </label>
-              <label className="radio-inline">
-                <input type="radio" id="inlineCheckbox2" value="No" name="radio2" /> No
-              </label>
-              <label className="radio-inline">
-                <input type="radio" id="inlineCheckbox3" value="Not sure" name="radio2" defaultChecked /> Not sure
-              </label>
-            </div>
-          </div>
-          <div className="form-group">
-            <label htmlFor="student-notes-box">Comments</label>
-            <textarea className="form-control" rows="4" id="student-notes-box" placeholder="Briefly, what did you assist the student with."></textarea>
-          </div>
-        </form>
-        <form id="close-ticket-form inline">
-          <button id="close-ticket-btn" type="submit" className="btn btn-default">Close ticket</button>
-        </form>
-        <form id="noshow-form" style={{display:"inline", marginLeft:"8px"}}>
-          <button id="noshow-btn" type="submit" className="btn ">No show</button>
-        </form>
-        <hr />
-        <h4 id="current-student-name-2"></h4>
-        <table className="table table-striped" id="prev-tickets-table">
-          <thead>
-            <tr>
-              <th>#</th>
-              <th>Closed date</th>
-              <th>TA</th>
-              <th>Description</th>
-              <th>TA Comments</th>
-            </tr>
-          </thead>
-          <tbody>
-          </tbody>
-        </table>
-      </div>
-    </div>
-    : <div></div>
-  }
-}
+            <div className="form-group">
+              <label>Do you think the student could have still solved the problem with less help?</label>
+              <div className="radio">
+                <label className="radio-inline">
+                  <input type="radio" value="Yes" name="toldTooMuch"
+                    onChange={this.handleInputChange}
+                    checked={this.state.toldTooMuch === "Yes"} /> Yes
+                </label>
+                <label className="radio-inline">
+                  <input type="radio" value="No" name="toldTooMuch"
+                    onChange={this.handleInputChange}
+                    checked={this.state.toldTooMuch === "No"} /> No
+                </label>
+                <label className="radio-inline">
+                  <input type="radio" value="Not sure" name="toldTooMuch"
+                    onChange={this.handleInputChange}
+                    checked={this.state.toldTooMuch === "Not sure"} /> Not sure
+                </label>
+                </div>
+              </div>
+              <div className="form-group">
+                <label htmlFor="student-notes-box">Comments</label>
+                <textarea className="form-control" rows="4" onChange={this.handleInputChange} name="text" placeholder="Briefly, what did you assist the student with."></textarea>
+              </div>
+            </form>
+            <button id="close-ticket-btn" type="submit" onClick={() => {this.props.closeTicket(this.state)}} className="btn btn-default">Close ticket</button>
+            <button id="noshow-btn" type="submit" onClick={this.props.markNoshow} className="btn" style={{display:"inline", marginLeft:"10px"}}>No show</button>
+            <hr />
+            <h4>{this.props.ticket.user.name + "'s previous comments"}</h4>
 
-export default Comments;
+            <PreviousComments client={this.props.client} ticket={this.props.ticket} />
+          </div>
+        </div>
+        : <div></div>
+    }
+  }
+
+  export default Comments;

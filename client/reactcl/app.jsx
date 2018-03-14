@@ -28,8 +28,6 @@ class Application extends React.Component {
     }));
     const users = client.service('/users');
 
-    client.set('socket', socket);
-
     // Try to authenticate with the JWT stored in localStorage
     client.authenticate()
     .then(response => {
@@ -43,7 +41,10 @@ class Application extends React.Component {
     })
     .then(user => {
       client.set('user', user);
+      client.set('socket', socket);
       client.emit('authWithUser', user);
+
+      client.on('reauthentication-error', () => {console.log("REAUTH ERROR!")});
     })
     .catch((err) => {console.log(err)});
     this.state = {client};
@@ -56,7 +57,7 @@ class Application extends React.Component {
   render() {
     return <Router>
       <div>
-        <Nav/>
+        <Nav client={this.state.client} />
         <div id="main" className="container login-container">
           <Route exact path="/" render={(routeProps) => (
               <Home {...routeProps} client={this.state.client} />
@@ -80,7 +81,7 @@ class Nav extends React.Component {
   }
 
   logout = () => {
-    client.logout().then(() => {
+    this.props.client.logout().then(() => {
       location.reload();
     });
   }
