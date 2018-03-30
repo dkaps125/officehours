@@ -1,10 +1,11 @@
 import React from 'react';
 import ReactDOM from 'react-dom';
 import { AppContainer } from 'react-hot-loader';
-import { BrowserRouter as Router, Switch, Route, Link, browserHistory } from 'react-router-dom';
+import { BrowserRouter as Router, Switch, Route, Link, browserHistory, Redirect } from 'react-router-dom';
 import Ta from './components/Ta';
 import Student from './components/Student';
 import Login from './components/Login';
+import Instructor from './components/Instructor';
 
 const render = (Comp) => {
   ReactDOM.render(
@@ -19,6 +20,7 @@ class Application extends React.Component {
 
   constructor(props) {
     super(props);
+
     const socket = io({secure: true});
     const client = feathers()
     .configure(feathers.hooks())
@@ -43,7 +45,7 @@ class Application extends React.Component {
       client.set('user', user);
       client.set('socket', socket);
       client.emit('authWithUser', user);
-
+      this.setState({user})
       client.on('reauthentication-error', () => {console.log("REAUTH ERROR!")});
     })
     .catch((err) => {console.log(err)});
@@ -53,27 +55,97 @@ class Application extends React.Component {
   componentDidMount() {
 
   }
+  //<Route exact path="/" render={(routeProps) => ()} component={Login}/>
+  //<Route exact path="/" component={Login}/>
+
+  /*
+  else if (this.state.user.role === "Instructor") {
+    return <Redirect to={{pathname:'/ta', state: {from: this.props.location}}} />
+  } else if (this.state.user.role === "TA") {
+    return <Redirect to={{pathname:'/ta', state: {from: this.props.location}}} />
+  } else if (this.state.user.role === "Student") {
+    return <Redirect to={{pathname:'/student', state: {from: this.props.location}}} />
+  } else {
+    return <Redirect to={{pathname:'/login', state: {from: this.props.location}}} />
+  }
+  */
+          /*went in render below <Route exact path="/" user={this.state.user} render={(props) => {
+              console.log(this.props.user);
+            return !props.user ? (
+              <Redirect to={{pathname: "/login", state: {user:props.user}}} />
+            ) : (
+              user.role === 'TA' ? (
+                <Redirect to="/ta" />
+              ) : (
+                user.role === 'Instructor' ? (
+                  <Redirect to="/ta" />
+                ) : (
+                  <Redirect to="/student" />
+                )
+              )
+            )
+          }} />*/
 
   render() {
+    const user = this.state.user;
     return <Router>
       <div>
-        <Nav client={this.state.client} />
+        <Nav client={this.state.client} location={this.props.location} />
         <div id="main" className="container login-container">
-          <Route exact path="/" render={(routeProps) => (
-              <Home {...routeProps} client={this.state.client} />
-          )} />
+          <FeathersRoute exact path="/" client={this.state.client} component={Login} />
+          <FeathersRoute path="/login" client={this.state.client} component={Login} />
+          <FeathersRoute path="/instructor" client={this.state.client} forRoles={["Instructor"]} component={Instructor} />
+          <FeathersRoute path="/ta" client={this.state.client} forRoles={["Instructor", "TA"]} component={Ta} />
         </div>
-        </div>
+      </div>
     </Router>
   }
 };
 
+const FeathersRoute = ({ component: Component, client: client, ...rest }) => (
+  <Route
+    {...rest}
+    render={props =>
+      (<Component {...props} client={client} />)
+    }
+  />
+)
+
+const AuthenticatedRoute = ({ component: Component, client: client, ...rest }) => (
+  <Route
+    {...rest}
+    render={props =>
+      !! props.client.get('user') /* && props.forRoles.contains(props.user)*/ ? (
+        <Component {...props} />
+      ) : (
+        <Redirect
+          to={{
+            pathname: "/",
+            state: { from: props.location }
+          }}
+        />
+      )
+    }
+  />
+);
+
 class Nav extends React.Component {
   constructor(props) {
     super(props);
+    const possibleUser = props.client.get('user');
     this.state = {
-
+      location: this.props.location,
+      user: possibleUser,
+      roles: []
     };
+
+    if (!!possibleUser) {
+      this.state.roles = [possibleUser.role];
+    }
+
+    props.client.on('authWithUser', (user) => {
+      this.setState({user, roles: [user.role]});
+    });
   }
 
   componentDidMount() {
@@ -86,6 +158,7 @@ class Nav extends React.Component {
     });
   }
 
+  // TODO: <li className="active"> <span className="sr-only">(current)</span>
   render() {
     return <nav className="navbar">
       <div className="container-fluid">
@@ -100,12 +173,24 @@ class Nav extends React.Component {
         </div>
         <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul className="nav navbar-nav">
-            <li className="active"><a href="#">TA Home <span className="sr-only">(current)</span></a></li>
-            <li><a href="/tickets">Ticket history</a></li>
+            {
+              this.state.roles.includes('Instructor') &&
+                <li><Link to="/instructor">Instructor home</Link></li>
+            }
+            {
+              (this.state.roles.includes('Instructor') || this.state.roles.includes('TA')) &&
+                <li><Link to="/ta">TA Home</Link></li>
+            }
+            {
+              (this.state.roles.includes('Instructor') || this.state.roles.includes('TA')) &&
+                <li><Link to="/tickets">Ticket history</Link></li>
+            }
             <li><a className="oh-sched-link" href="#">OH Schedule</a></li>
           </ul>
           <ul className="nav navbar-nav navbar-right">
-            <li><a href="#" onClick={this.logout}>Logout</a></li>
+            {
+              this.state.user && <li><a href="#" onClick={this.logout}>Logout</a></li>
+            }
           </ul>
         </div>
       </div>
@@ -114,14 +199,14 @@ class Nav extends React.Component {
 
 }
 
-class Home extends React.Component {
+class LoginContainer extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
 
     };
 
-    props.client.on("authWithUser", (user) => {
+    props.client.on('authWithUser', (user) => {
       console.log(user);
       this.setState({user});
     });
@@ -132,29 +217,21 @@ class Home extends React.Component {
   }
 
   render() {
-    if (!this.state.user) {
+    /*if (!this.state.user) {
       return <Login />;
     } else if (this.state.user.role === "TA") {
-        return <Ta client={this.props.client} user={this.state.user} />
+        //return <Ta client={this.props.client} user={this.state.user} />
     } else if (this.state.user.role === "Instructor") {
-        return <Ta client={this.props.client} />
+        //return <Ta client={this.props.client} />
     }
-    return <Student client={this.props.client} user={this.state.user} />
-  }
-}
+    //return <Student client={this.props.client} user={this.state.user} />
+    */
+    /*if (!this.state.user ) {
+      return <Redirect to={{pathname:'/login', state: {from: this.props.location}}} />
+    } */
 
-class Instructor extends React.Component {
-  constructor(props) {
-    super(props);
-    this.state = {};
+    return props.children;
   }
-
-  render() {
-    return <div className="row" style={{paddingTop:"15px"}}>
-      <p> Instr View goes here </p>
-    </div>
-  }
-
 }
 
 render(Application);

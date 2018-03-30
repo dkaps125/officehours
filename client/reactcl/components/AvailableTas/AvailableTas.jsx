@@ -28,10 +28,15 @@ class AvailableTas extends React.Component {
 
   render() {
     return <div>
-      <p className="lead">Available TAs:
-        <strong> {this.state.numTas}</strong>
-      </p>
-      <hr/>
+      {
+        !this.props.hideCount &&
+        <div>
+          <p className="lead">Available TAs:
+            <strong> {this.state.numTas}</strong>
+          </p>
+          <hr/>
+        </div>
+      }
       <div className="panel panel-primary">
         <div className="panel-heading">TAs hosting office hours</div>
         <table className="table">

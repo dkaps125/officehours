@@ -63,7 +63,12 @@ module.exports = function () {
     });
   }
   app.use('/csvUpload', auth.express.authenticate('jwt'),
-    upload.single('userfile'), csvUpload({app}))
+    upload.single('userfile'), csvUpload({app}));
+
+  app.use('/login', (req,res) => {res.redirect('/')});
+  app.use('/ta', (req,res) => {res.redirect('/')});
+  app.use('/instructor', (req,res) => {res.redirect('/')});
+  app.use('/student', (req,res) => {res.redirect('/')});
 /*
   app.use('/', function(req, res, next) {
     // we do this for lazy routing
