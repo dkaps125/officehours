@@ -1,28 +1,15 @@
 import React from 'react';
-import AvailableTas from '../AvailableTas';
-import QueuedStudentsTable from '../QueuedStudentsTable';
 import Utils from '../../Utils';
 
-class Instructor extends React.Component {
+class UserRoster extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-      numTas: 0,
-      studentsInQueue: 0,
-      studentQueue: [],
-    };
+    this.state = {};
 
     const user = props.client.get('user');
     const socket = props.client.get('socket');
 
-    // Don't toast because QueuedStudentsTable toasts for us
-    socket.on('tokens created', this.updateQueueCount);
-    socket.on('tokens patched', this.updateQueueCount);
 
-    if (!! user) {
-      this.state.onDuty = user.onDuty;
-    }
-    this.updateQueueCount();
   }
 
   componentDidMount() {
@@ -46,35 +33,59 @@ class Instructor extends React.Component {
     cb();
   }
 
-  updateQueueCount = () => {
-    const client = this.props.client;
-    client.service('/tokens').find({query:
-      {
-        $limit: 0,
-        fulfilled: false,
-      }
-    }).then(tickets => {
-      console.log({studentsInQueue: tickets.total})
-      this.setState({studentsInQueue: tickets.total});
-    }).catch(console.error);
+  deleteUser = (user) => {
+    if (window.confirm("Are you sure you want to permanently delete this user?")) {
+      this.props.client.service('/users').remove(user).then( res => {
+        toastr.success("User successfully removed");
+        this.props.loadUserRoster();
+      }).catch(function(err) {
+        toastr.error("Error removing user");
+        console.error(err);
+      })
+    }
   }
 
   render() {
-    return <div className="row" style={{paddingTop:"15px"}}>
-      <div className="col-md-3">
-        <h3>Dashboard</h3>
-        <AvailableTas client={this.props.client} hideCount={true} />
-      </div>
-      <div className="col-md-9">
-        <h3>Live student queue</h3>
-        <QueuedStudentsTable client={this.props.client} />
-        <hr />
-        <h3>Student statistics</h3>
-        <hr />
+    return <div>
+      <h3>All users</h3>
+      <form className="form-inline">
+        <input type="text" className="form-control" onKeyUp={this.search}
+          placeholder="Search..." />
+      </form>
+      <table className="table table-striped" data-sortorder="1">
+        <thead>
+          <tr className="active">
+            <th onClick={() => {this.sortTable(0)}}>#</th>
+            <th onClick={() => {this.sortTable(1)}}>Directory ID</th>
+            <th onClick={() => {this.sortTable(2)}}>Name</th>
+            <th onClick={() => {this.sortTable(3)}}>Role</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {
+            !!this.props.userRoster && this.props.userRoster.map((user, row) => {
+              const userIsMe = this.props.client.get('user')._id === user._id;
+              return <tr key={row}>
+                <td>{row+1}</td>
+                <td>{Utils.genUserElt(user, user.directoryID)}
+                {userIsMe && <a style={{color: "gray"}}> (Me)</a>}</td>
+                <td>{Utils.genUserElt(user, user.name || user.directoryID)}
+                {userIsMe && <a style={{color: "gray"}}> (Me)</a>}</td>
+                <td>{user.role}</td>
+                <td>{
+                  !userIsMe ?
+                    <a onClick={() => {this.deleteUser(user._id)}}>Delete ✖</a>
+                    : <a style={{color: "gray"}}>Delete ✖</a>
+                }</td>
+              </tr>
+            })
+          }
+        </tbody>
+      </table>
 
-      </div>
     </div>
   }
 }
 
-export default Instructor;
+export default UserRoster;

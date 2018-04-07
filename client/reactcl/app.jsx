@@ -6,6 +6,7 @@ import Ta from './components/Ta';
 import Student from './components/Student';
 import Login from './components/Login';
 import Instructor from './components/Instructor';
+import TicketHistory from './components/TicketHistory';
 
 const render = (Comp) => {
   ReactDOM.render(
@@ -96,6 +97,8 @@ class Application extends React.Component {
           <FeathersRoute path="/login" client={this.state.client} component={Login} />
           <FeathersRoute path="/instructor" client={this.state.client} forRoles={["Instructor"]} component={Instructor} />
           <FeathersRoute path="/ta" client={this.state.client} forRoles={["Instructor", "TA"]} component={Ta} />
+          <FeathersRoute path="/student" client={this.state.client} forRoles={["Student"]} component={Student} />
+          <FeathersRoute path="/history" client={this.state.client} forRoles={["Instructor", "TA"]} component={TicketHistory} />
         </div>
       </div>
     </Router>
@@ -184,6 +187,10 @@ class Nav extends React.Component {
             {
               (this.state.roles.includes('Instructor') || this.state.roles.includes('TA')) &&
                 <li><Link to="/tickets">Ticket history</Link></li>
+            }
+            {
+              (this.state.roles.includes('Student')) &&
+              <li><Link to="/student">Home</Link></li>
             }
             <li><a className="oh-sched-link" href="#">OH Schedule</a></li>
           </ul>

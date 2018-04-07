@@ -96,6 +96,7 @@
     "gulp-sourcemaps": "^2.6.4",
     "gulp-uglifyes": "^0.1.3",
     "mocha": "^3.4.2",
+    "react-infinite-scroller": "^1.1.3",
     "request": "^2.81.0",
     "request-promise": "^4.2.1",
     "webpack": "^4.0.1",
