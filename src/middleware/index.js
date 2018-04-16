@@ -69,6 +69,8 @@ module.exports = function () {
   app.use('/ta', (req,res) => {res.redirect('/')});
   app.use('/instructor', (req,res) => {res.redirect('/')});
   app.use('/student', (req,res) => {res.redirect('/')});
+  app.use('/tickets', (req,res) => {res.redirect('/')});
+  app.use('/user*', (req,res) => {res.redirect('/')});
 /*
   app.use('/', function(req, res, next) {
     // we do this for lazy routing

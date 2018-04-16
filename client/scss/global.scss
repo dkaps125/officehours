@@ -88,6 +88,19 @@ body {
   width:100px;
 }
 
+.ticket-desc-modal {
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background-color:#e6fff2;
+  height:40px;
+  line-height:40px;
+}
+
+.modal-block {
+  display:inline-inline-block;
+}
+
 /* drag and drop upload css */
 .upload-drop-zone {
     height: 200px;

@@ -1,1 +1,1 @@
-export {default} from './QueuedStudentsTable.jsx';
+export {default} from './TicketHistory.jsx';

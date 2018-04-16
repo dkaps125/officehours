@@ -7,6 +7,7 @@ import Student from './components/Student';
 import Login from './components/Login';
 import Instructor from './components/Instructor';
 import TicketHistory from './components/TicketHistory';
+import UserDetails from './components/UserDetails';
 
 const render = (Comp) => {
   ReactDOM.render(
@@ -98,7 +99,8 @@ class Application extends React.Component {
           <FeathersRoute path="/instructor" client={this.state.client} forRoles={["Instructor"]} component={Instructor} />
           <FeathersRoute path="/ta" client={this.state.client} forRoles={["Instructor", "TA"]} component={Ta} />
           <FeathersRoute path="/student" client={this.state.client} forRoles={["Student"]} component={Student} />
-          <FeathersRoute path="/history" client={this.state.client} forRoles={["Instructor", "TA"]} component={TicketHistory} />
+          <FeathersRoute path="/tickets" client={this.state.client} forRoles={["Instructor", "TA"]} component={TicketHistory} />
+          <FeathersRoute path="/user" client={this.state.client} forRoles={["Instructor", "TA"]} component={UserDetails} />
         </div>
       </div>
     </Router>
