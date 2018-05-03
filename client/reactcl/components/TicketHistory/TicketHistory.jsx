@@ -16,34 +16,16 @@ class TicketHistory extends React.Component {
   }
 
   componentDidMount() {
-    const socket = this.props.client.get('socket');
-
-    // Bind events
-    socket.on('tokens created', this.ticketCreated);
-    socket.on('tokens patched', this.ticketPatched);
-
     this.updateTicketList(0);
   }
 
   componentWillUnmount() {
-    const socket = this.props.client.get('socket');
-
-    socket.removeListener('tokens created', this.ticketCreated);
-    socket.removeListener('tokens patched', this.ticketPatched);
   }
 
   componentDidUpdate(oldProps, oldState) {
     if (!oldProps.client && !!this.props.client) {
 
     }
-  }
-
-  ticketCreated = () => {
-    toastr.success('New ticket created');
-  }
-
-  ticketPatched = () => {
-    toastr.success('Ticket status updated');
   }
 
   updateTicketList = (page) => {
@@ -86,6 +68,14 @@ class TicketHistory extends React.Component {
       }
     };
 
+    if (!!this.props.user) {
+      q.query.user = this.props.user;
+    }
+
+    if (!!this.props.fulfilledBy) {
+      q.query.fulfilledBy = this.props.fulfilledBy;
+    }
+
     client.service('/tokens').find(q).then(tickets => {
       if (tickets.data.length < this.state.itemsPerPage) {
         this.setState({hasMoreTickets : false});
@@ -101,7 +91,6 @@ class TicketHistory extends React.Component {
   }
 
   handleHideModal = () => {
-    console.log("MODAL NO LONGER VISIBLE");
     this.setState({modalVisible: false});
   }
 
@@ -130,7 +119,7 @@ class TicketHistory extends React.Component {
           </tr>
           {
             this.state.studentsInQueue == 0 ?
-              <tr><td><p style={{color: "gray"}}>No tickets</p></td></tr>
+              <tr key={"nothing"}><td><p style={{color: "gray"}}>No tickets</p></td></tr>
               :
             this.state.tickets.map((ticket, row) => {
               if (ticket.isClosed) {

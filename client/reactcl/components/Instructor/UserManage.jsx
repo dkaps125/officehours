@@ -45,6 +45,7 @@ class UserManage extends React.Component {
       }
     }).then(res => {
       this.props.loadUserRoster();
+      toastr.success("Successfully deleted users");
     }).catch(err => {
       console.err(err);
     });
@@ -66,7 +67,8 @@ class UserManage extends React.Component {
     event.preventDefault();
 
     if (!this.state.name || !this.state.directoryID || !this.state.role) {
-      toastr.warning("Missing field in add user form");
+      toastr.warning("Missing field in user creation form");
+      return;
     }
     const newUser = {
       name: this.state.name,
@@ -76,9 +78,11 @@ class UserManage extends React.Component {
 
 
     this.props.client.service('/users').create(newUser).then(res => {
+      toastr.success("User " + this.state.name + " successfully created");
       this.setState({name: '', directoryID: ''});
       this.props.loadUserRoster();
     }).catch(function(err) {
+      toastr.error("Could not create user with this directory ID and name");
       console.error(err);
     });
   }
@@ -87,9 +91,9 @@ class UserManage extends React.Component {
     return <div>
       <hr id="manage-user" />
       <h3>Add user</h3>
-      <form id="add-user" className="form-inline">
+      <form className="form-inline">
         <div className="form-group">
-          <label htmlFor="userName">Name</label>
+          <label htmlFor="userName">&nbsp;Name</label>
           <input type="text" className="form-control" name="name"
             placeholder="John Smith" value={this.state.name}
             onChange={this.handleInputChange} />
@@ -110,7 +114,7 @@ class UserManage extends React.Component {
           </select>
         </div>
         &nbsp;
-        <button type="submit" className="btn btn-default"
+        <button type="button" className="btn btn-default"
           onClick={this.userCreate}>Create user</button>
       </form>
       <hr />

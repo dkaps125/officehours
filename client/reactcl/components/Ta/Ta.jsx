@@ -79,7 +79,9 @@ class Ta extends React.Component {
     const onDuty = !this.state.onDuty;
     client.service('/users').patch(client.get('user')._id, {onDuty})
     .then(newMe => {
-      toastr.success("You are now in office hours");
+      onDuty ? toastr.success("You are now in office hours") :
+        toastr.success("You have left office hours");
+
       this.setState({onDuty});
     }).catch(err => {
       toastr.error("Cannot change on duty status");
@@ -97,7 +99,8 @@ class Ta extends React.Component {
           fulfilledBy: client.get('user')._id,
           $sort: {
             createdAt: 1
-          }
+          },
+          cancelledByStudent: false
         }
       }
     ).then(tickets => {

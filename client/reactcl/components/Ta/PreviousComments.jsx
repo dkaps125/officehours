@@ -92,7 +92,7 @@ class PreviousComments extends React.Component {
               <tr><td><p style={{color: "gray"}}>No tickets for {curTicket.userName}</p></td></tr>
             : this.state.prevTickets.map((ticket, row) => {
               return <tr key={row}>
-                <td>{row}</td>
+                <td>{row+1}</td>
                 <td><small>{new Date(ticket.closedAt).toLocaleString()}</small></td>
                 <td><small>{ticket.fulfilledByName || 'N/A'}</small></td>
                 <td>

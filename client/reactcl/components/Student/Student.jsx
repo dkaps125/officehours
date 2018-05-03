@@ -33,22 +33,35 @@ class Student extends React.Component {
       { query: { fulfilled: false, $limit:0 } }
     );
     const getQueuePos = client.service('/queue-position').get();
+    const getCurrentTicket =  client.service('/tokens').find({
+      query: {
+        $limit: 1,
+        fulfilled: true,
+        isBeingHelped: true,
+        $sort: {
+          createdAt: 1
+        }
+      }
+    });
     const getAvailableTAs = null;
 
-    Promise.all([getNumToks, getUnfulfilledToks, getQueuePos]).then(res => {
+    Promise.all([getNumToks, getUnfulfilledToks, getQueuePos, getCurrentTicket]).then(res => {
       const numTokens = res[0].tokensRemaining;
       const numUnfulfilledTickets = res[1].total;
       const studentsInQueue = res[2].sizeOfQueue;
       const numStudentsAheadOfMe = res[2].peopleAheadOfMe + 1;
+      //const currentTicket = res[3].data.length > 0 ? res[3].data[0] : null;
 
       if (numUnfulfilledTickets == 0 &&
         this.state.numUnfulfilledTickets > 0  && !this.state.lastTicketCancelled) {
         toastr.success("You have been dequeued by a TA!", {timeout: 15000});
-      } else if (numUnfulfilledTickets > 0) {
-        this.getCurrentTicket();
+        //} else if (numUnfulfilledTickets > 0) {
+        //this.getCurrentTicket();
       }
+      this.getCurrentTicket();
       this.setState({numTokens, numUnfulfilledTickets,
-        studentsInQueue, numStudentsAheadOfMe, lastTicketCancelled: false});
+        studentsInQueue, numStudentsAheadOfMe, lastTicketCancelled: false,
+        /*currentTicket*/});
 
       console.log(this.state);
     }).catch(err => {
@@ -97,11 +110,12 @@ class Student extends React.Component {
         if (shouldPushNotif) {
           // TODO: push notif
         }
-        const currentResponder = "TA " + ticket.fulfilledByName + " is assisting you";
+        console.log("000");
+        const currentResponder = ticket.fulfilledByName + " is assisting you";
         const curTicketDesc = ticket.desc || "No description provided";
-        this.setState({currentResponder, curTicketDesc});
+        this.setState({currentResponder, curTicketDesc, currentTicket: ticket});
       } else {
-        this.setState({currentResponder: "", curTicketDesc: ""})
+        this.setState({currentResponder: "", curTicketDesc: "", currentTicket: null})
       }
     }).catch(err => {
       console.error(err);
@@ -124,13 +138,31 @@ class Student extends React.Component {
           toastr.warning("Your help ticket has been canceled")
           this.setNumTokens()
         }).catch( function (err) {
-          toastr.error((!!err.message) ? err.message : "Cannot cancel ticket")
+          console.error(err);
+          toastr.error(err.message || "Cannot cancel ticket")
         })
-      })
+      });
     }).catch(err => {
       console.error(err);
-      toastr.error((!!err.message) ? err.message : "Cannot cancel ticket");
+      toastr.error(err.message || "Cannot cancel ticket");
     })
+  }
+
+  cancelSpecificTicket = (ticket) => {
+    const client = this.props.client;
+    client.service('/tokens').patch(ticket._id, {
+      fulfilled: true,
+      cancelledByStudent: true,
+      isBeingHelped: false
+    }).then(ticket => {
+      this.setState({lastTicketCancelled: true });
+      toastr.warning("Your help ticket has been canceled")
+      this.setNumTokens()
+    }).catch((err) =>  {
+      console.error(err);
+      toastr.error(err.message || "Cannot cancel ticket")
+    });
+
   }
 
   handleInputChange = event => {
@@ -156,7 +188,7 @@ render() {
         <div className="panel-heading">Request Office Hours</div>
         <div className="panel-body">
           {
-            (this.state.numUnfulfilledTickets == 0) ?
+            (this.state.numUnfulfilledTickets == 0 && !this.state.currentTicket) ?
             <div id="ticket-submit-area">
               <p id="num-tokens">You have <strong>{this.state.numTokens}</strong> tokens remaining.</p>
               <p><small>This will add you to the office hours queue and will cost one OH token.
@@ -184,12 +216,12 @@ render() {
               </button>
             </div>
             : <div id="current-ticket-area">
-            <h4>{this.state.currentResponder}</h4>
-            <br/>
-            <p>Ticket description: </p>
-            <div className="well">
-              <p>{this.state.curTicketDesc}</p>
-            </div>
+              <h4>{this.state.currentResponder}</h4>
+              <br/>
+              <p>Ticket description: </p>
+              <div className="well">
+                <p>{this.state.curTicketDesc}</p>
+              </div>
           </div>
         )
       }

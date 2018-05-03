@@ -1,5 +1,7 @@
 import React from 'react';
 import Utils from '../../Utils';
+import TicketHistory from '../TicketHistory';
+import UserEdit from './UserEdit.jsx';
 
 class UserDetails extends React.Component {
   constructor(props) {
@@ -9,38 +11,61 @@ class UserDetails extends React.Component {
     };
     const client = this.props.client;
     const socket = client.get('socket');
+    this.loadUser();
 
+  }
+
+  loadUser = () => {
+    const client = this.props.client;
     client.service('/users').get(this.state.userId).then(user => {
       if (user.role !== 'Student' && (client.get('user').role === 'TA')) {
         /* no-op */
         return;
       }
       this.setState({user: user});
-    })
+    });
   }
 
   componentDidMount() {
   }
 
-  handleInputChange = event => {
-    var curReq = {
-      ...this.state.curReq,
-      [event.target.name]: event.target.value
-    };
+  toastAndUpdate = (msg, cb) => {
+    toastr.success(msg);
+    cb();
+  }
 
-    this.setState({curReq});
+  handleSubmit = (oldUser, newUser) => {
+    const usersSvc = this.props.client.service('/users');
+
+    usersSvc.patch(oldUser._id, newUser)
+    .then(() => {
+      this.toastAndUpdate("User successfully updated", this.loadUser);
+    })
+    .catch(() => {
+      toastr.error("Could not update user");
+    });
+
   }
 
   deleteUser = () => {
-    console.log("TODO");
+    if (window.confirm("Are you sure you want to permanently delete " +
+      (this.state.user.name || this.state.user.directoryID))) {
+      this.props.client.service('/users').remove(this.state.user._id).then(() => {
+        toastr.success("User successfully deleted");
+        this.setState({user: null});
+      }).catch(err => {
+        toastr.error("Could not delete user");
+      });
+    }
   }
 
   render() {
     if (!this.state.user) {
-      return <div><h2>Cannot find user</h2></div>
+      return <div><h2>User not found</h2></div>
     }
 
     const user = this.state.user;
+    const isThisMe = this.props.client.get('user')._id == this.state.user._id;
 
     return <div className="row" style={{paddingTop:"15px"}}>
       <div className="instr-sidebar-container col-xl-3 col-lg-3 col-md-3  device-xl device-lg device-md visible-xl visible-lg visible-md">
@@ -50,7 +75,9 @@ class UserDetails extends React.Component {
             <p><strong>Directory ID:</strong> <span>{user.directoryID}</span></p>
             <p><strong>Role:</strong> <span>{user.role}</span></p>
             <br />
-            <button onClick={this.deleteUser} className="instr-only btn btn-warning">Delete user</button>
+              {!isThisMe &&
+                <button onClick={this.deleteUser} className="instr-only btn btn-warning">Delete user</button>
+              }
           </div>
         </div>
         <div className="col-md-3 device-sm device-xs visible-sm visible-xs">
@@ -60,10 +87,24 @@ class UserDetails extends React.Component {
             <p><strong>Directory ID:</strong>{user.directoryID}</p>
             <p><strong>Role:</strong>{user.role}</p>
             <br />
-            <button onClick={this.deleteUser} className="instr-only btn btn-warning">Delete user</button>
+              {!isThisMe &&
+                <button onClick={this.deleteUser} className="instr-only btn btn-warning">Delete user</button>
+              }
           </div>
         </div>
-        ///
+        <div className="col-xl-9 col-lg-9 col-md-9">
+          {this.props.client.get('user').role === "Instructor" &&
+            <UserEdit user={user} handleSubmit={this.handleSubmit} />
+          }
+          <hr />
+          <div id="STUDENT OR TA STATS"> </div>
+          {
+            user.role === "Student" ?
+            <TicketHistory client={this.props.client} user={user} searchBar={false} />
+            : <TicketHistory client={this.props.client} fulfilledBy={user} searchBar={false} />
+          }
+        </div>
+
       </div>
     }
   }

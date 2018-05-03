@@ -31,7 +31,7 @@ class TicketDescModal extends React.Component {
     const ticket = this.props.ticket;
 
     if (!ticket) {
-      return <div>No ticket selected</div>
+      return <div></div>
     }
 
     // Greg: This is abysmal both in design and the amount of nested div's

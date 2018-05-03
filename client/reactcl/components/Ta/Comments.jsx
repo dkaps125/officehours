@@ -7,17 +7,58 @@ class Comments extends React.Component {
     this.state = {
       knowledgeable: "Not sure",
       toldTooMuch: "Not sure",
-      text: ""
+      text: "",
+      showAlertTimeout: true,
     };
+
+  }
+
+  componentWillUnmount() {
+    if (!!this.state.tooMuchTimeTimeout) {
+      clearTimeout(this.state.tooMuchTimeTimeout);
+    }
+    this._ismounted = false;
+  }
+
+  componentDidMount() {
+    if (!!this.props.ticket) {
+      this.setShowWarningTimeout();
+    }
+    this._ismounted = true;
   }
 
   componentDidUpdate(oldProps, oldState) {
+
+
     if (!oldProps.ticket && !! this.props.ticket) {
       this.setState({
         student: this.props.ticket.user._id,
         ticket: this.props.ticket._id
-      })
+      });
+      this.setShowWarningTimeout();
     }
+  }
+
+  setShowWarningTimeout = () => {
+    const taAlertTimeoutMinutes = 0.15;
+
+    const alertTime = this.addMinutes(new Date(this.props.ticket.dequeuedAt),
+      taAlertTimeoutMinutes);
+    const nowTime = new Date();
+
+    if (alertTime > nowTime) {
+      this.setState({
+        showAlertTimeout: false,
+        tooMuchTimeTimeout: setTimeout(() => {
+          if (this._ismounted) {
+            this.setState({showAlertTimeout: true});
+          }
+      }, (alertTime-nowTime))});
+    }
+  }
+
+  addMinutes(date, minutes) {
+    return new Date(date.getTime() + minutes*60000);
   }
 
   handleInputChange = (event) => {
@@ -40,7 +81,7 @@ class Comments extends React.Component {
       return (useWordBoundary ? subString.substr(0, subString.lastIndexOf(' '))
       : subString) + "...";
     }
-    
+
     return !! this.props.ticket ?
     <div className="panel panel-default">
       <div className="panel-heading">Current Student</div>
@@ -49,11 +90,14 @@ class Comments extends React.Component {
         <p style={{color:"gray"}}>Ticket created
           {' ' + new Date(this.props.ticket.createdAt).toLocaleString()}
         </p>
-        <h3 id="current-student-time-warn" style={{paddingBottom:"15px"}}>
-          <span className="label label-warning">
-            Warning: You have spent over 10 minutes assisting this student
-          </span>
-        </h3>
+        {
+          this.state.showAlertTimeout &&
+          <h3 style={{paddingBottom:"15px"}}>
+            <span className="label label-warning">
+              Warning: You have spent over 10 minutes assisting this student
+            </span>
+          </h3>
+        }
         <label>Student's issue:</label>
         <div className="well">
           <p>{this.props.ticket.desc || "No description provided"}</p>
