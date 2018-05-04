@@ -32,6 +32,10 @@ body {
   background-color: white;
 }
 
+.inline {
+  display: inline;
+}
+
 #main {
   padding-top:60px;
   z-index:1000;
@@ -77,6 +81,26 @@ body {
   height:100%;
 }
 
+/* TA */
+.passcode {
+  display:inline-block;
+  padding-bottom:15px;
+  width:100px;
+}
+
+.ticket-desc-modal {
+  position:fixed;
+  bottom:0;
+  width:100%;
+  background-color:#e6fff2;
+  height:40px;
+  line-height:40px;
+}
+
+.modal-block {
+  display:inline-inline-block;
+}
+
 /* drag and drop upload css */
 .upload-drop-zone {
     height: 200px;
@@ -103,6 +127,7 @@ body {
 
 /* stats */
 .statsBlock {
+  display: inline-block;
   border-radius: 10px;
   border: 2px solid gray;
   padding: 5px 5px 5px 5px;

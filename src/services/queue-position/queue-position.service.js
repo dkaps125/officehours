@@ -1,7 +1,6 @@
 // Initializes the `queuePosition` service on path `/queue-position`
 const createService = require('./queue-position.class.js');
 const hooks = require('./queue-position.hooks');
-const filters = require('./queue-position.filters');
 
 module.exports = function () {
   const app = this;
@@ -20,8 +19,4 @@ module.exports = function () {
   const service = app.service('queue-position');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };

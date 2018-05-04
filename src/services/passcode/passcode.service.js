@@ -1,7 +1,6 @@
 // Initializes the `passcode` service on path `/passcode`
 const createService = require('./passcode.class.js');
 const hooks = require('./passcode.hooks');
-const filters = require('./passcode.filters');
 
 module.exports = function () {
   const app = this;
@@ -20,8 +19,4 @@ module.exports = function () {
   const service = app.service('passcode');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };

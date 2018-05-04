@@ -1,5 +1,5 @@
-const authentication = require('feathers-authentication');
-const jwt = require('feathers-authentication-jwt');
+const authentication = require('@feathersjs/authentication');
+const jwt = require('@feathersjs/authentication-jwt');
 
 
 module.exports = function () {

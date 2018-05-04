@@ -1,5 +1,5 @@
 const passport = require('passport');
-const auth = require('feathers-authentication');
+const auth = require('@feathersjs/authentication');
 const multer = require('multer');
 const csvUpload = require('./csv');
 const casLogin = require('./cas-login');
@@ -35,6 +35,7 @@ module.exports = function () {
     if (login != null) {
       userService.find({ query: { directoryID: login } })
       .then(user => {
+        // TODO: 5/3/18: this is garbage, fix it
         if (!user || user.total == 0) {
           cb(null, false, null)
         } else {
@@ -58,15 +59,23 @@ module.exports = function () {
         app.get('authentication')).then(accessToken => {
 
         res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })
-        res.redirect('/student.html')
+        res.redirect('/')
       });
     });
   }
   app.use('/csvUpload', auth.express.authenticate('jwt'),
-    upload.single('userfile'), csvUpload({app}))
+    upload.single('userfile'), csvUpload({app}));
 
+  app.use('/login', (req,res) => {res.redirect('/')});
+  app.use('/ta', (req,res) => {res.redirect('/')});
+  app.use('/instructor', (req,res) => {res.redirect('/')});
+  app.use('/student', (req,res) => {res.redirect('/')});
+  app.use('/tickets', (req,res) => {res.redirect('/')});
+  app.use('/user*', (req,res) => {res.redirect('/')});
+/*
   app.use('/', function(req, res, next) {
     // we do this for lazy routing
     res.redirect('/cas_login');
   });
+  */
 };

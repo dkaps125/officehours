@@ -1,5 +1,5 @@
 const passport = require('passport');
-const auth = require('feathers-authentication');
+const auth = require('@feathersjs/authentication');
 
 module.exports = function (options = {}) {
   const app = options.app
@@ -8,13 +8,16 @@ module.exports = function (options = {}) {
     passport.authenticate('cas', function(err, user, info) {
       if (err) {
         // login error
-        res.redirect("/login.html?invalid");
+        //res.redirect("/login.html?invalid");
+        res.redirect("/?invalid");
       } else if (!user || !user.data || !user.data.length > 0){
         // user not authorized
-        res.redirect("/login.html?invalid");
+        //res.redirect("/login.html?invalid");
+        res.redirect("/?invalid");
       } else {
         // user authorized
         var redirect = "/";
+        /*
         if (user.data[0].role == "Instructor") {
           redirect = "/instructor.html";
         } else if (user.data[0].role == "TA") {
@@ -22,7 +25,7 @@ module.exports = function (options = {}) {
         } else if (user.data[0].role == "Student") {
           redirect = "/student.html";
         }
-
+      */
         return app.passport.createJWT({ userId: user.data[0]._id },
           app.get('authentication')).then(accessToken => {
 

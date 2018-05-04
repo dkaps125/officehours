@@ -1,8 +1,8 @@
-const { authenticate } = require('feathers-authentication').hooks;
+const { authenticate } = require('@feathersjs/authentication').hooks;
 const auth  = require('feathers-authentication-hooks');
 const commonHooks = require('feathers-hooks-common');
 const search = require('feathers-mongodb-fuzzy-search');
-const errors = require('feathers-errors');
+const errors = require('@feathersjs/errors');
 const xss = require('xss');
 const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
@@ -53,7 +53,7 @@ commonHooks.when(hook => !!hook.params.user &&
   [
     commonHooks.discard('user','userName',
     'fulfilledBy', 'fulfilledByName',
-    'desc', 'isBeingHelped', 'cancelledByTA',
+    'desc', /*'isBeingHelped',*/ 'cancelledByTA',
     'noShow', 'shouldIgnoreInTokenCount',
     'comment', 'dequeuedAt', 'closedAt')
   ]

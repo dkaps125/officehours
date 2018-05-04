@@ -1,7 +1,6 @@
 // Initializes the `dequeueStudent` service on path `/dequeue-student`
 const createService = require('./dequeue-student.class.js');
 const hooks = require('./dequeue-student.hooks');
-const filters = require('./dequeue-student.filters');
 
 module.exports = function () {
   const app = this;
@@ -20,8 +19,4 @@ module.exports = function () {
   const service = app.service('dequeue-student');
 
   service.hooks(hooks);
-
-  if (service.filter) {
-    service.filter(filters);
-  }
 };
