@@ -105,8 +105,8 @@ class StudentStats extends React.Component {
           }
         });
       }).then(res => {
-        //$("#sessions-week").html(res.length > 0 ? precisionRoundDecimals(res[0].avgTotal) : "N/A");
-        this.setState({taSessionsPerWeek: res[0].avgTotal});
+        const taSessionsPerWeek = precisionRoundDecimals(res[0].avgTotal);
+        this.setState({taSessionsPerWeek});
         return client.service('users').find({
           query: {
               $or: [{ role: "Instructor" }, { role: "TA" }],

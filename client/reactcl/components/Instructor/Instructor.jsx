@@ -18,9 +18,17 @@ class Instructor extends React.Component {
 
     const user = props.client.get('user');
     const socket = props.client.get('socket');
+    socket.on('users created', this.loadUserRoster);
+    socket.on('users patched', this.loadUserRoster);
     this.loadUserRoster();
 
     // Don't toast because QueuedStudentsTable toasts for us
+  }
+
+  componentWillUnmount() {
+    const socket = this.props.client.get('socket');
+    socket.socket.removeListener('users created', this.loadUserRoster);
+    socket.socket.removeListener('users patched', this.loadUserRoster);
   }
 
   componentDidMount() {

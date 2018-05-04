@@ -1,5 +1,6 @@
 import React from 'react';
 import Utils from '../../Utils';
+import CSVUpload from './CSVUpload.jsx';
 
 class UserManage extends React.Component {
   constructor(props) {
@@ -130,16 +131,7 @@ class UserManage extends React.Component {
       </p>
 
       <br />
-      <form action="" method="post" encType="multipart/form-data" id="js-upload-form" accept=".csv">
-        <div className="form-inline">
-          <div className="form-group">
-            <input type="file" name="files[]" id="js-upload-files" />
-          </div>
-          <div className="form-group">
-            <button type="submit" className="btn btn-sm btn-primary" id="js-upload-submit">Upload CSV</button>
-          </div>
-        </div>
-      </form>
+      <CSVUpload client={this.props.client} />
       <hr />
       <h3>Bulk user deletion</h3>
       <button onClick={this.deleteAllStudents} className="btn btn-warning">Delete all students</button>

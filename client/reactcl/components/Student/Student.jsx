@@ -19,7 +19,11 @@ class Student extends React.Component {
     const client = this.props.client;
     const socket = client.get('socket');
     socket.on('queue update', this.setNumTokens);
-    socket.on('queue update', console.log);
+  }
+
+  componentWillUnmount() {
+    const socket = this.props.client.get('socket');
+    socket.removeListener('queue update', this.setNumTokens)
   }
 
   componentDidMount() {
