@@ -53,7 +53,7 @@ commonHooks.when(hook => !!hook.params.user &&
   [
     commonHooks.discard('user','userName',
     'fulfilledBy', 'fulfilledByName',
-    'desc', 'isBeingHelped', 'cancelledByTA',
+    'desc', /*'isBeingHelped',*/ 'cancelledByTA',
     'noShow', 'shouldIgnoreInTokenCount',
     'comment', 'dequeuedAt', 'closedAt')
   ]

@@ -55,7 +55,6 @@ class Student extends React.Component {
       const studentsInQueue = res[2].sizeOfQueue;
       const numStudentsAheadOfMe = res[2].peopleAheadOfMe + 1;
       //const currentTicket = res[3].data.length > 0 ? res[3].data[0] : null;
-
       if (numUnfulfilledTickets == 0 &&
         this.state.numUnfulfilledTickets > 0  && !this.state.lastTicketCancelled) {
         toastr.success("You have been dequeued by a TA!", {timeout: 15000});
@@ -67,7 +66,6 @@ class Student extends React.Component {
         studentsInQueue, numStudentsAheadOfMe, lastTicketCancelled: false,
         /*currentTicket*/});
 
-      console.log(this.state);
     }).catch(err => {
       console.error(err);
     });

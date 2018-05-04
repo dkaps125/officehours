@@ -27,8 +27,8 @@ class Instructor extends React.Component {
 
   componentWillUnmount() {
     const socket = this.props.client.get('socket');
-    socket.socket.removeListener('users created', this.loadUserRoster);
-    socket.socket.removeListener('users patched', this.loadUserRoster);
+    socket.removeListener('users created', this.loadUserRoster);
+    socket.removeListener('users patched', this.loadUserRoster);
   }
 
   componentDidMount() {

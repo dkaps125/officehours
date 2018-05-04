@@ -40,7 +40,7 @@ class Comments extends React.Component {
   }
 
   setShowWarningTimeout = () => {
-    const taAlertTimeoutMinutes = 0.15;
+    const taAlertTimeoutMinutes = 10;
 
     const alertTime = this.addMinutes(new Date(this.props.ticket.dequeuedAt),
       taAlertTimeoutMinutes);

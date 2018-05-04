@@ -35,6 +35,7 @@ module.exports = function () {
     if (login != null) {
       userService.find({ query: { directoryID: login } })
       .then(user => {
+        // TODO: 5/3/18: this is garbage, fix it
         if (!user || user.total == 0) {
           cb(null, false, null)
         } else {

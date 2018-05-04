@@ -16,7 +16,7 @@ class Service {
           $gt: lastMidnight.getTime(),
         },
         user: params.user._id,
-        cancelledByStudent: false
+        cancelledByStudent: false,
       }
     })
     .then(res => {
