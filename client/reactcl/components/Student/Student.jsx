@@ -112,7 +112,6 @@ class Student extends React.Component {
         if (shouldPushNotif) {
           // TODO: push notif
         }
-        console.log("000");
         const currentResponder = ticket.fulfilledByName + " is assisting you";
         const curTicketDesc = ticket.desc || "No description provided";
         this.setState({currentResponder, curTicketDesc, currentTicket: ticket});

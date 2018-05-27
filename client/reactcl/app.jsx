@@ -8,6 +8,8 @@ import Login from './components/Login';
 import Instructor from './components/Instructor';
 import TicketHistory from './components/TicketHistory';
 import UserDetails from './components/UserDetails';
+import ManageCourses from './components/ManageCourses'
+import CreateCourseWizard from './components/CreateCourseWizard'
 
 const render = (Comp) => {
   ReactDOM.render(
@@ -101,6 +103,8 @@ class Application extends React.Component {
           <FeathersRoute path="/student" client={this.state.client} forRoles={["Student"]} component={Student} />
           <FeathersRoute path="/tickets" client={this.state.client} forRoles={["Instructor", "TA"]} component={TicketHistory} />
           <FeathersRoute path="/user" client={this.state.client} forRoles={["Instructor", "TA"]} component={UserDetails} />
+          <FeathersRoute exact path="/courses" client={this.state.client} forRoles={["Instructor"]} component={ManageCourses} />
+          <FeathersRoute path="/courses/create" client={this.state.client} forRoles={["Instructor"]} component={CreateCourseWizard} />
         </div>
       </div>
     </Router>
@@ -174,7 +178,20 @@ class Nav extends React.Component {
             <span className="icon-bar"></span>
             <span className="icon-bar"></span>
           </button>
-          <a className="navbar-brand app-title" href="#">Office Hours</a>
+          <a className="navbar-brand dropdown-toggle" data-toggle="dropdown" href="#">
+            CMSC131 Office Hours
+            <span className="caret"></span></a>
+              <ul className="dropdown-menu" style={{marginLeft: "25px"}}>
+                <li><a>Recent courses:</a></li>
+                <li role="separator" className="divider"></li>
+                <li><a href="#">CMSC330</a></li>
+                <li><a href="#">CMSC131</a></li>
+                <li role="separator" className="divider"></li>
+                <li><Link to="/courses">All courses</Link></li>
+                <li><Link to="/courses/create">Manage CMSC131</Link></li>
+                <li role="separator" className="divider"></li>
+                <li><Link to="/courses/create">+ New Course</Link></li>
+              </ul>
         </div>
         <div className="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
           <ul className="nav navbar-nav">
