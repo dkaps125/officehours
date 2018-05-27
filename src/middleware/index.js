@@ -6,6 +6,9 @@ const casLogin = require('./cas-login');
 const { authenticate } = auth.hooks;
 const path = require('path');
 
+// GREG TODO: move this into config
+const frontend = 'http://localhost:3000/';
+
 var upload = multer({
   dest: path.join(__dirname, '../../csvUploads/'),
   preservePath: true,
@@ -59,19 +62,21 @@ module.exports = function () {
         app.get('authentication')).then(accessToken => {
 
         res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })
-        res.redirect('/')
+        res.redirect(frontend);
       });
     });
   }
   app.use('/csvUpload', auth.express.authenticate('jwt'),
     upload.single('userfile'), csvUpload({app}));
 
-  app.use('/login', (req,res) => {res.redirect('/')});
-  app.use('/ta', (req,res) => {res.redirect('/')});
-  app.use('/instructor', (req,res) => {res.redirect('/')});
-  app.use('/student', (req,res) => {res.redirect('/')});
-  app.use('/tickets', (req,res) => {res.redirect('/')});
-  app.use('/user*', (req,res) => {res.redirect('/')});
+  app.use('/login', (req,res) => {res.redirect(frontend)});
+  app.use('/ta', (req,res) => {res.redirect(frontend)});
+  app.use('/instructor', (req,res) => {res.redirect(frontend)});
+  app.use('/student', (req,res) => {res.redirect(frontend)});
+  app.use('/tickets', (req,res) => {res.redirect(frontend)});
+  app.use('/user*', (req,res) => {res.redirect(frontend)});
+  app.use('/courses', (req,res) => {res.redirect(frontend)});
+  app.use('/courses/create', (req,res) => {res.redirect(frontend)});
 /*
   app.use('/', function(req, res, next) {
     // we do this for lazy routing

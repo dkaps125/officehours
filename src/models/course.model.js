@@ -10,13 +10,12 @@ module.exports = function (app) {
     courseid: { type: String, required: true, maxlength: 20, trim: true },
     ohURL: { type: String },
     ohLocations: [{ type: String, required: true, maxlength: 20, trim: true, unique: true }],
-    // GREG TODO: move semester to its own entity
     semester: {
       term: { type: String, enum: ['Winter', 'Spring', 'Summer', 'Fall'], required: true },
       year: { type: Number,
         required: true,
         validate: {
-          validator: function(v) { return v > 2018 }
+          validator: function(v) { return v >= 2018 }
         }
       }
     },

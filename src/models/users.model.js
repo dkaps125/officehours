@@ -4,9 +4,20 @@
 // for more of what you can do here.
 module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient');
+  const { Schema } = mongooseClient;
   const users = new mongooseClient.Schema({
     directoryID: { type: String, required: true, unique: true, index: true },
     role: { type: String, enum: ["Student", "Instructor", "TA"], required: true},
+    roles: [{
+      type: {
+        type: String,
+        enum: ["Student", "Instructor", "TA", "Admin"],
+      },
+      course: {
+        type: Schema.Types.ObjectId,
+        ref: "course"
+      }
+    }],
     onDuty: {
       type: Boolean,
       default: false,

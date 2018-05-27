@@ -2,21 +2,24 @@ const passport = require('passport');
 const auth = require('@feathersjs/authentication');
 
 module.exports = function (options = {}) {
-  const app = options.app
+  const app = options.app;
+
+  // TODO: remove
+  const frontend = 'http://localhost:3000/';
 
   return function casLogin(req, res, next) {
     passport.authenticate('cas', function(err, user, info) {
       if (err) {
         // login error
         //res.redirect("/login.html?invalid");
-        res.redirect("/?invalid");
+        res.redirect(frontend+"?invalid");
       } else if (!user || !user.data || !user.data.length > 0){
         // user not authorized
         //res.redirect("/login.html?invalid");
-        res.redirect("/?invalid");
+        res.redirect(frontend+"?invalid");
       } else {
         // user authorized
-        var redirect = "/";
+        var redirect = frontend;
         /*
         if (user.data[0].role == "Instructor") {
           redirect = "/instructor.html";
