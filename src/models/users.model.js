@@ -7,7 +7,7 @@ module.exports = function (app) {
   const { Schema } = mongooseClient;
   const users = new mongooseClient.Schema({
     directoryID: { type: String, required: true, unique: true, index: true },
-    role: { type: String, enum: ["Student", "Instructor", "TA"], required: true},
+    role: { type: String, enum: ["Student", "Instructor", "TA", "Admin"], required: true},
     roles: [{
       type: {
         type: String,

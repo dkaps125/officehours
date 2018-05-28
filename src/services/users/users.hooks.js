@@ -14,20 +14,24 @@ const restrict = [
 const restrictToInstructor = [
   authenticate('jwt'),
   commonHooks.when(hook => !!hook.params.user &&
-    !(hook.params.user.role === "Instructor"),
+    !(hook.params.user.role === "Instructor"
+    || hook.params.user.role === "Admin" ),
   commonHooks.disallow('external'))
 ];
 
 const restrictToInstructorOrTA = [
   authenticate('jwt'),
   commonHooks.when(hook => !!hook.params.user &&
-    !(hook.params.user.role === "Instructor" || hook.params.user.role === "TA"),
+    !(hook.params.user.role === "Instructor"
+    || hook.params.user.role === "Admin"
+    || hook.params.user.role === "TA"),
   commonHooks.disallow('external'))
 ];
 
 const restrictGet = [
   commonHooks.when(hook => !!hook.params.user &&
     !(hook.params.user.role === "Instructor"
+    || hook.params.user.role === "Admin"
     || hook.params.user.role === "TA"),
     restrictToOwner({
       idField: '_id',
@@ -79,7 +83,8 @@ module.exports = {
             query: {
               $or: [
                 {role: "TA"},
-                {role: "Instructor"}
+                {role: "Instructor"},
+                {role: "Admin"}
               ],
               onDuty: true
             }
