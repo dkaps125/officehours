@@ -9,10 +9,6 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const MAX_DESC_LEN = 200;
 
-const createdToken = hook => {
-  console.log(hook);
-}
-
 const restrictToTAOrSelf =
 // !!hooks.params.provider true when external
 commonHooks.when(hook => !!hook.params.provider &&

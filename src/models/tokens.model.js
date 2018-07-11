@@ -57,6 +57,10 @@ module.exports = function (app) {
       type: Schema.Types.ObjectId,
       ref: 'comment'
     },
+    course: {
+      type: Schema.Types.ObjectId,
+      ref: 'course'
+    },
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     dequeuedAt: { type: Date },

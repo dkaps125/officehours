@@ -25,6 +25,10 @@ module.exports = function (app) {
       ref: 'token',
       required: true
     },
+    course: {
+      type: Schema.Types.ObjectId,
+      ref: 'course'
+    }
   }, {
     timestamps: true
   });

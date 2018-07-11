@@ -77,7 +77,7 @@ module.exports = function () {
   app.use('/user*', (req,res) => {res.redirect(frontend)});
   app.use('/courses', (req,res) => {res.redirect(frontend)});
   app.use('/courses/create', (req,res) => {res.redirect(frontend)});
-/*
+  /*
   app.use('/', function(req, res, next) {
     // we do this for lazy routing
     res.redirect('/cas_login');
