@@ -35,6 +35,18 @@ const commentSchema = {
   }
 }
 
+const courseSchema = {
+  include: {
+    service: 'course',
+    nameAs: 'course',
+    parentField: 'course',
+    childField: '_id'
+  }
+}
+
+const populateCourse =
+  commonHooks.populate({schema: courseSchema});
+
 const populateFieldsIfTA =
 commonHooks.when(hook => !!hook.params.user &&
   (hook.params.user.role === "Instructor"
@@ -77,16 +89,33 @@ const incrTotalTickets = context => {
   }
 }
 
-const validatePasscode = context => {
-  if (!!context.data && ((typeof context.data.passcode) === "string")
-    && context.data.passcode.toLowerCase().trim() === context.app.passcode) {
-      return context;
+const validatePasscodeAndCourse = context => {
+  if (!context.data || !context.data.course) {
+    throw new errors.BadRequest('Malformed request');
   }
-  throw new errors.BadRequest('Incorrect passcode', { errors: { passcode: context.data.passcode } });
+
+  // check course passcode requirement before it's populated in the after hook
+  return context.app.service('/course').get(context.data.course).then(res => {
+    if (!res) {
+      throw new errors.BadRequest('Course not found', { errors: { course: context.data.course } });
+    }
+    if (res.requiresPasscode) {
+      if (((typeof context.data.passcode) === "string")
+        && context.data.passcode.toLowerCase().trim() === context.app.passcode) {
+          return context;
+      }
+      throw new errors.BadRequest('Incorrect passcode', { errors: { passcode: context.data.passcode } });
+    } else {
+      return context;
+    }
+  }).catch(err => {
+    throw new errors.BadRequest('Course not found', { errors: { course: context.data.course } });
+  });
+
 }
 
 const emitQueuePositionUpdate = context => {
-  context.app.io.emit("queue update");
+  context.app.io.emit('queue update'); // TODO + context.params.course
 }
 
 const filterXSS = context => {
@@ -165,7 +194,7 @@ module.exports = {
     get: [restrictToTAOrSelf],
     // TODO: validate description length
     create: [auth.associateCurrentUser({as: 'user'}),
-      validatePasscode,
+      validatePasscodeAndCourse,
       validateTokens,
       setUserName,
       incrTotalTickets,

@@ -6,8 +6,14 @@ class Service {
   }
 
   get (id, params) {
-    return this.app.service('/tokens').find({query:{$limit: 100, fulfilled:false, cancelledByStudent: false}})
-    .then(tickets => {
+    return this.app.service('/tokens').find({
+      query: {
+        $limit: 100,
+        fulfilled: false,
+        cancelledByStudent: false,
+        course: params.course
+      }
+    }).then(tickets => {
       var peopleAheadOfMe = 0;
 
       for (var i = 0; i < tickets.total; i++) {
@@ -18,10 +24,11 @@ class Service {
       }
 
       return { peopleAheadOfMe, sizeOfQueue: tickets.total}
-    })
-
+    }).catch(err => {
+      console.error('queuePosition: ', err);
+      throw new errors.BadRequest('Cannot update queue position');
+    });
   }
-
 }
 
 module.exports = function (options) {

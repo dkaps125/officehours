@@ -6,7 +6,9 @@ class Service {
     this.app = options.app
     this.MAX_TOKENS = this.app.get('tokens').max;
   }
-  get (id, params) {
+
+  // TODO: make sure id and course are deconstructed correctly
+  get (course, params) {
     const lastMidnight = new Date();
     lastMidnight.setHours(0,0,0,0);
 
@@ -16,6 +18,7 @@ class Service {
           $gt: lastMidnight.getTime(),
         },
         user: params.user._id,
+        course,
         cancelledByStudent: false,
       }
     })
@@ -24,6 +27,7 @@ class Service {
       return Promise.resolve({tokensRemaining});
     })
     .catch(function(err) {
+      console.error('Error in numtokens', err);
       return Promise.resolve({tokensRemaining: 0});
     })
   }

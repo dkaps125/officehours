@@ -6,16 +6,16 @@ class Service {
   }
 
   find (params) {
-    return this.app.service('/users').find(
-      {
-        query: {
-          $or: [
-            {role: "TA"},
-            {role: "Instructor"}
-          ],
-          onDuty: true
-        }
-      })
+    return this.app.service('/users').find({
+      query: {
+        $or: [
+          {role: "TA"},
+          {role: "Instructor"}
+        ],
+        onDuty: true,
+        onDutyCourse: params.course
+      }
+    });
   }
 }
 

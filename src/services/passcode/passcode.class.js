@@ -4,7 +4,8 @@ class Service {
     this.options = options || {};
   }
 
-  get (id, params) {
+// TODO set passcode for each course?
+  get (course, params) {
     return Promise.resolve({
       passcode: this.options.app.passcode
     });

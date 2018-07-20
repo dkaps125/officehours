@@ -17,7 +17,8 @@ class Service {
           cancelledByStudent: false,
           $sort: {
             createdAt: 1
-          }
+          },
+          course: params.course
         }
     }).then(tokens => {
       // there's already a dequeued ticket
@@ -32,7 +33,8 @@ class Service {
               cancelledByStudent: false,
               $sort: {
                 createdAt: 1
-              }
+              },
+              course: params.course
             }
         });
       }
@@ -50,7 +52,7 @@ class Service {
         return tokens
       }
     }).catch(function(err) {
-      console.log(err);
+      console.error('Error while dequeuing', err);
       Promise.reject({error: "Cannot dequeue"})
     })
   }

@@ -1,13 +1,16 @@
-// users-model.js - A mongoose model
-//
-// See http://mongoosejs.com/docs/models.html
-// for more of what you can do here.
+// users-model.js - Users model
+
+// User's global role should decide whether they have rights to edit users' creds
 module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient');
   const { Schema } = mongooseClient;
   const users = new mongooseClient.Schema({
     directoryID: { type: String, required: true, unique: true, index: true },
-    role: { type: String, enum: ["Student", "Instructor", "TA", "Admin"], required: true},
+    role: {
+      type: String,
+      enum: ["Student", "Instructor", "TA", "Admin"],
+      required: true
+    },
     roles: [{
       type: {
         type: String,
@@ -21,6 +24,10 @@ module.exports = function (app) {
     onDuty: {
       type: Boolean,
       default: false,
+    },
+    onDutyCourse: {
+      type: Schema.Types.ObjectId,
+      ref: "course"
     },
     name: {
       type: String

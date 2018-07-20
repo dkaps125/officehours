@@ -13,6 +13,32 @@ commonHooks.when(hook => !!hook.params.user &&
   || hook.params.user.role === "TA"),
   commonHooks.disallow());
 
+const validateCourse = context => {
+  // check course passcode requirement before it's populated
+  return context.app.service('/course').get(context.data.course).then(res => {
+    if (!res) {
+      throw new errors.BadRequest('Course not found', { errors: { course: context.data.course } });
+    }
+    return context;
+  }).catch(err => {
+    console.error('validateCourse: ', err);
+    throw new errors.BadRequest('Course not found', { errors: { course: context.data.course } });
+  })
+}
+
+// TODO: pull these out, dedupe code
+const courseSchema = {
+  include: {
+    service: 'course',
+    nameAs: 'course',
+    parentField: 'course',
+    childField: '_id'
+  }
+}
+
+const populateCourse =
+  commonHooks.populate({schema: courseSchema});
+
 const filterXSS = context => {
   if (context.data) {
     if ((typeof context.data.text) === "string") {
@@ -40,7 +66,7 @@ const aggregateToks = hook => {
 
 module.exports = {
   before: {
-    all: [ authenticate('jwt'), restrictToTA ],
+    all: [ authenticate('jwt'), restrictToTA, validateCourse ],
     find: [aggregateToks],
     get: [],
     create: [auth.associateCurrentUser({as: 'ta'}), filterXSS],
@@ -60,7 +86,7 @@ module.exports = {
   },
 
   error: {
-    all: [],
+    all: [populateCourse],
     find: [],
     get: [],
     create: [],

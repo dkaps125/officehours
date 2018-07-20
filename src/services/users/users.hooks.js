@@ -76,6 +76,7 @@ module.exports = {
     get: [],
     create: [],
     update: [],
+    // TODO: on duty for different courses
     patch: [commonHooks.when(hook => (hook.result.role === "Instructor" || hook.result.role === "TA"),
       (hook) => {
         hook.app.service('/users').find(
@@ -86,12 +87,14 @@ module.exports = {
                 {role: "Instructor"},
                 {role: "Admin"}
               ],
-              onDuty: true
+              onDuty: true,
+              // TODO: onDutyCourse: hook.params.course ????
             }
           }).then(res => {
             hook.app.io.emit('availabletas updated', res);
+            // hook.app.io.emit('availabletas updated ' + hooks.params.course, res);
           });
-          return hook ;
+          return hook;
       }
     )],
     remove: []

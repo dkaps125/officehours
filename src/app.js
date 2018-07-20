@@ -68,13 +68,13 @@ function setPasscode() {
   })
 
   if (!!app.io) {
-    app.io.emit("passcode updated");
+    app.io.emit('passcode updated');
   }
 }
-const TWO_HR_MS = 2* 60 * 60 * 1000
+const TWO_HR_MS = 2* 60 * 60 * 1000;
 
 function clearTAS() {
-  const userService = app.service("users");
+  const userService = app.service('users');
   userService.find(
     {
       query: {
@@ -85,14 +85,15 @@ function clearTAS() {
         }
     }
   }).then(inHoursTAs => {
-    console.log("Clearing stale TA's on duty status");
+    console.info('Clearing stale TA on duty status');
     inHoursTAs.data.map(curTA => {
-      userService.patch({"_id" : curTA._id}, {onDuty: false})
-      .catch(function(err) {
-        console.error("Cannot reset onduty status for",curTA);
-      })
-    })
-  })
+      userService
+        .patch({'_id' : curTA._id}, {onDuty: false})
+        .catch(function(err) {
+          console.error('Cannot reset onduty status for',curTA);
+        });
+    });
+  });
 }
 
 // on the hour, set a new passcode
