@@ -19,6 +19,10 @@ module.exports = function (app) {
       course: {
         type: Schema.Types.ObjectId,
         ref: "course"
+      },
+      totalTickets: {
+        type: Number,
+        default: 0
       }
     }],
     onDuty: {
