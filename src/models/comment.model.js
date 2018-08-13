@@ -27,7 +27,8 @@ module.exports = function (app) {
     },
     course: {
       type: Schema.Types.ObjectId,
-      ref: 'course'
+      ref: 'course',
+      required: true
     }
   }, {
     timestamps: true

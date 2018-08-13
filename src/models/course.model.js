@@ -1,15 +1,13 @@
 // course-model.js - A mongoose model
 //
-// See http://mongoosejs.com/docs/models.html
-// for more of what you can do here.
 module.exports = function (app) {
   const mongooseClient = app.get('mongooseClient');
   const { Schema } = mongooseClient;
   const course = new Schema({
     title: { type: String, required: true, maxlength: 140, trim: true },
-    courseid: { type: String, required: true, maxlength: 20, trim: true },
+    courseid: { type: String, required: true, maxlength: 20, trim: true, unique: true },
     ohURL: { type: String },
-    ohLocations: [{ type: String, required: true, maxlength: 20, trim: true, unique: true }],
+    ohLocations: [{ type: String, required: true, maxlength: 20, trim: true }],
     semester: {
       term: { type: String, enum: ['Winter', 'Spring', 'Summer', 'Fall'], required: true },
       year: { type: Number,

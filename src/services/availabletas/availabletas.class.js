@@ -6,6 +6,7 @@ class Service {
   }
 
   find (params) {
+    const { course } = params.query;
     return this.app.service('/users').find({
       query: {
         $or: [
@@ -13,7 +14,7 @@ class Service {
           {role: "Instructor"}
         ],
         onDuty: true,
-        onDutyCourse: params.course
+        onDutyCourse: course
       }
     });
   }

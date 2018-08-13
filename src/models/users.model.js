@@ -9,12 +9,15 @@ module.exports = function (app) {
     role: {
       type: String,
       enum: ["Student", "Instructor", "TA", "Admin"],
-      required: true
     },
+    permissions: [{
+      type: String,
+      enum: ["course_create", "course_mod", "user_create", "user_mod", "admin"]
+    }],
     roles: [{
-      type: {
+      privilege: {
         type: String,
-        enum: ["Student", "Instructor", "TA", "Admin"],
+        enum: ["Student", "Instructor", "TA"],
       },
       course: {
         type: Schema.Types.ObjectId,

@@ -6,6 +6,7 @@ class Service {
   }
 
   create (data, params) {
+    console.log(' deq', data, params)
     // prevent double-dequeuing
     return this.app.service('tokens').find(
       {
@@ -18,7 +19,7 @@ class Service {
           $sort: {
             createdAt: 1
           },
-          course: params.course
+          course: data.course
         }
     }).then(tokens => {
       // there's already a dequeued ticket
@@ -34,7 +35,7 @@ class Service {
               $sort: {
                 createdAt: 1
               },
-              course: params.course
+              course: data.course
             }
         });
       }
