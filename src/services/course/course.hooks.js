@@ -2,13 +2,33 @@ const { authenticate } = require('@feathersjs/authentication').hooks;
 const commonHooks = require('feathers-hooks-common');
 const xss = require('xss');
 
-const restrictToAdmin = [
-  authenticate('jwt'),
+const hasRole = (role, hook) => hook.params.user.permissions.includes(role);
+const restrictCreate = [
   commonHooks.when(hook => !!hook.params.user &&
-    !(hook.params.user.role === "Instructor"
-    || hook.params.user.role === "Admin" ),
+    !(hasRole('admin', hook) || hasRole('course_create', hook)),
   commonHooks.disallow('external'))
 ];
+
+const restrictMod = [
+  commonHooks.when(hook => !!hook.params.user &&
+    !(hasRole('admin', hook) || hasRole('course_mod', hook)),
+  commonHooks.disallow('external'))
+];
+
+const restrictRemove = [
+  commonHooks.when(hook => !!hook.params.user &&
+    !(hasRole('admin', hook)),
+  commonHooks.disallow('external'))
+];
+
+const isUserInCourse = (user, courseDbId) => {
+  const privs =
+    user &&
+    user.roles &&
+    user.roles.filter(role => role.course.toString() === courseDbId.toString());
+  return privs && privs.length > 0 && !!privs[0];
+};
+
 
 const filterXSS = (context) => {
   if (!!context.data){
@@ -36,10 +56,10 @@ module.exports = {
     all: [ authenticate('jwt') ],
     find: [],
     get: [],
-    create: [...restrictToAdmin, filterXSS],
-    update: [...restrictToAdmin, filterXSS, commonHooks.setUpdatedAt()],
-    patch: [...restrictToAdmin, filterXSS, commonHooks.setUpdatedAt()],
-    remove: [...restrictToAdmin]
+    create: [...restrictCreate, filterXSS],
+    update: [...restrictMod, filterXSS, commonHooks.setUpdatedAt()],
+    patch: [...restrictMod, filterXSS, commonHooks.setUpdatedAt()],
+    remove: [...restrictRemove]
   },
 
   after: {

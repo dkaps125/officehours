@@ -2,7 +2,7 @@
 //
 // See http://mongoosejs.com/docs/models.html
 // for more of what you can do here.
-module.exports = function (app) {
+module.exports = function(app) {
   const mongooseClient = app.get('mongooseClient');
   const { Schema } = mongooseClient;
   const tokens = new Schema({
@@ -16,14 +16,14 @@ module.exports = function (app) {
     },
     fulfilled: {
       type: Boolean,
-      default: false,
+      default: false
     },
     fulfilledBy: {
       type: Schema.Types.ObjectId,
       ref: 'user'
     },
     fulfilledByName: {
-      type: String,
+      type: String
     },
     isClosed: {
       type: Boolean,
@@ -64,11 +64,11 @@ module.exports = function (app) {
     createdAt: { type: Date, default: Date.now },
     updatedAt: { type: Date, default: Date.now },
     dequeuedAt: { type: Date },
-    closedAt:  { type: Date }
+    closedAt: { type: Date }
     // TODO: verifier for closedAt
   });
 
-  tokens.index({desc: 'text', userName: 'text', fulfilledByName: 'text'});
+  tokens.index({ desc: 'text', userName: 'text', fulfilledByName: 'text' });
 
   return mongooseClient.model('tokens', tokens);
 };

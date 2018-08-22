@@ -24,7 +24,7 @@ module.exports = function (options = {}) {
       }
     }
 
-    if (req.user.role !== "Instructor") {
+    if (!req.user.permissions.contains('user_create') || !req.user.permissions.contains('user_mod')) {
       failure("unauthorized");
     }
 

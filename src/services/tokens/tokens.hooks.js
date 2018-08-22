@@ -1,100 +1,101 @@
-const { authenticate } = require("@feathersjs/authentication").hooks;
-const auth = require("feathers-authentication-hooks");
-const commonHooks = require("feathers-hooks-common");
-const search = require("feathers-mongodb-fuzzy-search");
-const errors = require("@feathersjs/errors");
-const xss = require("xss");
-const mongoose = require("mongoose");
+const { authenticate } = require('@feathersjs/authentication').hooks;
+const auth = require('feathers-authentication-hooks');
+const commonHooks = require('feathers-hooks-common');
+const search = require('feathers-mongodb-fuzzy-search');
+const errors = require('@feathersjs/errors');
+const xss = require('xss');
+const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
 const MAX_DESC_LEN = 200;
 
 // !!hooks.params.provider true when external
+const hasCoursePriv = (priv, user, courseDbId) => {
+  const privs =
+    user &&
+    user.roles &&
+    user.roles.filter(
+      role =>
+        role.privilege.toString().toLowerCase() === priv.toLowerCase() &&
+        role.course.toString() === courseDbId.toString()
+    );
+  return privs && privs.length > 0 && !!privs[0];
+};
+// TODO use the above
+
 const restrictToTAOrSelf = commonHooks.when(
   hook =>
     !!hook.params.provider &&
     !!hook.params.user &&
-    !(hook.params.user.role === "Instructor" || hook.params.user.role === "TA"),
-  auth.restrictToOwner({ ownerField: "user" })
+    !(hook.params.user.role === 'Instructor' || hook.params.user.role === 'TA'),
+  auth.restrictToOwner({ ownerField: 'user' })
 );
 
 const userSchema = {
   include: {
-    service: "users",
-    nameAs: "user",
-    parentField: "user",
-    childField: "_id"
+    service: 'users',
+    nameAs: 'user',
+    parentField: 'user',
+    childField: '_id'
   }
 };
 
 const commentSchema = {
   include: {
-    service: "comment",
-    nameAs: "comment",
-    parentField: "comment",
-    childField: "_id"
+    service: 'comment',
+    nameAs: 'comment',
+    parentField: 'comment',
+    childField: '_id'
   }
 };
 
 const courseSchema = {
   include: {
-    service: "course",
-    nameAs: "course",
-    parentField: "course",
-    childField: "_id"
+    service: 'course',
+    nameAs: 'course',
+    parentField: 'course',
+    childField: '_id'
   }
 };
 
 const populateCourse = commonHooks.populate({ schema: courseSchema });
 
 const populateFieldsIfTA = commonHooks.when(
-  hook =>
-    !!hook.params.user &&
-    (hook.params.user.role === "Instructor" || hook.params.user.role === "TA"),
-  [
-    commonHooks.populate({ schema: userSchema }),
-    commonHooks.populate({ schema: commentSchema })
-  ]
+  hook => !!hook.params.user && (hook.params.user.role === 'Instructor' || hook.params.user.role === 'TA'),
+  [commonHooks.populate({ schema: userSchema }), commonHooks.populate({ schema: commentSchema })]
 );
 
-const discardFieldsIfStudent = commonHooks.when(
-  hook => !!hook.params.user && hook.params.user.role === "Student",
-  [
-    commonHooks.discard(
-      "user",
-      "userName",
-      "fulfilledBy",
-      "fulfilledByName",
-      "desc",
-      /*'isBeingHelped',*/ "cancelledByTA",
-      "noShow",
-      "shouldIgnoreInTokenCount",
-      "comment",
-      "dequeuedAt",
-      "closedAt"
-    )
-  ]
-);
+const discardFieldsIfStudent = commonHooks.when(hook => !!hook.params.user && hook.params.user.role === 'Student', [
+  commonHooks.discard(
+    'user',
+    'userName',
+    'fulfilledBy',
+    'fulfilledByName',
+    'desc',
+    /*'isBeingHelped',*/ 'cancelledByTA',
+    'noShow',
+    'shouldIgnoreInTokenCount',
+    'comment',
+    'dequeuedAt',
+    'closedAt'
+  )
+]);
 
 const isUserInCourse = (user, courseDbId) => {
-  const privs =
-    user &&
-    user.roles &&
-    user.roles.filter(role => role.course.toString() === courseDbId.toString());
+  const privs = user && user.roles && user.roles.filter(role => role.course.toString() === courseDbId.toString());
   return privs && privs.length > 0 && !!privs[0];
 };
 
 const setUserName = context => {
   if (context.data && !!context.params.user) {
-    context.params.userName =
-      context.params.user.name || context.params.user.directoryID;
+    context.params.userName = context.params.user.name || context.params.user.directoryID;
   }
 };
 
 const incrTotalTickets = context => {
   if (context.data && !!context.params.user) {
     return context.app
-      .service("/users")
+      .service('/users')
       .get(context.params.user._id)
       .then(res => {
         var totalTickets = 1;
@@ -102,7 +103,7 @@ const incrTotalTickets = context => {
           totalTickets = res.totalTickets + 1;
         }
         return context.app
-          .service("/users")
+          .service('/users')
           .patch(context.params.user._id, {
             totalTickets
           })
@@ -115,33 +116,33 @@ const incrTotalTickets = context => {
 
 const validatePasscodeAndCourse = context => {
   if (!context.data || !context.data.course) {
-    throw new errors.BadRequest("Malformed request");
+    throw new errors.BadRequest('Malformed request');
   }
 
   if (!isUserInCourse(context.params.user, context.data.course)) {
-    throw new errors.Forbidden("User is not in this course", {
+    throw new errors.Forbidden('User is not in this course', {
       errors: { course: context.data.course }
     });
   }
 
   // check course passcode requirement before it's populated in the after hook
   return context.app
-    .service("/courses")
+    .service('/courses')
     .get(context.data.course)
     .then(res => {
       if (!res) {
-        throw new errors.BadRequest("Course not found", {
+        throw new errors.BadRequest('Course not found', {
           errors: { course: context.data.course }
         });
       }
       if (res.requiresPasscode) {
         if (
-          typeof context.data.passcode === "string" &&
+          typeof context.data.passcode === 'string' &&
           context.data.passcode.toLowerCase().trim() === context.app.passcode
         ) {
           return context;
         }
-        throw new errors.BadRequest("Incorrect passcode", {
+        throw new errors.BadRequest('Incorrect passcode', {
           errors: { passcode: context.data.passcode }
         });
       } else {
@@ -149,19 +150,19 @@ const validatePasscodeAndCourse = context => {
       }
     })
     .catch(err => {
-      throw new errors.BadRequest("Course not found", {
+      throw new errors.BadRequest('Course not found', {
         errors: { course: context.data.course }
       });
     });
 };
 
 const emitQueuePositionUpdate = context => {
-  context.app.io.emit("queue update"); // TODO + context.params.course
+  context.app.io.emit('queue update'); // TODO + context.params.course
 };
 
 const filterXSS = context => {
   if (context.data) {
-    if (typeof context.data.desc === "string") {
+    if (typeof context.data.desc === 'string') {
       context.data.desc = context.data.desc.substring(0, MAX_DESC_LEN);
       context.data.desc = xss(context.data.desc);
     }
@@ -171,12 +172,12 @@ const filterXSS = context => {
 };
 
 const validateTokens = context => {
-  const MAX_TOKENS = context.app.get("tokens").max;
+  const MAX_TOKENS = context.app.get('tokens').max;
   const lastMidnight = new Date();
   lastMidnight.setHours(0, 0, 0, 0);
 
   return context.app
-    .service("/tokens")
+    .service('/tokens')
     .find({
       query: {
         createdAt: {
@@ -187,18 +188,17 @@ const validateTokens = context => {
       }
     })
     .then(res => {
-      const tokensRemaining =
-        MAX_TOKENS - res.total < 0 ? 0 : MAX_TOKENS - res.total;
+      const tokensRemaining = MAX_TOKENS - res.total < 0 ? 0 : MAX_TOKENS - res.total;
       if (tokensRemaining > 0) {
         return context;
       } else {
-        throw new errors.BadRequest("Out of tokens", {
+        throw new errors.BadRequest('Out of tokens', {
           errors: { tokensRemaining: 0 }
         });
       }
       res.data.map(token => {
         if (!token.fulfilled) {
-          throw new errors.BadRequest("Already in the queue", {
+          throw new errors.BadRequest('Already in the queue', {
             errors: { tokensRemaining }
           });
         }
@@ -206,34 +206,26 @@ const validateTokens = context => {
     })
     .catch(function(err) {
       // TODO: this error checking code is questionable, look into this
-      if (
-        err.message === "Out of tokens" ||
-        err.message === "Already in the queue"
-      ) {
-        throw new errors.BadRequest("Out of tokens", {
+      if (err.message === 'Out of tokens' || err.message === 'Already in the queue') {
+        throw new errors.BadRequest('Out of tokens', {
           errors: { tokensRemaining: 0 }
         });
-      } else if (err.message === "Incorrect passcode") {
+      } else if (err.message === 'Incorrect passcode') {
         throw err;
       } else {
-        throw new errors.BadRequest("Token calculation error", { errors: {} });
+        throw new errors.BadRequest('Token calculation error', { errors: {} });
       }
     });
 };
 
 const aggregateToks = hook => {
-  if ("_aggregate" in hook.params.query && !!hook.params.query._aggregate) {
+  if ('_aggregate' in hook.params.query && !!hook.params.query._aggregate) {
     // ugly
-    if (
-      hook.params.query._aggregate.length > 0 &&
-      "$match" in hook.params.query._aggregate[0]
-    ) {
-      if ("fulfilledBy" in hook.params.query._aggregate[0].$match) {
+    if (hook.params.query._aggregate.length > 0 && '$match' in hook.params.query._aggregate[0]) {
+      if ('fulfilledBy' in hook.params.query._aggregate[0].$match) {
         const fulfilledBy = hook.params.query._aggregate[0].$match.fulfilledBy;
-        hook.params.query._aggregate[0].$match.fulfilledBy = ObjectId(
-          fulfilledBy
-        );
-      } else if ("user" in hook.params.query._aggregate[0].$match) {
+        hook.params.query._aggregate[0].$match.fulfilledBy = ObjectId(fulfilledBy);
+      } else if ('user' in hook.params.query._aggregate[0].$match) {
         const user = hook.params.query._aggregate[0].$match.user;
         hook.params.query._aggregate[0].$match.user = ObjectId(user);
       }
@@ -244,23 +236,23 @@ const aggregateToks = hook => {
 
 module.exports = {
   before: {
-    all: [authenticate("jwt")],
+    all: [authenticate('jwt')],
     find: [
       restrictToTAOrSelf,
       aggregateToks,
       search({
-        fields: ["userName", "fulfilledByName", "desc"]
+        fields: ['userName', 'fulfilledByName', 'desc']
       })
     ],
     get: [restrictToTAOrSelf],
     // TODO: validate description length
     create: [
-      auth.associateCurrentUser({ as: "user" }),
+      auth.associateCurrentUser({ as: 'user' }),
       validatePasscodeAndCourse,
       validateTokens,
       setUserName,
       incrTotalTickets,
-      commonHooks.discard("passcode"),
+      commonHooks.discard('passcode'),
       filterXSS
     ],
     update: [restrictToTAOrSelf, discardFieldsIfStudent, filterXSS],

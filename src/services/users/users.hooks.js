@@ -3,6 +3,8 @@ const { restrictToOwner } = require('feathers-authentication-hooks');
 const commonHooks = require('feathers-hooks-common');
 const xss = require('xss');
 
+const hasRole = (role, hook) => hook.params.user.permissions.includes(role);
+
 const restrict = [
   authenticate('jwt'),
   restrictToOwner({
@@ -11,28 +13,31 @@ const restrict = [
   })
 ];
 
-const restrictToInstructor = [
+const restrictCreate = [
   authenticate('jwt'),
   commonHooks.when(hook => !!hook.params.user &&
-    !(hook.params.user.role === "Instructor"
-    || hook.params.user.role === "Admin" ),
+    !(hasRole('user_create', hook) || hasRole('admin', hook)),
   commonHooks.disallow('external'))
 ];
 
-const restrictToInstructorOrTA = [
+const restrictMod = [
   authenticate('jwt'),
   commonHooks.when(hook => !!hook.params.user &&
-    !(hook.params.user.role === "Instructor"
-    || hook.params.user.role === "Admin"
-    || hook.params.user.role === "TA"),
+    !(hasRole('user_mod', hook) || hasRole('admin', hook)),
   commonHooks.disallow('external'))
 ];
+
+const restrictRemove = [
+  authenticate('jwt'),
+  commonHooks.when(hook => !!hook.params.user &&
+    !(hasRole('user_delete', hook) || hasRole('admin', hook)),
+  commonHooks.disallow('external'))
+];
+
 
 const restrictGet = [
   commonHooks.when(hook => !!hook.params.user &&
-    !(hook.params.user.role === "Instructor"
-    || hook.params.user.role === "Admin"
-    || hook.params.user.role === "TA"),
+    !(hasRole('user_view', hook) || hasRole('admin', hook)),
     restrictToOwner({
       idField: '_id',
       ownerField: '_id'
@@ -56,13 +61,13 @@ module.exports = {
   before: {
     all: [filterXSS],
     find: [
-    ...restrictToInstructorOrTA
+    ...restrictGet
     ],
     get: [ ...restrictGet ],
-    create: [ ...restrictToInstructor],
-    update: [ ...restrictToInstructorOrTA, commonHooks.setUpdatedAt() ],
-    patch: [ ...restrictToInstructorOrTA, commonHooks.setUpdatedAt() ],
-    remove: [ ...restrictToInstructor ]
+    create: [ ...restrictCreate],
+    update: [ ...restrictMod, commonHooks.setUpdatedAt() ],
+    patch: [ ...restrictMod, commonHooks.setUpdatedAt() ],
+    remove: [ ...restrictRemove ]
   },
 
   after: {

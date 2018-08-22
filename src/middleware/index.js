@@ -3,6 +3,7 @@ const auth = require('@feathersjs/authentication');
 const multer = require('multer');
 const csvUpload = require('./csv');
 const casLogin = require('./cas-login');
+const configure = require('./configure');
 const { authenticate } = auth.hooks;
 const path = require('path');
 
@@ -54,6 +55,7 @@ module.exports = function () {
   })
   passport.use(cas);
 
+  app.use('/configure', configure({app}));
   app.use('/cas_login', casLogin({app: app}));
   if (environment !== "production") {
     app.use('/loginAsFakeUser', function(req, res, next) {
