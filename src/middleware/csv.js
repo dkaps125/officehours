@@ -70,7 +70,9 @@ module.exports = function (options = {}) {
         });
       }
       if (!!req.file && !!req.file.path) {
-        fs.unlink(req.file.path)
+        fs.unlink(req.file.path, (err) => {
+          if (err) failure(err.message || "Could not unlink file");
+        });
       }
     })
     .on('error', err => {
