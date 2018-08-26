@@ -67,6 +67,16 @@ module.exports = function () {
         res.redirect(frontend);
       });
     });
+
+    app.use('/loginAsFakeInstr', function(req, res, next) {
+      console.log('logging in as fake instr')
+      app.passport.createJWT({ userId: app.get("autologin").fakeUser1 },
+        app.get('authentication')).then(accessToken => {
+
+        res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })
+        res.redirect(frontend);
+      });
+    });
   }
   app.use('/csvUpload', auth.express.authenticate('jwt'),
     upload.single('userfile'), csvUpload({app}));

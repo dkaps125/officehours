@@ -8,11 +8,25 @@ const ObjectId = mongoose.Types.ObjectId;
 
 const MAX_TEXT_LEN = 500;
 
+const privForCourse = (user, course) => {
+  const privs = user && course && user.roles && user.roles.filter(role => role.course.toString() === course.toString());
+
+  return privs && privs.length > 0 && privs[0];
+};
+
+const isInstrOrTa = (user, course) => {
+  const roleForCourse = privForCourse(user, course);
+  return roleForCourse && (roleForCourse.privilege === 'Instructor' || roleForCourse.privilege === 'TA');
+};
+
 const restrictToTA = commonHooks.when(
-  hook =>
-    !!hook.params.user &&
-    !(hook.params.user.role === "Instructor" || hook.params.user.role === "TA"),
-  commonHooks.disallow()
+  context => // if
+    !context.params.user ||
+    !(
+      context.params.user.permissions.includes('admin') || context.params.user.permissions.includes('course_mod')
+      || !isInstrOrTa(context.params.user, context.query.course)
+    ),
+  commonHooks.disallow('external')
 );
 
 const isUserInCourse = (user, courseDbId) => {
@@ -23,9 +37,9 @@ const isUserInCourse = (user, courseDbId) => {
   return privs && privs.length > 0 && !!privs[0];
 };
 
+// TODO: get rid of this test code
 // Vaidate user querying belongs in course, TODO: exceptions for admins
 const restrictToCourse = async context => {
-  console.log('restr to course: ', context.params);
   const { query } = context.params;
 
   // TODO: inject an OR query to all courses the user is an instr or TA in unless they're admin
@@ -54,7 +68,6 @@ const restrictToCourse = async context => {
 }
 
 const validateCourse = context => {
-  console.log('comment hook', context.params);
   if (!isUserInCourse(context.params.user, context.data.course)) {
     throw new errors.Forbidden("User is not in this course", {
       errors: { course: context.data.course }
@@ -102,21 +115,21 @@ const filterXSS = context => {
   return context;
 };
 
-const aggregateToks = hook => {
-  if ("_aggregate" in hook.params.query && !!hook.params.query._aggregate) {
+const aggregateToks = context => {
+  if ("_aggregate" in context.params.query && !!context.params.query._aggregate) {
     if (
-      hook.params.query._aggregate.length > 0 &&
-      "$match" in hook.params.query._aggregate[0]
+      context.params.query._aggregate.length > 0 &&
+      "$match" in context.params.query._aggregate[0]
     ) {
-      if ("student" in hook.params.query._aggregate[0].$match) {
-        const student = hook.params.query._aggregate[0].$match.student;
-        hook.params.query._aggregate[0].$match.student = ObjectId(student);
-      } else if ("ta" in hook.params.query._aggregate[0].$match) {
-        const ta = hook.params.query._aggregate[0].$match.ta;
-        hook.params.query._aggregate[0].$match.ta = ObjectId(ta);
+      if ("student" in context.params.query._aggregate[0].$match) {
+        const student = context.params.query._aggregate[0].$match.student;
+        context.params.query._aggregate[0].$match.student = ObjectId(student);
+      } else if ("ta" in context.params.query._aggregate[0].$match) {
+        const ta = context.params.query._aggregate[0].$match.ta;
+        context.params.query._aggregate[0].$match.ta = ObjectId(ta);
       }
     }
-    hook.result = hook.service.Model.aggregate(hook.params.query._aggregate);
+    context.result = context.service.Model.aggregate(context.params.query._aggregate);
   }
 };
 
@@ -124,7 +137,7 @@ module.exports = {
   before: {
     all: [authenticate("jwt"), restrictToTA],
     find: [aggregateToks],
-    get: [],
+    get: [commonHooks.disallow('external')], // I don't think we use this
     create: [auth.associateCurrentUser({ as: "ta" }), filterXSS, validateCourse],
     update: [auth.restrictToOwner({ ownerField: "ta" }), filterXSS, validateCourse],
     patch: [auth.restrictToOwner({ ownerField: "ta" }), filterXSS, validateCourse],

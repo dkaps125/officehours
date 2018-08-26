@@ -21,14 +21,26 @@ const hasCoursePriv = (priv, user, courseDbId) => {
     );
   return privs && privs.length > 0 && !!privs[0];
 };
+
+// Greg TODO: pull these out into a package
+const privForCourse = (user, course) => {
+  const privs = user && course && user.roles && user.roles.filter(role => role.course.toString() === course.toString());
+
+  return privs && privs.length > 0 && privs[0];
+};
+
+const isInstrOrTa = (user, course) => {
+  const roleForCourse = privForCourse(user, course);
+  return roleForCourse && (roleForCourse.privilege === 'Instructor' || roleForCourse.privilege === 'TA');
+};
 // TODO use the above
 
 const restrictToTAOrSelf = commonHooks.when(
-  hook =>
-    !!hook.params.provider &&
-    !!hook.params.user &&
-    !(hook.params.user.role === 'Instructor' || hook.params.user.role === 'TA'),
-  auth.restrictToOwner({ ownerField: 'user' })
+  context =>
+    !!context.params.provider &&
+    !!context.params.user &&
+    !(context.params.user.permissions.includes('admin') || context.params.user.permissions.includes('course_mod')),
+    auth.restrictToOwner({ ownerField: ['user', 'fulfilledBy'] })
 );
 
 const userSchema = {
@@ -49,37 +61,40 @@ const commentSchema = {
   }
 };
 
-const courseSchema = {
-  include: {
-    service: 'course',
-    nameAs: 'course',
-    parentField: 'course',
-    childField: '_id'
-  }
-};
-
-const populateCourse = commonHooks.populate({ schema: courseSchema });
-
+/*
 const populateFieldsIfTA = commonHooks.when(
-  hook => !!hook.params.user && (hook.params.user.role === 'Instructor' || hook.params.user.role === 'TA'),
+  context => context.params.user && (context.params.user.role === 'Instructor' || context.params.user.role === 'TA'),
+  [commonHooks.populate({ schema: userSchema }), commonHooks.populate({ schema: commentSchema })]
+);
+*/
+// This works
+const populateFieldsIfTa = commonHooks.when(
+  context =>
+    context.params.user &&
+    (isInstrOrTa(context.params.user, context.params.query.course) ||
+      context.params.user.permissions.includes('admin') ||
+      context.params.user.permissions.includes('user_view')),
   [commonHooks.populate({ schema: userSchema }), commonHooks.populate({ schema: commentSchema })]
 );
 
-const discardFieldsIfStudent = commonHooks.when(hook => !!hook.params.user && hook.params.user.role === 'Student', [
-  commonHooks.discard(
-    'user',
-    'userName',
-    'fulfilledBy',
-    'fulfilledByName',
-    'desc',
-    /*'isBeingHelped',*/ 'cancelledByTA',
-    'noShow',
-    'shouldIgnoreInTokenCount',
-    'comment',
-    'dequeuedAt',
-    'closedAt'
-  )
-]);
+const discardFieldsIfStudent = commonHooks.when(
+  context => !!context.params.user && context.params.user.role === 'Student',
+  [
+    commonHooks.discard(
+      'user',
+      'userName',
+      'fulfilledBy',
+      'fulfilledByName',
+      'desc',
+      /*'isBeingHelped',*/ 'cancelledByTA',
+      'noShow',
+      'shouldIgnoreInTokenCount',
+      'comment',
+      'dequeuedAt',
+      'closedAt'
+    )
+  ]
+);
 
 const isUserInCourse = (user, courseDbId) => {
   const privs = user && user.roles && user.roles.filter(role => role.course.toString() === courseDbId.toString());
@@ -119,41 +134,28 @@ const validatePasscodeAndCourse = context => {
     throw new errors.BadRequest('Malformed request');
   }
 
-  if (!isUserInCourse(context.params.user, context.data.course)) {
+  const { course, roleForCourse, user } = context.params;
+
+  if (!course || !roleForCourse) {
     throw new errors.Forbidden('User is not in this course', {
       errors: { course: context.data.course }
     });
   }
 
   // check course passcode requirement before it's populated in the after hook
-  return context.app
-    .service('/courses')
-    .get(context.data.course)
-    .then(res => {
-      if (!res) {
-        throw new errors.BadRequest('Course not found', {
-          errors: { course: context.data.course }
-        });
-      }
-      if (res.requiresPasscode) {
-        if (
-          typeof context.data.passcode === 'string' &&
-          context.data.passcode.toLowerCase().trim() === context.app.passcode
-        ) {
-          return context;
-        }
-        throw new errors.BadRequest('Incorrect passcode', {
-          errors: { passcode: context.data.passcode }
-        });
-      } else {
-        return context;
-      }
-    })
-    .catch(err => {
-      throw new errors.BadRequest('Course not found', {
-        errors: { course: context.data.course }
-      });
+  if (course.requiresPasscode) {
+    if (
+      typeof context.data.passcode === 'string' &&
+      context.data.passcode.toLowerCase().trim() === context.app.passcode
+    ) {
+      return context;
+    }
+    throw new errors.BadRequest('Incorrect passcode', {
+      errors: { passcode: context.data.passcode }
     });
+  } else {
+    return context;
+  }
 };
 
 const emitQueuePositionUpdate = context => {
@@ -172,7 +174,9 @@ const filterXSS = context => {
 };
 
 const validateTokens = context => {
-  const MAX_TOKENS = context.app.get('tokens').max;
+  // guaranteed to have course
+  const { course } = context.params;
+  const maxTokens = course.dailyTokens || context.app.get('tokens').max;
   const lastMidnight = new Date();
   lastMidnight.setHours(0, 0, 0, 0);
 
@@ -188,7 +192,7 @@ const validateTokens = context => {
       }
     })
     .then(res => {
-      const tokensRemaining = MAX_TOKENS - res.total < 0 ? 0 : MAX_TOKENS - res.total;
+      const tokensRemaining = maxTokens - res.total < 0 ? 0 : maxTokens - res.total;
       if (tokensRemaining > 0) {
         return context;
       } else {
@@ -218,36 +222,105 @@ const validateTokens = context => {
     });
 };
 
-const aggregateToks = hook => {
-  if ('_aggregate' in hook.params.query && !!hook.params.query._aggregate) {
+const aggregateToks = context => {
+  if ('_aggregate' in context.params.query && !!context.params.query._aggregate) {
     // ugly
-    if (hook.params.query._aggregate.length > 0 && '$match' in hook.params.query._aggregate[0]) {
-      if ('fulfilledBy' in hook.params.query._aggregate[0].$match) {
-        const fulfilledBy = hook.params.query._aggregate[0].$match.fulfilledBy;
-        hook.params.query._aggregate[0].$match.fulfilledBy = ObjectId(fulfilledBy);
-      } else if ('user' in hook.params.query._aggregate[0].$match) {
-        const user = hook.params.query._aggregate[0].$match.user;
-        hook.params.query._aggregate[0].$match.user = ObjectId(user);
+    if (context.params.query._aggregate.length > 0 && '$match' in context.params.query._aggregate[0]) {
+      if ('fulfilledBy' in context.params.query._aggregate[0].$match) {
+        const fulfilledBy = context.params.query._aggregate[0].$match.fulfilledBy;
+        context.params.query._aggregate[0].$match.fulfilledBy = ObjectId(fulfilledBy);
+      } else if ('user' in context.params.query._aggregate[0].$match) {
+        const user = context.params.query._aggregate[0].$match.user;
+        context.params.query._aggregate[0].$match.user = ObjectId(user);
       }
     }
-    hook.result = hook.service.Model.aggregate(hook.params.query._aggregate);
+    context.result = context.service.Model.aggregate(context.params.query._aggregate);
   }
 };
+
+const assocCourse = context => {
+  if (!context.data || !context.data.course) {
+    return context;
+  }
+
+  return context.app
+    .service('/courses')
+    .get(context.data.course)
+    .then(res => {
+      if (!res) {
+        throw new errors.BadRequest('Course not found', {
+          errors: { course: context.data.course }
+        });
+      }
+      context.params.course = res;
+      context.params.roleForCourse = privForCourse(context.params.user, context.data.course);
+    })
+    .catch(err => {
+      console.error(err);
+      throw new errors.BadRequest('Course not found', {
+        errors: { course: context.data.course }
+      });
+    });
+};
+
+const restrictQueryToCourses = context => {
+  const { query, user } = context.params;
+  // do not restrict for these roles
+  if (!context.params.provider || user.permissions.includes('admin') || user.permissions.includes('global_ticket_view')) {
+    return context;
+  }
+
+  // allowed courses for searching: ones where user is an instructor or TA
+  const userCourses = user.roles
+    .filter(role => role.privilege === 'Instructor' || role.privilege === 'TA')
+    .map(role => role.course.toLowerCase());
+
+  const courseRoleData = privForCourse(user, query.course);
+  const courseRole = courseRoleData && courseRoleData.privilege;
+
+  // restrict to course
+  if (!query.course) {
+    context.params.query = Object.assign(query, { course: { $in: userCourses } });
+  }
+
+  // if student, restrict to owner
+  if (courseRole === 'Student') {
+    context.params.query.user = user._id;
+    return context; //this breaks it: auth.restrictToOwner({ ownerField: 'user' });
+  } else if (courseRole === 'TA' || courseRole === 'Instructor') {
+    // let them do what they want if they're an instr or or TA for this course
+    return context;
+  } else {
+    // they're not enrolled
+    throw new errors.BadRequest('Insufficent permissions for query', {
+      errors: { course: context.data.course }
+    });
+  }
+};
+
+/* design decisions:
+- only allow queries with course(s) specified that they're in
+ - unless user has global_ticket_view
+- don't try to restrict otherwise, just deny the user.
+*/
+
+// TOOD: https://feathers-plus.github.io/v1/feathers-hooks-common/guide.html#fastJoin
 
 module.exports = {
   before: {
     all: [authenticate('jwt')],
     find: [
-      restrictToTAOrSelf,
+      restrictQueryToCourses,
       aggregateToks,
       search({
         fields: ['userName', 'fulfilledByName', 'desc']
       })
     ],
-    get: [restrictToTAOrSelf],
+    get: [restrictToTAOrSelf], // we don't use this?
     // TODO: validate description length
     create: [
       auth.associateCurrentUser({ as: 'user' }),
+      assocCourse, // TODO: Greg moved this here, make sure it doesn't interefere
       validatePasscodeAndCourse,
       validateTokens,
       setUserName,
@@ -262,8 +335,8 @@ module.exports = {
 
   after: {
     all: [],
-    find: [populateFieldsIfTA],
-    get: [populateFieldsIfTA],
+    find: [populateFieldsIfTa],
+    get: [populateFieldsIfTa],
     create: [emitQueuePositionUpdate],
     update: [emitQueuePositionUpdate, commonHooks.setUpdatedAt()],
     patch: [emitQueuePositionUpdate, commonHooks.setUpdatedAt()],

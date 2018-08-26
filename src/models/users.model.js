@@ -17,7 +17,8 @@ module.exports = function(app) {
         // instrs may have course_create, user_create, user_mod, all others
         // tas must have user_view
         // if admin is checked, all should automatically be checked
-        enum: ['course_create', 'course_mod', 'user_create', 'user_mod', 'user_delete', 'user_view', 'admin']
+        // only admins can delete users
+        enum: ['global_ticket_view', 'course_create', 'course_mod', 'user_create', 'user_mod', 'user_delete', 'user_view', 'admin']
       }
     ],
     roles: [
@@ -35,7 +36,6 @@ module.exports = function(app) {
         totalTickets: {
           type: Number,
           default: 0,
-          required: true
         }
       }
     ],

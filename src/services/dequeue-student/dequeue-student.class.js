@@ -1,4 +1,6 @@
 /* eslint-disable no-unused-vars */
+
+// Greg TODO: pull this garbage out into middleware
 class Service {
   constructor (options) {
     this.options = options || {};
@@ -6,7 +8,6 @@ class Service {
   }
 
   create (data, params) {
-    console.log(' deq', data, params)
     // prevent double-dequeuing
     return this.app.service('tokens').find(
       {
@@ -20,7 +21,8 @@ class Service {
             createdAt: 1
           },
           course: data.course
-        }
+        },
+        user: params.user
     }).then(tokens => {
       // there's already a dequeued ticket
       if (tokens.total >= 1) {
@@ -36,7 +38,8 @@ class Service {
                 createdAt: 1
               },
               course: data.course
-            }
+            },
+            user: params.user
         });
       }
     }).then(tokens => {

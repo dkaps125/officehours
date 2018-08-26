@@ -1,15 +1,29 @@
 const { authenticate } = require('@feathersjs/authentication').hooks;
 const commonHooks = require('feathers-hooks-common');
 
-const restrictToTA =
-commonHooks.when(hook => !!hook.params.user &&
-  !(hook.params.user.role === "Instructor"
-  || hook.params.user.role === "TA"),
-  commonHooks.disallow());
+const privForCourse = (user, course) => {
+  const privs = user && course && user.roles && user.roles.filter(role => role.course.toString() === course.toString());
+
+  return privs && privs.length > 0 && privs[0];
+};
+
+const isInstrOrTa = (user, course) => {
+  const roleForCourse = privForCourse(user, course);
+  return roleForCourse && (roleForCourse.privilege === 'Instructor' || roleForCourse.privilege === 'TA');
+};
+
+const restrictToTA = commonHooks.when(
+  context =>
+    !context.params.user ||
+    !context.data ||
+    !context.data.course ||
+    !isInstrOrTa(context.params.user, context.data.course),
+  commonHooks.disallow()
+);
 
 module.exports = {
   before: {
-    all: [ authenticate('jwt'), restrictToTA ],
+    all: [authenticate('jwt'), restrictToTA],
     find: [],
     get: [],
     create: [],

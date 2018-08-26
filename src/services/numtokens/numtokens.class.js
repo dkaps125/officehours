@@ -11,19 +11,25 @@ class Service {
   get (course, params) {
     const lastMidnight = new Date();
     lastMidnight.setHours(0,0,0,0);
+    let maxTokens;
 
-    return this.app.service('/tokens').find({
-      query: {
-        createdAt: {
-          $gt: lastMidnight.getTime(),
-        },
-        user: params.user._id,
-        course,
-        cancelledByStudent: false,
-      }
+    return this.app.service('/courses').get(course).then(course => {
+      console.log('COR', course);
+      maxTokens = (course && course.dailyTokens) || this.MAX_TOKENS;
+
+      return this.app.service('/tokens').find({
+        query: {
+          createdAt: {
+            $gt: lastMidnight.getTime(),
+          },
+          user: params.user._id,
+          course,
+          cancelledByStudent: false,
+        }
+      })
     })
     .then(res => {
-      const tokensRemaining = (this.MAX_TOKENS-res.total) < 0 ? 0 : (this.MAX_TOKENS-res.total);
+      const tokensRemaining = (maxTokens-res.total) < 0 ? 0 : (maxTokens-res.total);
       return Promise.resolve({tokensRemaining});
     })
     .catch(function(err) {

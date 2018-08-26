@@ -12,11 +12,12 @@ module.exports = function(options = {}) {
 
   return function configure(req, res, next) {
     const { name, directoryID } = req.body;
-    console.log('configure ', name, directoryID);
+    console.log('configure called with: ', name, directoryID);
     globalService.find().then(globals => {
-      if (globals.data.length !== 0) {
-        // this 404's, we should fail properly
+      if (!globals.data || globals.data.length !== 0) {
+        // TODO: this 404's, we should fail properly
         next();
+        return;
       }
       // set the app to configured
       globalService
@@ -26,7 +27,7 @@ module.exports = function(options = {}) {
           userService.create({
             directoryID,
             name,
-            permissions: ['course_create', 'course_mod', 'user_create', 'user_mod', 'user_delete', 'user_view', 'admin']
+            permissions: ['course_create', 'course_mod', 'user_create', 'user_mod', 'user_view', 'admin']
           });
           res.redirect(frontend);
         })

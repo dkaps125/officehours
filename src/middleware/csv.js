@@ -25,7 +25,7 @@ module.exports = function (options = {}) {
     }
 
     if (!req.user.permissions.contains('user_create') || !req.user.permissions.contains('user_mod')) {
-      failure("unauthorized");
+      failure("Unauthorized: user missing user_create and/or user_mod permissions");
     }
 
     const parseUser = transform( function(record, cb) {
