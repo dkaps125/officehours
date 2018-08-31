@@ -4,6 +4,8 @@ const multer = require('multer');
 const csvUpload = require('./csv');
 const casLogin = require('./cas-login');
 const configure = require('./configure');
+const joinOh = require('./joinOh');
+const closeTicket = require('./closeTicket');
 const { authenticate } = auth.hooks;
 const path = require('path');
 
@@ -55,6 +57,8 @@ module.exports = function () {
   })
   passport.use(cas);
 
+  app.post('/joinOH', auth.express.authenticate('jwt'), joinOh({app}));
+  app.post('/closeTicket', auth.express.authenticate('jwt'), closeTicket({app}));
   app.use('/configure', configure({app}));
   app.use('/cas_login', casLogin({app: app}));
   if (environment !== "production") {

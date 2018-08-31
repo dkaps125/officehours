@@ -269,11 +269,10 @@ const restrictQueryToCourses = context => {
   if (!context.params.provider || user.permissions.includes('admin') || user.permissions.includes('global_ticket_view')) {
     return context;
   }
-
   // allowed courses for searching: ones where user is an instructor or TA
   const userCourses = user.roles
     .filter(role => role.privilege === 'Instructor' || role.privilege === 'TA')
-    .map(role => role.course.toLowerCase());
+    .map(role => role.course.toString().toLowerCase());
 
   const courseRoleData = privForCourse(user, query.course);
   const courseRole = courseRoleData && courseRoleData.privilege;
@@ -293,7 +292,7 @@ const restrictQueryToCourses = context => {
   } else {
     // they're not enrolled
     throw new errors.BadRequest('Insufficent permissions for query', {
-      errors: { course: context.data.course }
+      errors: { query: context.params.query }
     });
   }
 };

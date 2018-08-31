@@ -1,26 +1,28 @@
 /* eslint-disable no-unused-vars */
 class Service {
-  constructor (options) {
+  constructor(options) {
     this.options = options || {};
-    this.app = options.app
+    this.app = options.app;
   }
 
-  find (params) {
+  find(params) {
     const { course } = params.query;
     return this.app.service('/users').find({
       query: {
-        $or: [
-          {role: "TA"},
-          {role: "Instructor"}
-        ],
         onDuty: true,
-        onDutyCourse: course
+        onDutyCourse: course,
+        roles: {
+          $elemMatch: {
+            privilege: { $in: ['Instructor', 'TA'] },
+            course
+          }
+        }
       }
     });
   }
 }
 
-module.exports = function (options) {
+module.exports = function(options) {
   return new Service(options);
 };
 

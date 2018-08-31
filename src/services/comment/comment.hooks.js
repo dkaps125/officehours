@@ -1,9 +1,9 @@
-const { authenticate } = require("@feathersjs/authentication").hooks;
-const auth = require("feathers-authentication-hooks");
-const commonHooks = require("feathers-hooks-common");
-const errors = require("@feathersjs/errors");
-const xss = require("xss");
-const mongoose = require("mongoose");
+const { authenticate } = require('@feathersjs/authentication').hooks;
+const auth = require('feathers-authentication-hooks');
+const commonHooks = require('feathers-hooks-common');
+const errors = require('@feathersjs/errors');
+const xss = require('xss');
+const mongoose = require('mongoose');
 const ObjectId = mongoose.Types.ObjectId;
 
 const MAX_TEXT_LEN = 500;
@@ -19,21 +19,21 @@ const isInstrOrTa = (user, course) => {
   return roleForCourse && (roleForCourse.privilege === 'Instructor' || roleForCourse.privilege === 'TA');
 };
 
+// context.data && context.data.course gives the right thing
 const restrictToTA = commonHooks.when(
-  context => // if
-    !context.params.user ||
-    !(
-      context.params.user.permissions.includes('admin') || context.params.user.permissions.includes('course_mod')
-      || !isInstrOrTa(context.params.user, context.query.course)
-    ),
+  context =>
+    !context.params.user || (
+    !context.params.user.permissions.includes('admin') &&
+    !context.params.user.permissions.includes('course_mod') &&
+    !isInstrOrTa(
+      context.params.user,
+      context.query && context.query.course ? context.query.course : context.data.course
+    )),
   commonHooks.disallow('external')
 );
 
 const isUserInCourse = (user, courseDbId) => {
-  const privs =
-    user &&
-    user.roles &&
-    user.roles.filter(role => role.course.toString() === courseDbId.toString());
+  const privs = user && user.roles && user.roles.filter(role => role.course.toString() === courseDbId.toString());
   return privs && privs.length > 0 && !!privs[0];
 };
 
@@ -61,45 +61,36 @@ const restrictToCourse = async context => {
   */
 
   if (query && query.course && !isUserInCourse(context.params.user, query.course)) {
-    throw new errors.Forbidden("User is not in this course", {
+    throw new errors.Forbidden('User is not in this course', {
       errors: { course: query.course }
     });
   }
-}
+};
 
 const validateCourse = context => {
-  if (!isUserInCourse(context.params.user, context.data.course)) {
-    throw new errors.Forbidden("User is not in this course", {
-      errors: { course: context.data.course }
-    });
+  if (!context.params.provider) {
+    return context;
   }
 
-  return context.app
-    .service("/courses")
-    .get(context.data.course)
-    .then(res => {
-      if (!res) {
-        throw new errors.BadRequest("Course not found", {
-          errors: { course: context.data.course }
-        });
-      }
-      return context;
-    })
-    .catch(err => {
-      console.error("validateCourse: ", err);
-      throw new errors.BadRequest("Course not found", {
-        errors: { course: context.data.course }
-      });
+  if (!context.data || !context.data.course) {
+    throw new errors.BadRequest('Malformed request');
+  }
+
+  const { course, roleForCourse, user } = context.params;
+
+  if (!course) {
+    throw new errors.Forbidden('User is not in this course', {
+      errors: { course: context.data.course }
     });
-};
+  }};
 
 // TODO: pull these out, dedupe code
 const courseSchema = {
   include: {
-    service: "course",
-    nameAs: "course",
-    parentField: "course",
-    childField: "_id"
+    service: 'course',
+    nameAs: 'course',
+    parentField: 'course',
+    childField: '_id'
   }
 };
 
@@ -107,7 +98,7 @@ const populateCourse = commonHooks.populate({ schema: courseSchema });
 
 const filterXSS = context => {
   if (context.data) {
-    if (typeof context.data.text === "string") {
+    if (typeof context.data.text === 'string') {
       context.data.text = context.data.text.substring(0, MAX_TEXT_LEN);
       context.data.text = xss(context.data.text);
     }
@@ -116,15 +107,12 @@ const filterXSS = context => {
 };
 
 const aggregateToks = context => {
-  if ("_aggregate" in context.params.query && !!context.params.query._aggregate) {
-    if (
-      context.params.query._aggregate.length > 0 &&
-      "$match" in context.params.query._aggregate[0]
-    ) {
-      if ("student" in context.params.query._aggregate[0].$match) {
+  if ('_aggregate' in context.params.query && !!context.params.query._aggregate) {
+    if (context.params.query._aggregate.length > 0 && '$match' in context.params.query._aggregate[0]) {
+      if ('student' in context.params.query._aggregate[0].$match) {
         const student = context.params.query._aggregate[0].$match.student;
         context.params.query._aggregate[0].$match.student = ObjectId(student);
-      } else if ("ta" in context.params.query._aggregate[0].$match) {
+      } else if ('ta' in context.params.query._aggregate[0].$match) {
         const ta = context.params.query._aggregate[0].$match.ta;
         context.params.query._aggregate[0].$match.ta = ObjectId(ta);
       }
@@ -135,12 +123,12 @@ const aggregateToks = context => {
 
 module.exports = {
   before: {
-    all: [authenticate("jwt"), restrictToTA],
+    all: [authenticate('jwt'), restrictToTA],
     find: [aggregateToks],
     get: [commonHooks.disallow('external')], // I don't think we use this
-    create: [auth.associateCurrentUser({ as: "ta" }), filterXSS, validateCourse],
-    update: [auth.restrictToOwner({ ownerField: "ta" }), filterXSS, validateCourse],
-    patch: [auth.restrictToOwner({ ownerField: "ta" }), filterXSS, validateCourse],
+    create: [auth.associateCurrentUser({ as: 'ta' }), filterXSS, validateCourse],
+    update: [auth.restrictToOwner({ ownerField: 'ta' }), filterXSS, validateCourse],
+    patch: [auth.restrictToOwner({ ownerField: 'ta' }), filterXSS, validateCourse],
     remove: [commonHooks.disallow()] // comments should be immutable
   },
 
