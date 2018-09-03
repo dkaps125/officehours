@@ -19,16 +19,32 @@ const isInstrOrTa = (user, course) => {
   return roleForCourse && (roleForCourse.privilege === 'Instructor' || roleForCourse.privilege === 'TA');
 };
 
+const tryGetCourse = context => {
+  if (context.result && context.result.course) {
+    return context.result.course;
+  }
+
+  if (context.params && context.params.query && context.params.query.course) {
+    return context.params.query.course;
+  }
+
+  if (context.data && context.data.course) {
+    return context.data.course;
+  }
+
+  return null;
+}
+
 // context.data && context.data.course gives the right thing
 const restrictToTA = commonHooks.when(
   context =>
-    !context.params.user || (
+    !!context.params.provider && (!context.params.user || (
     !context.params.user.permissions.includes('admin') &&
     !context.params.user.permissions.includes('course_mod') &&
     !isInstrOrTa(
       context.params.user,
-      context.query && context.query.course ? context.query.course : context.data.course
-    )),
+      tryGetCourse(context)
+    ))),
   commonHooks.disallow('external')
 );
 
@@ -123,12 +139,12 @@ const aggregateToks = context => {
 
 module.exports = {
   before: {
-    all: [authenticate('jwt'), restrictToTA],
-    find: [aggregateToks],
+    all: [authenticate('jwt')],
+    find: [restrictToTA, aggregateToks],
     get: [commonHooks.disallow('external')], // I don't think we use this
-    create: [auth.associateCurrentUser({ as: 'ta' }), filterXSS, validateCourse],
-    update: [auth.restrictToOwner({ ownerField: 'ta' }), filterXSS, validateCourse],
-    patch: [auth.restrictToOwner({ ownerField: 'ta' }), filterXSS, validateCourse],
+    create: [restrictToTA, auth.associateCurrentUser({ as: 'ta' }), filterXSS, validateCourse],
+    update: [restrictToTA, auth.restrictToOwner({ ownerField: 'ta' }), filterXSS, validateCourse],
+    patch: [restrictToTA, auth.restrictToOwner({ ownerField: 'ta' }), filterXSS, validateCourse],
     remove: [commonHooks.disallow()] // comments should be immutable
   },
 

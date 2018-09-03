@@ -1,3 +1,5 @@
+// GREG todo: clean up this entire file
+
 const { authenticate } = require('@feathersjs/authentication').hooks;
 const auth = require('feathers-authentication-hooks');
 const commonHooks = require('feathers-hooks-common');
@@ -39,8 +41,9 @@ const restrictToTAOrSelf = commonHooks.when(
   context =>
     !!context.params.provider &&
     !!context.params.user &&
-    !(context.params.user.permissions.includes('admin') || context.params.user.permissions.includes('course_mod')),
-    auth.restrictToOwner({ ownerField: ['user', 'fulfilledBy'] })
+    !(context.params.user.permissions.includes('admin') || context.params.user.permissions.includes('course_mod')) &&
+    !(isInstrOrTa(context.params.user, context.params.query.course)),
+  auth.restrictToOwner({ ownerField: 'user' })
 );
 
 const userSchema = {
@@ -49,25 +52,31 @@ const userSchema = {
     nameAs: 'user',
     parentField: 'user',
     childField: '_id'
-  }
+  }, provider: null
 };
+/*
+const commentSchema = (course) => ({
+  include: {
+    service: 'comment',
+    nameAs: 'comment',
+    parentField: 'comment',
+    childField: '_id'
+  }, query: {
+    course
+  }
+});
+*/
 
+// setting provider to null is a hack to let us assoc comments with permissions
 const commentSchema = {
   include: {
     service: 'comment',
     nameAs: 'comment',
     parentField: 'comment',
     childField: '_id'
-  }
-};
+  }, provider: null
+}
 
-/*
-const populateFieldsIfTA = commonHooks.when(
-  context => context.params.user && (context.params.user.role === 'Instructor' || context.params.user.role === 'TA'),
-  [commonHooks.populate({ schema: userSchema }), commonHooks.populate({ schema: commentSchema })]
-);
-*/
-// This works
 const populateFieldsIfTa = commonHooks.when(
   context =>
     context.params.user &&
@@ -157,10 +166,31 @@ const validatePasscodeAndCourse = context => {
     return context;
   }
 };
+const tryGetCourse = context => {
+  if (context.result && context.result.course) {
+    return context.result.course;
+  }
 
-const emitQueuePositionUpdate = context => {
-  context.app.io.emit('queue update'); // TODO + context.params.course
+  if (context.params && context.params.query && context.params.query.course) {
+    return context.params.query.course;
+  }
+
+  return null;
+}
+
+const emitTicketUpdate = context => {
+  const course = tryGetCourse(context);
+  if (course) {
+    context.app.io.emit(`ticket update ${course}`);
+  }
 };
+
+const emitTicketCreate = context => {
+  const course = tryGetCourse(context);
+  if (course) {
+    context.app.io.emit(`ticket create ${course}`);
+  }
+}
 
 const filterXSS = context => {
   if (context.data) {
@@ -266,9 +296,14 @@ const assocCourse = context => {
 const restrictQueryToCourses = context => {
   const { query, user } = context.params;
   // do not restrict for these roles
-  if (!context.params.provider || user.permissions.includes('admin') || user.permissions.includes('global_ticket_view')) {
+  if (
+    !context.params.provider ||
+    user.permissions.includes('admin') ||
+    user.permissions.includes('global_ticket_view')
+  ) {
     return context;
   }
+
   // allowed courses for searching: ones where user is an instructor or TA
   const userCourses = user.roles
     .filter(role => role.privilege === 'Instructor' || role.privilege === 'TA')
@@ -291,17 +326,11 @@ const restrictQueryToCourses = context => {
     return context;
   } else {
     // they're not enrolled
-    throw new errors.BadRequest('Insufficent permissions for query', {
+    throw new errors.Forbidden('Insufficent permissions for query', {
       errors: { query: context.params.query }
     });
   }
 };
-
-/* design decisions:
-- only allow queries with course(s) specified that they're in
- - unless user has global_ticket_view
-- don't try to restrict otherwise, just deny the user.
-*/
 
 // TOOD: https://feathers-plus.github.io/v1/feathers-hooks-common/guide.html#fastJoin
 
@@ -323,7 +352,7 @@ module.exports = {
       validatePasscodeAndCourse,
       validateTokens,
       setUserName,
-      incrTotalTickets,
+      // incrTotalTickets,
       commonHooks.discard('passcode'),
       filterXSS
     ],
@@ -336,9 +365,9 @@ module.exports = {
     all: [],
     find: [populateFieldsIfTa],
     get: [populateFieldsIfTa],
-    create: [emitQueuePositionUpdate],
-    update: [emitQueuePositionUpdate, commonHooks.setUpdatedAt()],
-    patch: [emitQueuePositionUpdate, commonHooks.setUpdatedAt()],
+    create: [emitTicketCreate],
+    update: [emitTicketUpdate, commonHooks.setUpdatedAt()],
+    patch: [emitTicketUpdate, commonHooks.setUpdatedAt()],
     remove: []
   },
 

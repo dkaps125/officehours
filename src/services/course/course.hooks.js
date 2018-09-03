@@ -3,6 +3,11 @@ const commonHooks = require('feathers-hooks-common');
 const xss = require('xss');
 
 const hasRole = (role, hook) => hook.params.user.permissions.includes(role);
+const isInstructor = (hook) => {
+  const role = roleForCourse(hook.params.user, hook.id);
+  return role && role.privilege === 'Instructor';
+}
+
 const restrictCreate = [
   commonHooks.when(hook => !!hook.params.user &&
     !(hasRole('admin', hook) || hasRole('course_create', hook)),
@@ -10,8 +15,8 @@ const restrictCreate = [
 ];
 
 const restrictMod = [
-  commonHooks.when(hook => !!hook.params.user &&
-    !(hasRole('admin', hook) || hasRole('course_mod', hook)),
+  commonHooks.when(hook => !hook.params.user ||
+    !(hasRole('admin', hook) || hasRole('course_mod', hook) || isInstructor(hook)),
   commonHooks.disallow('external'))
 ];
 
@@ -21,14 +26,11 @@ const restrictRemove = [
   commonHooks.disallow('external'))
 ];
 
-const isUserInCourse = (user, courseDbId) => {
-  const privs =
-    user &&
-    user.roles &&
-    user.roles.filter(role => role.course.toString() === courseDbId.toString());
-  return privs && privs.length > 0 && !!privs[0];
-};
+const roleForCourse = (user, course) => {
+  const privs = user && course && user.roles && user.roles.filter(role => role.course.toString() === course.toString());
 
+  return privs && privs.length > 0 && privs[0];
+};
 
 const filterXSS = (context) => {
   if (!!context.data){
