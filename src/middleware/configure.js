@@ -2,13 +2,11 @@ const auth = require('@feathersjs/authentication');
 const xss = require('xss');
 const fs = require('fs');
 
-// GREG TODO: move this into config
-const frontend = 'http://localhost:3000/';
-
 module.exports = function(options = {}) {
   const { app } = options;
   const userService = app.service('/users');
   const globalService = app.service('/global');
+  const frontend = app.get('frontend');
 
   return function configure(req, res, next) {
     const { name, directoryID } = req.body;

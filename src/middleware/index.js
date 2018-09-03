@@ -6,11 +6,11 @@ const casLogin = require('./cas-login');
 const configure = require('./configure');
 const joinOh = require('./joinOh');
 const closeTicket = require('./closeTicket');
+const markNoShow = require('./markNoShow');
+
 const { authenticate } = auth.hooks;
 const path = require('path');
 
-// GREG TODO: move this into config
-const frontend = 'http://localhost:3000/';
 
 var upload = multer({
   dest: path.join(__dirname, '../../csvUploads/'),
@@ -26,6 +26,8 @@ module.exports = function () {
   const app = this; // eslint-disable-line no-unused-vars
   const userService = app.service('users');
   const environment = process.env.NODE_ENV;
+  const frontend = app.get('frontend');
+  
   var serverBaseURL = app.get('http') + app.get('host') + ':' + app.get('port')+'/';
 
   if (environment === "production") {
@@ -57,6 +59,7 @@ module.exports = function () {
   })
   passport.use(cas);
 
+  app.post('/markNoShow', auth.express.authenticate('jwt'), markNoShow({app}));
   app.post('/joinOH', auth.express.authenticate('jwt'), joinOh({app}));
   app.post('/closeTicket', auth.express.authenticate('jwt'), closeTicket({app}));
   app.use('/configure', configure({app}));

@@ -4,9 +4,7 @@ const auth = require('@feathersjs/authentication');
 module.exports = function (options = {}) {
   const app = options.app;
 
-  // TODO: remove
-  const frontend = 'http://localhost:3000/';
-
+  const frontend = app.get('frontend');
   return function casLogin(req, res, next) {
     passport.authenticate('cas', function(err, user, info) {
       if (err) {
