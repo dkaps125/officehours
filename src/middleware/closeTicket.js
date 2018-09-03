@@ -4,9 +4,9 @@ const errors = require('@feathersjs/errors');
 // Greg TODO: pull these out into a package
 const roleForCourse = (user, course) => {
   const privs = user && course && user.roles && user.roles.filter(role => role.course.toString() === course.toString());
-
-  return privs && privs.length > 0 && privs;
+  return privs && privs.length > 0 && privs[0];
 };
+
 module.exports = function(options = {}) {
   const { app } = options;
 
@@ -16,19 +16,29 @@ module.exports = function(options = {}) {
       res.json({ message: null, error: 'No ticket information provided', user });
     }
 
-    // TODO: if !TA or not in course, throw something
-
-    const { comment, ticketId, userId } = req.body;
     let commentObj;
-    app
-      .service('comment')
-      .create(comment, {user})
-      .then(newComment => {
+    let course;
+    const { comment, ticketId, userId } = req.body;
+    app.service('/tokens')
+      .get(ticketId)
+      .then(ticket => {
+        if (!ticket) {
+          throw new errors.BadRequest('Cannot find ticket');
+        }
+        const requestorRole = roleForCourse(user, ticket.course);
+        if (!requestorRole || (requestorRole.privilege !== 'Instructor' && requestorRole.privilege !== 'TA')) {
+          throw new errors.Forbidden('Insufficent permissions');
+        }
+        return app
+          .service('comment')
+          .create(comment, { user });
+      }).then(newComment => {
         commentObj = newComment;
         return app.service('/users').get(userId);
       })
       .then(student => {
-        var role = roleForCourse(student, comment.course);
+        course = comment.course;
+        var role = roleForCourse(student, course);
         // total tix for course
         const tixForCourse = role.totalTickets ? role.totalTickets + 1 : 1;
         // total tix for user
@@ -48,14 +58,19 @@ module.exports = function(options = {}) {
         );
       })
       .then(updatedStudent => {
-        return app.service('/tokens').patch(ticketId, {
-          isBeingHelped: false,
-          isClosed: true,
-          closedAt: Date.now(),
-          comment: commentObj._id
-        }, {user})
+        return app.service('/tokens').patch(
+          ticketId,
+          {
+            isBeingHelped: false,
+            isClosed: true,
+            closedAt: Date.now(),
+            comment: commentObj._id
+          },
+          { user }
+        );
       })
       .then(closedTicket => {
+        app.io.emit(`queue update ${course}`);
         res.json({ message: 'Ticket closed', error: null });
       })
       .catch(err => {

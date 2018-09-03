@@ -14,7 +14,6 @@ class Service {
     let maxTokens;
 
     return this.app.service('/courses').get(course).then(course => {
-      console.log('COR', course);
       maxTokens = (course && course.dailyTokens) || this.MAX_TOKENS;
 
       return this.app.service('/tokens').find({
