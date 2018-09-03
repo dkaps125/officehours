@@ -36,7 +36,7 @@ const restrictRemove = [
 
 
 const restrictGet = [
-  commonHooks.when(hook => !!hook.params.user &&
+  commonHooks.when(hook => !!hook.params.provider && !!hook.params.user &&
     !(hasRole('user_view', hook) || hasRole('admin', hook)),
     restrictToOwner({
       idField: '_id',
