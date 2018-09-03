@@ -22,7 +22,7 @@ module.exports = function(app) {
 			// Add it to the authenticated user channel
 			app.channel('authenticated').join(connection);
 
-			// Channels can be named anything and joined on any condition 
+			// Channels can be named anything and joined on any condition
 
 			// E.g. to send real-time events only to admins use
 			// if(user.isAdmin) { app.channel('admins').join(connection); }
@@ -36,12 +36,33 @@ module.exports = function(app) {
 	}
 });
 
+/* greg test code TODO: implement
+app.on('join course', connection => {
+	if (!connection) {
+		return false;
+	}
+	const { user } = connection;
+
+	if (!user) {
+		return false;
+	}
+
+	console.log('connection, ', connection);
+
+	const privForCourse = (user, course) => {
+	  const privs = user && course && user.roles && user.roles.filter(role => role.course.toString() === course.toString());
+
+	  return privs && privs.length > 0 && privs[0];
+	};
+});
+*/
 app.publish((data, hook) => { // eslint-disable-line no-unused-vars
 	// Here you can add event publishers to channels set up in `channels.js`
 	// To publish only for a specific event use `app.publish(eventname, () => {})`
 
 	// e.g. to publish all service events to all authenticated users use
-	return app.channel('authenticated');
+
+	return false;//app.channel('authenticated');
 });
 
 // Here you can also add service specific event publishers
