@@ -122,5 +122,3 @@ client/scss/sass-cache/
 data/
 csvUploads/*
 
-# Temp-I'm rebuliding in producton for different classnames anyway
-public/*

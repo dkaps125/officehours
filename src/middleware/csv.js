@@ -46,7 +46,6 @@ module.exports = function(options = {}) {
       var query = {
         directoryID: xss(record.directoryId),
         name: xss(record.name),
-        role: xss(record.role)
       };
 
       if (!!record.course) {
