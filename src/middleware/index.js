@@ -23,7 +23,7 @@ var upload = multer({
 module.exports = function () {
   // Add your custom middleware here. Remember, that
   // in Express the order matters
-  const app = this; // eslint-disable-line no-unused-vars
+  const app = this; 
   const userService = app.service('users');
   const environment = process.env.NODE_ENV;
   const frontend = app.get('frontend');
@@ -31,7 +31,7 @@ module.exports = function () {
   var serverBaseURL = app.get('http') + app.get('host') + ':' + app.get('port')+'/';
 
   if (environment === "production") {
-    serverBaseURL = app.get('http') + app.get('host') + '/'
+    serverBaseURL = app.get('productionURL') || (app.get('http') + app.get('host') + '/');
   }
 
   const cas = new (require('passport-cas').Strategy)({

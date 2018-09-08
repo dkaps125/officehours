@@ -1,6 +1,7 @@
 {
   "host": "localhost",
   "frontend": "http://localhost:3000",
+  "productionURL": "https://yourdomain.edu:8443/",
   "port": 3030,
   "public": "../public/",
   "paginate": {
@@ -23,7 +24,7 @@
       "subject": "Office hours app",
       "issuer": "Your institution",
       "algorithm": "HS256",
-      "expiresIn": "1d"
+      "expiresIn": "6h"
     },
     "cookie": {
       "enabled": true,
