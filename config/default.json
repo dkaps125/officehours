@@ -29,7 +29,7 @@
     "cookie": {
       "enabled": true,
       "name": "feathers-jwt",
-      "httpOnly": true,
+      "httpOnly": false,
       "secure": false,
       "maxAge": 86400000
     }
