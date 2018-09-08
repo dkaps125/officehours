@@ -27,7 +27,7 @@ module.exports = function () {
   const userService = app.service('users');
   const environment = process.env.NODE_ENV;
   const frontend = app.get('frontend');
-  
+
   var serverBaseURL = app.get('http') + app.get('host') + ':' + app.get('port')+'/';
 
   if (environment === "production") {
@@ -65,12 +65,22 @@ module.exports = function () {
   app.use('/configure', configure({app}));
   app.use('/cas_login', casLogin({app: app}));
   if (environment !== "production") {
+    app.use('/loginAsFakeStudent', function(req, res, next) {
+      console.log('logging in as fake user')
+      app.passport.createJWT({ userId: app.get("autologin").fakeStudent },
+        app.get('authentication')).then(accessToken => {
+
+        res.cookie('feathers-jwt', accessToken, { maxAge: 900000000, httpOnly: false })
+        res.redirect(frontend);
+      });
+    });
+
     app.use('/loginAsFakeUser', function(req, res, next) {
       console.log('logging in as fake user')
       app.passport.createJWT({ userId: app.get("autologin").fakeUser0 },
         app.get('authentication')).then(accessToken => {
 
-        res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })
+        res.cookie('feathers-jwt', accessToken, { maxAge: 900000000, httpOnly: false })
         res.redirect(frontend);
       });
     });
@@ -80,7 +90,7 @@ module.exports = function () {
       app.passport.createJWT({ userId: app.get("autologin").fakeUser1 },
         app.get('authentication')).then(accessToken => {
 
-        res.cookie('feathers-jwt', accessToken, { maxAge: 900000, httpOnly: false })
+        res.cookie('feathers-jwt', accessToken, { maxAge: 900000000, httpOnly: false })
         res.redirect(frontend);
       });
     });

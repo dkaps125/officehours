@@ -1,40 +1,29 @@
 const passport = require('passport');
 const auth = require('@feathersjs/authentication');
 
-module.exports = function (options = {}) {
+module.exports = function(options = {}) {
   const app = options.app;
 
   const frontend = app.get('frontend');
+  const errorRedirectURL = `${frontend}?invalid`;
+  const { cookie: cookieParams } = app.get('authentication');
+
   return function casLogin(req, res, next) {
     passport.authenticate('cas', function(err, user, info) {
       if (err) {
         // login error
-        //res.redirect("/login.html?invalid");
-        res.redirect(frontend+"?invalid");
-      } else if (!user || !user.data || !user.data.length > 0){
+        res.redirect(errorRedirectURL);
+      } else if (!user || !user.data || user.data.length <= 0) {
         // user not authorized
-        //res.redirect("/login.html?invalid");
-        res.redirect(frontend+"?invalid");
-      } else {
-        // user authorized
-        var redirect = frontend;
-        /*
-        if (user.data[0].role == "Instructor") {
-          redirect = "/instructor.html";
-        } else if (user.data[0].role == "TA") {
-          redirect = "/ta.html";
-        } else if (user.data[0].role == "Student") {
-          redirect = "/student.html";
-        }
-      */
-        return app.passport.createJWT({ userId: user.data[0]._id },
-          app.get('authentication')).then(accessToken => {
-
-          // have to do this manually for feathers-authentication-client to accept the jwt
-          res.cookie('feathers-jwt', accessToken, { maxAge: 1800000, httpOnly: false })
-          res.redirect(redirect)
-        });
+        res.redirect(errorRedirectURL);
       }
+      // user authenticated
+      return app.passport.createJWT({ userId: user.data[0]._id }, app.get('authentication')).then(accessToken => {
+        // have to do this manually for feathers-authentication-client to accept the jwt
+        // default maxAge is 86400000 or 1 day in MS
+        res.cookie(cookieParams.name, accessToken, { maxAge: cookieParams.maxAge, httpOnly: !!cookieParams.httpOnly });
+        res.redirect(frontend);
+      });
     })(req, res, next);
   };
 };

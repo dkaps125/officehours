@@ -27,7 +27,6 @@ module.exports = function(options = {}) {
             }
           }
         ).then(res => {
-          console.log(`availabletas updated ${onDutyCourse}`, isOnDuty);
           app.io.emit(`availabletas updated ${onDutyCourse}`);
         }).catch(err => {
           console.error('joinOh:', err);

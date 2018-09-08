@@ -23,13 +23,14 @@
       "subject": "Office hours app",
       "issuer": "Your institution",
       "algorithm": "HS256",
-      "expiresIn": "2h"
+      "expiresIn": "1d"
     },
     "cookie": {
       "enabled": true,
       "name": "feathers-jwt",
       "httpOnly": true,
-      "secure": false
+      "secure": false,
+      "maxAge": 86400000
     }
   },
   "mongodb": "mongodb://localhost:27017/officehours",
