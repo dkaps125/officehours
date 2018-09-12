@@ -7,7 +7,6 @@ class Service {
     this.MAX_TOKENS = this.app.get('tokens').max;
   }
 
-  // TODO: make sure id and course are deconstructed correctly
   get (course, params) {
     const lastMidnight = new Date();
     lastMidnight.setHours(0,0,0,0);

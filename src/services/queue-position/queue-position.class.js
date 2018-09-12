@@ -7,17 +7,19 @@ class Service {
     this.app = options.app
   }
 
-  get (id, params) {
+  get (course, params) {
     return this.app.service('/tokens').find({
       query: {
         $limit: 100,
         fulfilled: false,
         cancelledByStudent: false,
-        course: params.course
+        course
       },
-      user: params.user
+      user: params.user,
+      provider: null
     }).then(tickets => {
       var peopleAheadOfMe = 0;
+      console.log('TIX', tickets);
 
       for (var i = 0; i < tickets.total; i++) {
         if (tickets.data[i].user.toString() === params.user._id.toString()) {
@@ -28,7 +30,6 @@ class Service {
 
       return { peopleAheadOfMe, sizeOfQueue: tickets.total}
     }).catch(err => {
-      console.error('queuePosition: ', err);
       throw new errors.BadRequest('Cannot update queue position');
     });
   }

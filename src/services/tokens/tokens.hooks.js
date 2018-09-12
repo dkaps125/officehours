@@ -294,10 +294,10 @@ const assocCourse = context => {
 };
 
 const restrictQueryToCourses = context => {
-  const { query, user } = context.params;
+  const { query, user, provider } = context.params;
   // do not restrict for these roles
   if (
-    !context.params.provider ||
+    !provider ||
     user.permissions.includes('admin') ||
     user.permissions.includes('global_ticket_view')
   ) {
