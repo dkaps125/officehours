@@ -31,6 +31,11 @@ module.exports = function(app) {
             return v >= 1;
           }
         }
+      },
+      studentMessaging: {
+        type: String,
+        maxlength: 300,
+        trim: true
       }
       // future: dept
     },

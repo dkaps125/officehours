@@ -33,20 +33,23 @@ const roleForCourse = (user, course) => {
 };
 
 const filterXSS = (context) => {
-  if (!!context.data){
-    if (!!context.data.title) {
+  if (context.data){
+    if (context.data.title) {
       context.data.title = xss(context.data.title);
     }
-    if (!!context.data.courseid) {
+    if (context.data.courseid) {
       context.data.courseid = xss(context.data.courseid);
     }
-    if (!!context.data.ohURL) {
+    if (context.data.ohURL) {
       context.data.ohURL = xss(context.data.ohURL);
     }
-    if (!!context.data.ohLocations) {
+    if (context.data.ohLocations) {
       context.data.ohLocations = context.data.ohLocations.map(loc => {
         return xss(loc);
       });
+    }
+    if (context.data.studentMessaging) {
+      context.data.studentMessaging = xss(context.data.studentMessaging);
     }
 
   }

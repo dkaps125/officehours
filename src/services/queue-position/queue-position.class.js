@@ -19,7 +19,6 @@ class Service {
       provider: null
     }).then(tickets => {
       var peopleAheadOfMe = 0;
-      console.log('TIX', tickets);
 
       for (var i = 0; i < tickets.total; i++) {
         if (tickets.data[i].user.toString() === params.user._id.toString()) {

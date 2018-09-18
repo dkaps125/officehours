@@ -46,7 +46,7 @@ module.exports = function(options = {}) {
 
       var query = {
         directoryID: xss(record.directoryId),
-        name: xss(record.name)
+        name: xss(record.name ? record.name.trim() : 'NoName')
       };
 
       let courseId;
@@ -79,7 +79,7 @@ module.exports = function(options = {}) {
               return userQuery.create(query);
             } else {
               const user = res.data[0];
-              if (user.roles && user.roles.length > 0 ) {
+              if (user.roles && user.roles.length > 0) {
                 const maybePrivs = user.roles.filter(role => role.course.toString() === courseId.toString());
                 if (maybePrivs && maybePrivs.length > 0) {
                   failure(`${record.name} is already enrolled in ${record.course}`);
@@ -114,9 +114,10 @@ module.exports = function(options = {}) {
       }
     });
 
-    var parser = csv({ columns: true }).on('error', err => {
+    var parser = csv({ columns: true, relax_column_count: true, trim: true }).on('error', err => {
       failure(err.message || 'Malformed CSV');
     });
+
     const csvInput = fs.createReadStream(req.file.path);
     csvInput
       .pipe(parser)
