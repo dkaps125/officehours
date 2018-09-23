@@ -45,7 +45,7 @@ module.exports = function(options = {}) {
       }
 
       var query = {
-        directoryID: xss(record.directoryId),
+        directoryID: xss(record.directoryId.trim()),
         name: xss(record.name ? record.name.trim() : 'NoName')
       };
 
