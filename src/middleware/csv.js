@@ -31,7 +31,9 @@ module.exports = function(options = {}) {
     }
 
     const parseUser = transform(function(record, cb) {
+      console.log(record);
       if (!record || !record.name || !record.directoryId) {
+        console.log('broken record', record);
         failure('Malformed CSV record, missing name or directoryID');
         return;
       }
@@ -114,7 +116,14 @@ module.exports = function(options = {}) {
       }
     });
 
-    var parser = csv({ columns: true, relax_column_count: true, trim: true }).on('error', err => {
+    // I'm annoyed most of these aren't enabled by default...
+    var parser = csv({
+      columns: true,
+      relax_column_count: true,
+      trim: true,
+      rtrim: true,
+      skip_empty_lines: true
+    }).on('error', err => {
       failure(err.message || 'Malformed CSV');
     });
 
